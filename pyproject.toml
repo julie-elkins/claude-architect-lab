@@ -1,0 +1,34 @@
+[project]
+name = "course-doctor"
+version = "0.1.0"
+description = "Checks training material against live documentation and reports what it could not check."
+requires-python = ">=3.12"
+dependencies = [
+  # Majors pinned, `uv.lock` committed. mcp 2.x is the floor that matters: 1.x's
+  # `FastMCP` was renamed `MCPServer` in 2.0, so a 1.x install fails at import in
+  # exactly the way a MISSING install does. `server.py` tells those two apart on
+  # purpose, because "install the package" sends a 1.x user looking in the wrong place.
+  "mcp>=2,<3",
+  # The output models. Returning raw dicts would publish an empty output schema, so a
+  # caller has to invoke the tool to learn what comes back -- which is the defect
+  # point 2 of the house MCP standard exists to prevent.
+  "pydantic>=2,<3",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8,<9",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/course_doctor"]
+
+# No [tool.pytest.ini_options] table and no coverage floor, both deliberate.
+# Test layout lives in pytest.ini so there is one config file rather than two that
+# shadow each other, and a coverage percentage measures lines executed rather than
+# properties pinned -- see `scripts/run-tests.sh`, which checks the collected count
+# instead.

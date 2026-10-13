@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "course-doctor": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "course_doctor.server"],
+      "env": {
+        "COURSE_DOCTOR_ROOT": "${COURSE_DOCTOR_ROOT:-.}",
+        "COURSE_DOCTOR_LOG_LEVEL": "${COURSE_DOCTOR_LOG_LEVEL:-WARNING}"
+      }
+    }
+  }
+}

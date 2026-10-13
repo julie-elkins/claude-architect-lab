@@ -1,0 +1,19 @@
+# Never `git add -A` in this repo. Stage by path.
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Recording scratch. Takes, exports and anything pulled off the camera stay out
+# of the repo -- a video file is not source, and an unreviewed take is the one
+# artifact here that could carry a frame nobody checked.
+takes/
+exports/
+*.mov
+*.mp4
+
+.DS_Store
