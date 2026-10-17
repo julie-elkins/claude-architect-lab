@@ -166,6 +166,31 @@ That last one matters more than it looks. By default in print mode, prompts go t
 Agent SDK host or a `--permission-prompt-tool`. If neither exists, you want the denial
 rather than the wait.
 
+### The security fact this lesson has to carry
+
+A `-p` run is not a sandbox, and the documentation says so plainly:
+
+> **"Without `--bare`, a `-p` session runs the hooks in a project's
+> `.claude/settings.json` and connects the servers in its `.mcp.json`, even in a folder
+> you've never trusted. A `-p` session shows no workspace trust dialog and no per-server
+> approval prompt."**
+
+Read that against a CI pipeline reviewing a pull request from a fork. The repository under
+review supplies the hooks that run and the MCP servers that connect, and nothing prompts.
+
+`--bare` is the mitigation: it skips auto-discovery of hooks, skills, custom commands,
+subagents, plugins, MCP servers, auto memory **and `CLAUDE.md`**. The docs call it *"the
+recommended mode for scripted and SDK calls"* and say it *"will become the default for
+`-p` in a future release."*
+
+**Which creates a tension worth naming, because both sides are right.** The exam guide's
+TS 3.6 objective is that `CLAUDE.md` supplies project context to a CI-invoked run — and it
+does, *without* `--bare`. The documentation recommends `--bare` for CI, which skips
+`CLAUDE.md`. If you want both the isolation and the context, pass it explicitly:
+`--append-system-prompt-file` for instructions, `--settings` and `--mcp-config` for the
+rest. For the exam, answer the guide. For a pipeline running untrusted code, read the
+quote above twice.
+
 **And `CLAUDE.md` is how the CI run learns about your project** — testing standards,
 fixture conventions, review criteria. A CI-invoked run has no conversation history to
 draw on, so whatever is not in the repository's instructions is not available to it.
@@ -263,6 +288,10 @@ CCAR-F exam guide **Version 1.0, effective July 2026**, §6:
 | `--max-turns` limits agentic turns and exits with an error at the limit | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
 | `--max-budget-usd` stops on ESTIMATED spend; spend can pass the cap | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
 | `--permission-prompts none` denies prompts when nobody can answer | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
+| `--permission-prompts none` denies anything that would prompt unless a `PermissionRequest` hook allows it, tells Claude not to retry, and removes tools needing a person such as `AskUserQuestion`; denials appear as `permission_denied` and in `permission_denials` | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
+| `--bare` is "the recommended mode for scripted and SDK calls" and "will become the default for `-p` in a future release" | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
+| Without `--bare`, a `-p` run loads hooks, skills, commands, subagents, plugins, MCP servers, auto memory and CLAUDE.md as an interactive session would | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
+| "Without `--bare`, a `-p` session runs the hooks in a project's `.claude/settings.json` and connects the servers in its `.mcp.json`, even in a folder you've never trusted… no workspace trust dialog and no per-server approval prompt" | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
 
 **Official documentation links — REQUIRED BEFORE PUBLICATION, not yet fetched.** Each
 needs a URL and a read date, and per this repo's rule a live link is not a verified
@@ -272,12 +301,18 @@ than written from memory, which is the failure this course is about.
 - [x] **CLI reference** — `-p`/`--print`, `--output-format`, `--json-schema`,
       `--max-turns`, `--max-budget-usd`, `--permission-prompts`. Fetched and quoted
       2026-10-17: https://code.claude.com/docs/en/cli-reference
-- [ ] `/docs/en/headless` — "Turn off permission prompts in unattended runs", and bare
-      mode. Named by the CLI reference; not yet fetched.
-- [ ] CLAUDE.md and memory documentation, for the CI-context mechanism —
-      https://code.claude.com/docs/en/memory (fetched 2026-10-17 for Domain 3 facts;
-      the CI-context claim specifically is not yet confirmed from it)
-- [ ] Any documented guidance on independent review instances
+- [x] **`/docs/en/headless`** — fetched 2026-10-17. `--permission-prompts none`, bare
+      mode, and the untrusted-folder behaviour now cited in the lesson.
+- [x] **CLAUDE.md in a `-p` run** — confirmed 2026-10-17 from `/docs/en/headless`:
+      without `--bare`, a `-p` run "discovers and loads them as an interactive session
+      would, including anything configured in the working directory or `~/.claude`."
+      So the guide's CI-context objective holds, and `--bare` is what turns it off.
+- [~] **Independent review instances** — the rationale is the exam guide's (TS 3.6 and
+      TS 4.6) and is **not stated in the documentation.** What the docs do is demonstrate
+      the pattern: `gh pr diff "$1" | claude -p --append-system-prompt "You are a security
+      engineer. Review for vulnerabilities."` — a fresh instance reviewing a diff it did
+      not produce. Recorded as pattern-demonstrated, rationale-uncited, rather than
+      closed.
 
 Everything in **Tips** is `OBSERVED`, not cited — behaviour measured on one version,
 a weaker claim than a documentation URL, labelled as such per the existing convention.

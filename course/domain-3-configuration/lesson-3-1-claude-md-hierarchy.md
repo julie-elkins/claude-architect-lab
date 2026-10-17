@@ -210,11 +210,9 @@ beat an option offering stronger instructions.
   them, taught in Domain 1 TS 1.5.
 - **Auto memory.** Claude writes its own notes alongside the instructions you write.
   Adjacent, real, and not in this task statement's objectives.
-- **`AGENTS.md`.** The documentation says Claude Code can read it in place of or
-  alongside project instructions, with a table per file combination. Not in the exam
-  guide's objectives for TS 3.1, so it is out of scope here — and I have an unresolved
-  note claiming a `CLAUDE.md` suppresses it entirely, which that table may contradict.
-  Unresolved is recorded as unresolved.
+- **`AGENTS.md` in depth.** Resolved, and summarised in the sources below: by default a
+  `CLAUDE.md` **does** suppress it. Not in the exam guide's objectives for TS 3.1, so the
+  detail stays out of the lesson.
 - **Symlinked rules directories**, and how Cowork sessions skip some external imports.
   Real, and past this task statement.
 
@@ -248,7 +246,21 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.1.
 the exam guide calls it "the `@import` syntax" and there is no `@import` keyword — the
 syntax is `@` followed by a path. Searching for the guide's label found nothing; searching
 for the mechanism found it immediately. **A label is not an identifier.**
-- [ ] The `AGENTS.md` per-combination table, for the scope note above.
+**`AGENTS.md` citation closed 2026-10-17**, from the same memory page, and it carries a
+trap worth knowing even though it is out of scope for this task statement:
+
+- With an `AGENTS.md` and **no** `CLAUDE.md` or `CLAUDE.local.md` at or above the working
+  directory, Claude reads the `AGENTS.md`.
+- With **both**, Claude reads *"Your `CLAUDE.md` files only"*. So a `CLAUDE.md` does
+  suppress it, by default.
+- A `CLAUDE.md` that imports `AGENTS.md` gets both.
+- **`CLAUDE.local.md` counts for that check.** So adding one to a repository that relies on
+  `AGENTS.md` silently stops `AGENTS.md` loading for you and nobody else. The documented
+  fix is the **Project instructions** setting, `claude-md-and-agents-md`.
+- `~/.claude/CLAUDE.md`, a managed `CLAUDE.md`, and `.claude/rules/` files do **not** count.
+- Never read at all: `AGENTS.local.md`, `AGENTS.override.md`, or anything under a
+  `.agents/` directory.
+- Reading `AGENTS.md` directly requires Claude Code v2.1.277 or later.
 
 **Verified by running it, 2026-10-13**, and now corroborated by the documentation above —
 recorded as `OBSERVED` first and upgraded rather than quietly restated:

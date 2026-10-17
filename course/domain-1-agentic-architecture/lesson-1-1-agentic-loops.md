@@ -191,8 +191,10 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.1.
 
 **Outstanding:**
 
-- [ ] The exam guide describes inspecting `stop_reason` for `"tool_use"`, which is the raw
-      Messages API level. The SDK result's `stop_reason` lists `end_turn`, `max_tokens`
-      and `refusal` as common values and describes termination through the
-      no-tool-calls condition instead. Both describe the same mechanism at different
-      layers; which layer a given exam item means is not resolved here.
+- [~] **Settled as a two-layer description, not a conflict.** The guide's **appendix (§17)
+      lists `stop_reason` values `"tool_use"` and `"end_turn"` under *Claude API***, which
+      confirms it means the Messages API level deliberately. The SDK's *result* carries a
+      `stop_reason` whose common values are `end_turn`, `max_tokens` and `refusal`, and
+      describes loop termination through the no-tool-calls condition. Same mechanism, two
+      altitudes, and an exam item framed as "Claude API" means the first. Nothing further
+      to fetch.

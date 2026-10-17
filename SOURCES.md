@@ -112,14 +112,17 @@ works rather than as what one run did:
       files on demand; a project file does not suppress a parent. **And: there is NO
       precedence between user and project rules** — "Neither set overrides the other…
       Claude may follow either one." Cited in lessons 3.1 and 3.3.
-- [ ] `.claude/rules/` frontmatter schema and exact glob matching semantics. **Lesson 3.3
-      deliberately does not state the grammar** because of this.
+- [x] **`.claude/rules/` frontmatter schema and glob semantics** — closed 2026-10-17 from
+      the memory docs, and it CORRECTED lesson 3.3 rather than confirming it: invalid YAML
+      makes a rule load unconditionally, not silently vanish.
 - [x] **Skill frontmatter and what `context: fork` isolates** —
       `https://code.claude.com/docs/en/skills`, read 2026-10-17. A forked skill spawns a
       subagent that does NOT see conversation history, runs in background by default, and
       takes `agent: Explore | Plan | general-purpose`. `allowed-tools` PRE-APPROVES;
       `disallowed-tools` removes from the pool. Cited in lesson 3.2.
-- [ ] `.mcp.json` schema, and whether `${VAR:-default}` is a documented form or incidental
+- [x] **`.mcp.json` schema and `${VAR:-default}`** — closed 2026-10-17. Both `${VAR}` and
+      `${VAR:-default}` are documented, expanding in `command`, `args`, `env`, `url` and
+      `headers`. Cited in lesson 2.4.
 - [x] **Slash command file format** — same page, read 2026-10-17.
       `.claude/commands/<name>.md` is the LEGACY form, creates the same `/name`, one file,
       no live reload, no plugin support. Cited in lesson 3.2.
@@ -130,7 +133,10 @@ works rather than as what one run did:
       also doesn't enforce plan mode's blocks."** It keeps its blocks in headless `-p`
       runs, Agent SDK sessions and the VS Code chat panel. So plan mode is a CONTROL in
       some contexts and an INSTRUCTION in others. Cited in lesson 3.4.
-- [ ] `@import` syntax. Listed in the exam guide under TS 3.1; searched the memory page
+- [x] **`@import`** — closed 2026-10-17. There is no `@import` keyword; the syntax is `@`
+      followed by a path, and imports do NOT reduce context cost. Cited in lesson 3.1.
+      Original note, kept because the reason the first search failed is the lesson:
+      listed in the exam guide under TS 3.1; searched the memory page
       2026-10-17 and **not found**. Lesson 3.1 names it as an objective and does not teach
       it.
 
@@ -156,9 +162,12 @@ change without notice, so the version string is re-read before any episode is pu
 **Still needs a documentation citation before Episode 1b is published** — each needs a
 `docs.claude.com` URL and a read date:
 
-- [ ] CLI reference: `-p` / `--print`, `--output-format`, `--json-schema`
-- [ ] CLAUDE.md and memory documentation, for the CI-context mechanism
-- [ ] Any documented guidance on independent review instances
+- [x] **CLI reference** — closed 2026-10-17, all flags confirmed verbatim plus
+      `--max-turns`, `--max-budget-usd` and `--permission-prompts`.
+- [x] **CLAUDE.md in a `-p` run** — closed 2026-10-17 from `/docs/en/headless`.
+- [~] **Independent review instances** — the rationale is the exam guide's and is NOT in
+      the documentation; the docs demonstrate the pattern without stating why. Recorded as
+      pattern-demonstrated, rationale-uncited.
 
 Everything in that lesson's Tips section is **OBSERVED**, not cited — behaviour measured on
 one version, which is a weaker claim than a documentation URL and is labelled as such. The

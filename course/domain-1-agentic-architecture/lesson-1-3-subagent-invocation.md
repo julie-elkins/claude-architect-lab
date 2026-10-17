@@ -206,6 +206,9 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.3.
 
 **Outstanding:**
 
-- [ ] Whether `Task` is a current alias for `Agent`, an Agent SDK name, or stale in the
-      exam guide. The lesson teaches the requirement under both names and does not
-      resolve which is authoritative for a given exam item.
+- [~] **Not resolvable by fetching, and now partly settled.** The guide's **appendix (§17)
+      names "subagent spawning via Task tool, allowedTools configuration"** as in-scope —
+      so `Task` is the guide's deliberate wording in two places, not a slip in one. The
+      documentation names `Agent`, and the tools reference has no `Task` row. Both stand:
+      answer `Task` for an exam item, write `Agent` in a settings file. The lesson teaches
+      the requirement under both names, which is the whole of what is testable.
