@@ -39,8 +39,16 @@ GUIDE = REPO / "GUIDE.md"
 # output it shapes. Domain 1 is the largest slice of the exam and still cannot
 # come first.
 MANIFEST: tuple[tuple[str, str, str], ...] = (
+    ("2.1", "Design effective tool interfaces with clear descriptions and boundaries",
+     "domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md"),
+    ("2.2", "Implement structured error responses for MCP tools",
+     "domain-2-tools-and-mcp/lesson-2-2-structured-errors.md"),
+    ("2.3", "Distribute tools appropriately across agents and configure tool choice",
+     "domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md"),
     ("2.4", "Integrate MCP servers into Claude Code and agent workflows",
      "domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md"),
+    ("2.5", "Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively",
+     "domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md"),
     ("3.1", "Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization",
      "domain-3-configuration/lesson-3-1-claude-md-hierarchy.md"),
     ("3.2", "Create and configure custom slash commands and skills",

@@ -20,12 +20,572 @@ including what is not yet written, how the course is sourced, and how to run the
 
 ## Contents
 
+- **TS 2.1** — Lesson 2.1 — The description is the routing logic
+- **TS 2.2** — Lesson 2.2 — An error the agent can act on
+- **TS 2.3** — Lesson 2.3 — Fewer tools, and forcing the first one
 - **TS 2.4** — Lesson 2.4 — Wiring a server in, and what a populated `/mcp` does not prove
+- **TS 2.5** — Lesson 2.5 — The built-in tools, and the two that are not there
 - **TS 3.1** — Lesson 3.1 — Where an instruction lives decides who gets it
 - **TS 3.2** — Lesson 3.2 — Packaging a procedure, and deciding what it may touch
 - **TS 3.3** — Lesson 3.3 — Rules that only load when they are relevant
 - **TS 3.4** — Lesson 3.4 — Planning first, and when plan mode is not actually a block
 - **TS 3.5 and 3.6** — Lesson 3b — Iterating on purpose, and reviewing without yourself
+
+---
+
+# Lesson 2.1 — The description is the routing logic
+
+**Domain 2: Tool Design & MCP Integration — 18% of CCAR-F**
+**Task Statement 2.1:** Design effective tool interfaces with clear descriptions and
+boundaries.
+
+Lab artifact: Course Doctor's tool surface, with each tool's purpose written so the next
+one cannot be confused with it.
+
+## What you will be able to do afterwards
+
+Diagnose a tool that never gets called, or gets called for the wrong request, and fix it
+in the description rather than in the code.
+
+## Why the exam cares
+
+The guide's first knowledge item states it outright: **tool descriptions are the primary
+mechanism a model uses for tool selection, and minimal descriptions lead to unreliable
+selection among similar tools.**
+
+So a tool nobody calls is almost never a code problem. It is a description problem, and
+the guide's own worked example is two tools called `analyze_content` and
+`analyze_document` with near-identical descriptions — which misroute not because either
+is wrong but because nothing distinguishes them.
+
+It also names a trap most people never consider: **system prompt wording can create
+unintended tool associations.** A keyword-sensitive instruction elsewhere can override a
+well-written description.
+
+## Fundamentals
+
+**Dispatch.** Choosing which of several implementations to run. *Why it matters here:*
+with an LLM, dispatch happens in natural language against your descriptions, so the
+description *is* the dispatch table. *Depth:* any treatment of dynamic dispatch; the
+mechanism differs, the problem does not.
+
+**Interface contract.** What a caller may rely on: inputs, outputs, failure modes. *Why
+it matters here:* the description is the only place a model learns the contract, since it
+cannot read your implementation. *Depth:* design-by-contract literature.
+
+**Cohesion.** One unit doing one thing. *Why it matters here:* a generic tool covering
+three jobs cannot be described precisely, which is why the guide's fix is to split it.
+*Depth:* any treatment of single responsibility.
+
+**Schema.** A machine-readable description of accepted input. *Why it matters here:* the
+schema constrains shape; the description conveys *meaning*, and only one of those stops a
+wrong-tool call. *Depth:* `json-schema.org`.
+
+## The idea, before any code
+
+**Write the description for a reader who cannot see the code**, because that is literally
+the situation. Three things it must carry, and the guide names all three: what the tool is
+for, what it expects, and **when to use it rather than the similar one next to it.**
+
+That last clause is the one people omit, and it is the one that does the routing. "Reads a
+file" describes a tool. "Reads a lesson file and lists the URLs it cites; use
+`fetch_source` to retrieve those URLs" routes between two.
+
+**Then look for overlap deliberately.** If two descriptions could plausibly answer the
+same request, the model will sometimes pick either — and you will debug the
+implementation of whichever one it chose.
+
+**If you cannot describe a tool precisely, it is doing too much.** The guide's fix is
+splitting a generic `analyze_document` into `extract_data_points`, `summarize_content`
+and `verify_claim_against_source`. Three names you can tell apart, three contracts.
+
+## The build
+
+### Step 1 — name the boundary in the description
+
+Course Doctor's first tool:
+
+```python
+"""Read a material file and list the documentation URLs it cites.
+
+Returns the file's text, a content hash, and every URL found. Use this to find
+out WHAT a lesson claims and WHERE it says the claim came from. It does NOT
+fetch those URLs or check whether they still support the claim — call
+fetch_source for that.
+"""
+```
+
+The last sentence is the routing. It names a sibling and says when to prefer it, so a
+request to "check whether this lesson is still accurate" does not stop here.
+
+### Step 2 — describe every parameter by its failure
+
+A parameter description that restates the type tells a caller nothing — and it passes any
+check that only looks for non-empty text:
+
+```
+BAD:   path: "A string path to the file."
+GOOD:  path: "Path to one material file, relative to the project root. An
+        absolute path or one escaping the root is refused rather than read.
+        Pass one file; this tool does not take a directory."
+```
+
+The second says what a *wrong* value does. That is the information a caller cannot get
+anywhere else.
+
+### Step 3 — hunt for overlap, then split or rename
+
+List your tools with one-line purposes side by side. For any pair you could imagine the
+same request matching, do one of two things — both named by the guide:
+
+- **Rename and re-describe** to eliminate the overlap: `analyze_content` becomes
+  `extract_web_results` with a web-specific description.
+- **Split the generic one** into purpose-specific tools with defined input and output
+  contracts.
+
+### Step 4 — read the system prompt for interference
+
+The guide names this as a skill: reviewing system prompts for keyword-sensitive
+instructions that might override well-written tool descriptions. An instruction saying
+"always search before answering" can pull a search tool into requests that needed
+something else, and no amount of description-polishing on the other tool fixes it.
+
+## Tips
+
+Things the documentation does not tell you.
+
+**A tool that is never called looks exactly like a tool that is broken.** Before
+debugging the implementation, check whether the description would make *you* pick it for
+the request you expected. Most of the time the answer is no.
+
+**A parameter description that names the type passes a truthiness check and teaches
+nothing.** If your test asserts descriptions are non-empty, it is asserting almost
+nothing. Assert a length floor, and better, review that each one says what a wrong value
+does.
+
+**Describing what a tool does NOT do is the highest-value sentence you will write.** It
+is the only thing that stops a near-neighbour being called, and it is almost always
+missing.
+
+**Two tools with 80% overlapping descriptions behave worse than one tool.** The
+single tool is reliably chosen; the pair is chosen at random and you debug whichever one
+you happened to open.
+
+**Returning raw dictionaries publishes an empty output schema.** A caller then has to
+*call* the tool to learn the shape of the reply, which is the one thing a schema exists to
+prevent. Typed output models cost almost nothing and are the difference between a
+documented surface and a guessable one.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Ambiguous or overlapping tool descriptions causing misrouting**, with
+> `analyze_content` against `analyze_document` as the named case.
+
+And its companion:
+
+> **Minimal descriptions**, which the guide ties directly to unreliable selection among
+> similar tools.
+
+The shape to recognise on exam day: when one option offers a clearer *description* and
+another offers a change to the *implementation* or the *prompt*, the description is
+usually the answer — because the guide states the description is the selection mechanism.
+
+## What this lesson does not cover
+
+- **Error responses** — lesson 2.2, and the guide treats it as its own task statement.
+- **How many tools an agent should have** — lesson 2.3.
+- **MCP configuration** — lesson 2.4.
+- **The built-in tools** — lesson 2.5.
+- **Writing the schema itself.** Domain 4 TS 4.3 treats JSON schemas properly.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 2.1.
+
+| Claim | Source |
+|---|---|
+| Tool descriptions are the primary mechanism LLMs use for tool selection; minimal descriptions lead to unreliable selection among similar tools | EG §6, TS 2.1 |
+| Descriptions should include input formats, example queries, edge cases and boundary explanations | EG §6, TS 2.1 |
+| Ambiguous or overlapping descriptions cause misrouting, e.g. `analyze_content` vs `analyze_document` | EG §6, TS 2.1 |
+| System prompt wording is keyword-sensitive and can create unintended tool associations | EG §6, TS 2.1 |
+| Renaming and re-describing to eliminate functional overlap is a tested skill | EG §6, TS 2.1 |
+| Splitting a generic tool into purpose-specific tools with defined input/output contracts, e.g. `extract_data_points`, `summarize_content`, `verify_claim_against_source` | EG §6, TS 2.1 |
+| Reviewing system prompts for instructions that override tool descriptions is a tested skill | EG §6, TS 2.1 |
+| Writing descriptions that differentiate purpose, expected inputs, outputs, and when to use one versus a similar alternative | EG §6, TS 2.1 |
+
+---
+
+# Lesson 2.2 — An error the agent can act on
+
+**Domain 2: Tool Design & MCP Integration — 18% of CCAR-F**
+**Task Statement 2.2:** Implement structured error responses for MCP tools.
+
+Lab artifact: Course Doctor's refusals carry a category, a retryable flag, and what was
+attempted.
+
+## What you will be able to do afterwards
+
+Design a failure reply an agent can make a decision from — and distinguish, in your
+return shape, a failed lookup from a successful one that found nothing.
+
+## Why the exam cares
+
+The guide's framing is sharp: **uniform error responses prevent the agent making
+appropriate recovery decisions.** A generic "Operation failed" is not a small
+infelicity; it removes the information the agent needed to choose between retrying,
+asking a human, and moving on.
+
+It names a four-way taxonomy — transient, validation, business, permission — and it names
+a specific distinction as a tested skill: **access failures versus valid empty results.**
+A timeout and a query that legitimately matched nothing are both "no data", and they call
+for opposite responses. Collapsing them means an agent retries something that worked, or
+gives up on something that would have succeeded.
+
+## Fundamentals
+
+**Error taxonomy.** Grouping failures by what the caller should *do*, not by where they
+happened. *Why it matters here:* the four categories are a decision table, not a
+filing system. *Depth:* HTTP's 4xx/5xx split is the same idea at a coarser grain.
+
+**Idempotence and retryability.** Whether repeating an operation is safe and might help.
+*Why it matters here:* `isRetryable` is the single most actionable field in a failure
+reply. *Depth:* REST method semantics.
+
+**Empty result versus failure.** A successful operation whose answer is "none" against an
+operation that did not happen. *Why it matters here:* the guide calls this out explicitly,
+and conflating them is the most common shape of this bug. *Depth:* the difference between
+`404` and `200 []`.
+
+**Fail loudly versus fail silently.** Whether a problem announces itself. *Why it matters
+here:* returning empty results as success is named as an anti-pattern. *Depth:* the
+principle of least astonishment in automation.
+
+**Structured versus prose errors.** A reply with named fields against a sentence. *Why it
+matters here:* an agent can branch on a field; it has to interpret a sentence. *Depth:*
+Domain 4 TS 4.3 on schemas.
+
+## The idea, before any code
+
+**Ask what the caller should do differently, then make the reply say that.** Four
+answers, which is why there are four categories:
+
+- **Transient** — timeout, service unavailable. Retry. `isRetryable: true`.
+- **Validation** — the input was wrong. Do not retry the same call; fix the input.
+- **Business** — a policy says no. Do not retry at all, and the caller may need to
+  explain why to a person, so the message has to be sayable out loud.
+- **Permission** — not allowed. Retrying is pointless; escalate.
+
+**Then decide what an empty answer means.** Did the lookup succeed and find nothing, or
+did the lookup not happen? Those are different results and they need different shapes. If
+your return type cannot express the difference, the agent cannot either.
+
+**And a refusal is a result, not an exception.** An agent formats whatever it is handed. A
+refusal thrown as a transport error gets summarised as "the tool failed", and whatever
+remedy you wrote is lost on the way.
+
+## The build
+
+### Step 1 — a refusal with a category and a remedy
+
+```python
+class Refusal(BaseModel):
+    """A refusal arrives as a normal result with an `error` field, not as a
+    raised exception."""
+
+    error: Literal["path_escapes_root", "not_a_file", "too_large", "unreadable"]
+    message: str          # what happened, for a human
+    guidance: str         # the cheapest correction, not a restatement of the rule
+    category: Literal["transient", "validation", "business", "permission"]
+    is_retryable: bool
+    attempted: str        # what the tool tried, so a coordinator can report it
+```
+
+`guidance` is the field that earns its place. "Paths must be relative to the project
+root" restates the rule. "Pass `course/domain-3-configuration/lesson-3-1-…md`" is the
+correction.
+
+### Step 2 — make the empty case unambiguous
+
+```python
+class MaterialReadingResult(BaseModel):
+    urls: list[str]
+    urls_found: int
+```
+
+A lesson citing no sources returns `urls: []` with `urls_found: 0` — **a finding about
+the material, not an error.** The docstring says so, because the next reader will assume
+otherwise.
+
+And the complement: if the file could not be read, that is a `Refusal`, not an empty
+list. Two different types, so the difference cannot be lost.
+
+### Step 3 — recover locally, propagate what you could not
+
+The guide's skill: a subagent implements local recovery for transient failures and
+propagates only what it cannot resolve — **including what was attempted and any partial
+results.**
+
+So a worker that retried twice and failed does not return "failed". It returns the
+failure type, the query it attempted, whatever partial findings it did get, and
+alternatives it did not try. The coordinator can then decide between re-delegating with a
+narrower query and reporting a gap, which it cannot do from "failed".
+
+### Step 4 — annotate coverage, not just content
+
+For a synthesis step, the guide names structuring output **with coverage annotations
+indicating which findings are well-supported and which topic areas have gaps due to
+unavailable sources.** A report that silently omits what it could not reach reads as
+complete.
+
+## Tips
+
+Things the documentation does not tell you.
+
+**A refusal raised as an exception loses your `guidance` field.** The agent reports "the
+tool failed" and the remedy you carefully wrote never reaches anyone. Return it.
+
+**`is_retryable: false` on a business rule saves more time than any retry policy.** Three
+automatic retries against a policy violation is three identical rejections and a slower
+answer.
+
+**Write `guidance` as the cheapest correction, never as a restatement of the rule.** "The
+path must be inside the project" is the rule. The fix is an example path.
+
+**An empty list and a failed read must be different types, not the same type with a
+flag.** A flag gets dropped by the next caller; a type cannot be.
+
+**Populate "what this does not show" on SUCCESS, not only on failure.** A successful reply
+that cannot say what it did not cover is the quietest failure in this domain — and it is
+the one your own reports will have, because nobody writes that field for the happy path.
+
+## The anti-pattern
+
+The guide names two directly, and they are opposites:
+
+> **Silently suppressing errors — returning empty results as success.**
+
+> **Terminating an entire workflow on a single failure.**
+
+Both are named anti-patterns, which tells you the answer is neither extreme: recover
+what you can locally, propagate what you cannot with enough context to decide, and never
+let a failure render as a clean result.
+
+And the one underneath them:
+
+> **A generic error status that hides context from the coordinator**, "search
+> unavailable" being the guide's own example.
+
+## What this lesson does not cover
+
+- **Error propagation across a multi-agent system** — Domain 5 TS 5.3 treats it as the
+  subject; here it is the shape of one tool's reply.
+- **Retry and validation loops for extraction** — Domain 4 TS 4.4.
+- **Escalation to a human** — Domain 5 TS 5.2.
+- **Tool descriptions** — lesson 2.1.
+- **The `isError` flag's wire-level detail.** Named by the guide as the MCP pattern for
+  communicating failure; the protocol specifics are out of scope for Foundations.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 2.2.
+
+| Claim | Source |
+|---|---|
+| The MCP `isError` flag communicates tool failures back to the agent | EG §6, TS 2.2 |
+| Four error categories: transient, validation, business, permission | EG §6, TS 2.2 |
+| Uniform error responses such as a generic "Operation failed" prevent appropriate recovery decisions | EG §6, TS 2.2 |
+| Structured metadata prevents wasted retry attempts by distinguishing retryable from non-retryable | EG §6, TS 2.2 |
+| Returning `errorCategory`, an `isRetryable` boolean, and human-readable descriptions | EG §6, TS 2.2 |
+| `retriable: false` plus customer-friendly explanations for business rule violations | EG §6, TS 2.2 |
+| Subagents recover locally from transient failures and propagate only unresolvable errors, with partial results and what was attempted | EG §6, TS 2.2 |
+| Distinguishing access failures from valid empty results is a tested skill | EG §6, TS 2.2 |
+| Structuring synthesis output with coverage annotations for well-supported findings versus gaps from unavailable sources | EG §6, TS 2.2 and TS 5.3 |
+| Silently suppressing errors, and terminating a workflow on a single failure, are both named anti-patterns | EG §6, TS 5.3 |
+
+---
+
+# Lesson 2.3 — Fewer tools, and forcing the first one
+
+**Domain 2: Tool Design & MCP Integration — 18% of CCAR-F**
+**Task Statement 2.3:** Distribute tools appropriately across agents and configure tool
+choice.
+
+Lab artifact: Course Doctor's tools scoped per agent role, with one extraction forced to
+run first.
+
+## What you will be able to do afterwards
+
+Decide which agent in a system should hold which tools, and say what `tool_choice` buys
+in each of its three settings.
+
+## Why the exam cares
+
+The guide gives a number, which is unusual enough to be worth noticing: **giving an agent
+access to too many tools — "18 instead of 4-5" — degrades tool selection reliability by
+increasing decision complexity.**
+
+That single figure is the heart of the task statement, and it has a direct consequence for
+lesson 2.4: if every configured MCP server's tools are live simultaneously, then adding
+servers quietly moves you toward the eighteen.
+
+The second half is `tool_choice`, and the guide names three settings precisely. Expect an
+item where the right answer is forcing a specific tool and the tempting one is a firmer
+instruction.
+
+## Fundamentals
+
+**Decision complexity.** The cost of choosing grows with the number of options. *Why it
+matters here:* it is the stated mechanism — more tools, less reliable selection. *Depth:*
+any treatment of choice overload; the effect transfers.
+
+**Specialisation.** Giving a component only what its role needs. *Why it matters here:*
+the guide observes agents with tools outside their specialisation tend to misuse them.
+*Depth:* single responsibility again, one level up.
+
+**Scoped access.** Permission narrowed to a role rather than granted globally. *Why it
+matters here:* this is least privilege applied to an agent's toolbox. *Depth:* RBAC
+literature.
+
+**Forced dispatch.** Requiring a specific call rather than letting the model choose. *Why
+it matters here:* that is `tool_choice` with a named tool, and it is a guarantee where a
+prompt is a request. *Depth:* Domain 4 TS 4.3, which uses the same mechanism for
+structured output.
+
+## The idea, before any configuration
+
+**Give each agent the tools its role needs and nothing else.** The guide's own example of
+the failure is a synthesis agent attempting web searches — not because it is broken, but
+because the tool was there.
+
+**Then handle the high-frequency exception deliberately.** A pure separation forces every
+cross-role need through the coordinator, which is a round trip. The guide's answer is a
+*scoped cross-role tool*: give the synthesis agent a narrow `verify_fact` and route the
+complex cases through the coordinator anyway. One tool, one purpose, not a general
+capability.
+
+**Replace generic tools with constrained ones.** The guide's example is swapping
+`fetch_url` for `load_document` that validates document URLs. Same job, smaller blast
+radius, and a description you can write precisely — which loops straight back to 2.1.
+
+**And when order matters, force it.** If metadata extraction must happen before
+enrichment, a prompt asking for that order has a non-zero failure rate. `tool_choice`
+naming the tool does not.
+
+## The build
+
+### Step 1 — scope by role
+
+Course Doctor's roles and their tools:
+
+```
+coordinator   : Task, read_manifest                      (delegates; does not fetch)
+reader        : read_material_file                       (reads; does not fetch)
+fetcher       : fetch_source                             (fetches; does not judge)
+synthesiser   : write_findings, verify_claim             (judges; narrow cross-role tool)
+```
+
+Four roles, two to three tools each — inside the guide's 4–5 band rather than near its
+eighteen. The synthesiser's `verify_claim` is the deliberate scoped exception: it is
+high-frequency, and routing every instance through the coordinator would double the
+traffic for no judgement gain.
+
+### Step 2 — the three `tool_choice` settings
+
+| Setting | Meaning |
+|---|---|
+| `"auto"` | The model may call a tool **or return text instead**. |
+| `"any"` | The model **must** call a tool, but chooses which. |
+| `{"type": "tool", "name": "..."}` | The model must call **that** tool. |
+
+Read the first row again, because it is where the exam item lives: under `auto`, "please
+always use the tool" is a request the model can decline by answering in prose. If you need
+structured output rather than a sentence, `any` guarantees a tool call.
+
+### Step 3 — force the one that must go first
+
+```python
+tool_choice = {"type": "tool", "name": "extract_metadata"}
+```
+
+The guide's own case: force `extract_metadata` so it runs before enrichment, then handle
+the subsequent steps in follow-up turns. The forcing applies to one turn; the sequence is
+built from turns.
+
+### Step 4 — count before you add a server
+
+Every configured MCP server's tools are available at once. So the audit is: list what each
+agent can actually see, and if the number has drifted toward the teens, the fix is
+narrowing per role — not better prompting.
+
+## Tips
+
+Things the documentation does not tell you.
+
+**`tool_choice: "auto"` plus "always call the tool" is not a guarantee, and it fails
+intermittently.** It works most of the time, which is worse than failing always, because
+you will ship it.
+
+**An agent misusing a tool outside its specialisation is a configuration finding, not a
+prompt finding.** The guide's framing is that agents *tend* to misuse such tools. Removing
+the tool is one line; teaching the agent not to reach for it is an ongoing argument.
+
+**Forcing a tool constrains one turn, not a sequence.** If you need A then B, that is a
+forced call followed by another turn — not one call with a plan in it.
+
+**The 4–5 versus 18 figure is the most quotable thing in this domain.** It is also a
+*modelling* claim in the guide rather than a measurement you can reproduce, so quote it as
+the guide's number rather than as physics.
+
+**A scoped cross-role tool beats both purity and generosity.** Full separation costs round
+trips; shared access costs misuse. One narrow tool for the frequent case, coordinator for
+the rest.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Giving one agent access to too many tools** — 18 where 4–5 would do — degrading
+> selection reliability.
+
+> **Agents holding tools outside their specialisation**, which they tend to misuse.
+
+And the `tool_choice` form, which is the same shape as every other failure in this course:
+
+> **Relying on an instruction where a setting would guarantee it.**
+
+A prompt asking the model to always call a tool, under `auto`, is context. `any` is a
+control. On exam day, when one option is firmer wording and another is a configuration
+value, the configuration is the answer.
+
+## What this lesson does not cover
+
+- **Tool descriptions** — lesson 2.1, and the first thing to fix if selection is
+  unreliable *within* a small tool set.
+- **MCP server configuration and scoping** — lesson 2.4.
+- **Coordinator and subagent architecture** — Domain 1 TS 1.2 and 1.3. Here distribution
+  is a configuration decision, not a system design.
+- **Using `tool_choice` for structured output** — Domain 4 TS 4.3, same mechanism,
+  different purpose.
+- **Built-in tools** — lesson 2.5.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 2.3.
+
+| Claim | Source |
+|---|---|
+| Too many tools (18 instead of 4-5) degrades tool selection reliability by increasing decision complexity | EG §6, TS 2.3 |
+| Agents with tools outside their specialisation tend to misuse them, e.g. a synthesis agent attempting web searches | EG §6, TS 2.3 |
+| Scoped tool access: only the tools a role needs, with limited cross-role tools for high-frequency needs | EG §6, TS 2.3 |
+| `tool_choice` options are `"auto"`, `"any"`, and forced selection `{"type": "tool", "name": "..."}` | EG §6, TS 2.3 |
+| Under `"auto"` the model may return text instead of calling a tool | EG §6, TS 4.3 |
+| `"any"` guarantees the model calls a tool rather than returning conversational text | EG §6, TS 2.3 |
+| Forcing a specific tool to run first, e.g. `extract_metadata` before enrichment, then processing subsequent steps in follow-up turns | EG §6, TS 2.3 |
+| Replacing generic tools with constrained alternatives, e.g. `fetch_url` with `load_document` that validates document URLs | EG §6, TS 2.3 |
+| Providing a scoped cross-role tool such as `verify_fact` for the synthesis agent while routing complex cases through the coordinator | EG §6, TS 2.3 |
+| Tools from all configured MCP servers are available simultaneously | EG §6, TS 2.4 |
 
 ---
 
@@ -238,6 +798,197 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 2.4.
 | A cached server can show `cached 2h ago · connects on first use · 5 tools` and connects on first call | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | An organisation `ask` control prompts every call in all permission modes, never remembers, and is not skipped by an allow rule; `blocked` filters the tool out before Claude sees it | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | `timeout` is a per-server tool execution timeout overriding `MCP_TOOL_TIMEOUT` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
+
+---
+
+# Lesson 2.5 — The built-in tools, and the two that are not there
+
+**Domain 2: Tool Design & MCP Integration — 18% of CCAR-F**
+**Task Statement 2.5:** Select and apply built-in tools (Read, Write, Edit, Bash, Grep,
+Glob) effectively.
+
+Lab artifact: tracing Course Doctor's own call path using the search strategy below,
+rather than reading the whole package.
+
+## What you will be able to do afterwards
+
+Choose the right tool for a search or an edit, build understanding of an unfamiliar
+codebase without reading all of it — and know why a permission rule written for `Grep`
+may match nothing on your machine.
+
+## Why the exam cares
+
+The guide's framing is selection: Grep for content, Glob for paths, Read and Write for
+whole files, Edit for targeted changes. And it names a *strategy*, not just a mapping —
+**start with Grep to find entry points, then Read to follow imports and trace flows,
+rather than reading all files upfront.**
+
+That is a context-management answer wearing a tooling hat, which is why it sits here and
+pays off in Domain 5. Reading twenty files to answer one question spends the budget you
+needed for the answer.
+
+## Fundamentals
+
+**Content search versus path search.** Finding text inside files against finding files by
+name. *Why it matters here:* it is the Grep/Glob distinction and the guide's first
+knowledge item. *Depth:* `man grep`, `man find`.
+
+**Anchored editing.** Changing a file by matching surrounding text rather than by line
+number. *Why it matters here:* it is how Edit works, and why it fails when the anchor is
+not unique. *Depth:* any treatment of patch application.
+
+**Incremental exploration.** Building understanding by following references from an entry
+point. *Why it matters here:* it is the named strategy, and the alternative is reading
+everything. *Depth:* Domain 5 TS 5.4.
+
+**Default tool sets.** Which tools a session actually has, which is not the same as which
+tools exist. *Why it matters here:* see the build. It is the whole surprise in this
+lesson. *Depth:* `/docs/en/tools-reference`.
+
+## The idea, before any commands
+
+**Match the tool to the question.**
+
+- *Where is this string?* → content search.
+- *Which files are named like this?* → path search.
+- *What does this file say?* → Read.
+- *Change this one part* → Edit.
+- *Replace the whole thing* → Write.
+
+**Then sequence it.** The guide's strategy is Grep to locate, Read to follow. For tracing
+a function across wrapper modules it names a two-step: identify all exported names first,
+then search for each across the codebase. That beats opening files and hoping.
+
+**And know what your session actually has.** Which is the part nobody expects.
+
+## The build
+
+### Step 1 — the surprise, and it matters for your permission rules
+
+> **"On macOS, Linux, and WSL, Claude Code leaves Glob and Grep out of the default tool
+> set, and Claude searches with `find` and `grep` through the Bash tool instead. In
+> Claude's shell those two commands run embedded versions of `bfs` and `ugrep`, and the
+> searches reach your hooks and permission rules as `Bash` calls."**
+
+On Windows, `Glob` is in the default set. On the platforms most developers use, **it and
+`Grep` are not.**
+
+Three consequences:
+
+1. A **permission rule** written for `Grep` matches nothing on macOS or Linux, because the
+   search never arrives as a `Grep` call. It arrives as `Bash`.
+2. A **hook** matching `Grep` never fires there either.
+3. A **subagent tool list** naming `Grep` and `Glob` is naming tools that may not be in
+   the set to begin with.
+
+The exam guide's TS 2.5 discusses *selecting* Grep and Glob as though they are simply
+available, which is true of the objective and not of every platform. Both facts are worth
+holding: the guide tests the selection reasoning; the documentation tells you what your
+session has.
+
+### Step 2 — Edit, and the uniqueness rule
+
+> **"`old_string` must appear exactly once. When it appears more than once, Claude either
+> supplies a longer string with enough surrounding context to pin down one occurrence, or
+> sets `replace_all: true` to replace them all."**
+
+Which is why the guide names the fallback as a tested skill: **when Edit cannot find a
+unique anchor, use Read followed by Write.** Read the whole file, write the whole file,
+no anchor needed.
+
+### Step 3 — explore incrementally
+
+Tracing how a lesson's cited URLs reach the fetch layer:
+
+```
+1. search content for "urls"           -> finds the extractor and its tests
+2. Read the extractor                  -> gives the function name and its caller
+3. search content for that name        -> finds every call site
+4. Read only those                     -> the flow, without the package
+```
+
+Four steps, four files read instead of twenty. The guide's words for the alternative are
+*reading all files upfront*, and it names the incremental version as the skill.
+
+### Step 4 — note what prompts and what does not
+
+Permission behaviour differs by tool, and in Manual mode for paths inside the working
+directory: `Read`, `Grep` and `Glob` do not prompt; `Edit`, `Write` and `Bash` do. But
+**`Read`, `Grep` and `Glob` still prompt for paths outside the working directory**, and
+`Bash` runs a built-in set of read-only commands without prompting even though it is
+marked as requiring permission.
+
+So "read tools are free" is nearly true and wrong at the boundary — which is the boundary
+that matters, because that is where somebody reaches outside the project.
+
+## Tips
+
+Things the documentation does not tell you.
+
+**If a permission rule or hook for `Grep` never fires, check your platform before your
+syntax.** On macOS, Linux and WSL the search is a `Bash` call. This is the single most
+expensive surprise in this task statement, and nothing warns you — the rule is valid, it
+simply never matches.
+
+**`Bash` is marked as requiring permission and still runs read-only commands without
+prompting.** So the permission column tells you less than it appears to, in both
+directions.
+
+**An Edit that fails on a non-unique anchor is not an error to work around with a longer
+anchor every time.** Sometimes the honest answer is Read plus Write, which the guide names
+as the fallback — and it is more reliable on a file where the same line appears five
+times.
+
+**Reading a file to find out whether it is relevant is the expensive habit.** Search
+first. The file list from a content search is itself information, and it costs almost
+nothing next to opening each one.
+
+**Export names first, then search each one** when tracing through wrapper modules. The
+guide names this specifically, and it is the difference between finding every caller and
+finding the ones you guessed.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Reading all files upfront** instead of building understanding incrementally from an
+> entry point.
+
+And the one the documentation adds:
+
+> **Assuming a tool is in your session's tool set because it exists.**
+
+Same family as the rest of this course: configuration that looks correct and does nothing.
+A rule naming a tool the session does not have is not an error — it is silently inert,
+which is the worst of both.
+
+## What this lesson does not cover
+
+- **Context management as a subject** — Domain 5, especially TS 5.4 on large codebases.
+- **Subagents for exploration** — Domain 1 TS 1.3, and lesson 3.4 for the `Explore` agent.
+- **Permission rule syntax** in depth. Named here for where tool names appear; the rules
+  themselves are configuration rather than tool selection.
+- **Custom tools via MCP** — lessons 2.1 through 2.4.
+- **Every built-in tool.** There are far more than six. This covers the six the task
+  statement names, plus the availability fact that changes how two of them behave.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 2.5.
+
+| Claim | Source |
+|---|---|
+| Grep for content search; Glob for file path pattern matching; Read/Write for full file operations; Edit for targeted modifications using unique text matching | EG §6, TS 2.5 |
+| When Edit fails due to non-unique text matches, using Read + Write as a fallback | EG §6, TS 2.5 |
+| Building codebase understanding incrementally — Grep for entry points, then Read to follow imports — rather than reading all files upfront | EG §6, TS 2.5 |
+| Tracing function usage across wrapper modules by identifying exported names, then searching each across the codebase | EG §6, TS 2.5 |
+| Selecting Glob for files matching naming patterns, e.g. `**/*.test.tsx` | EG §6, TS 2.5 |
+| "On macOS, Linux, and WSL, Claude Code leaves Glob and Grep out of the default tool set, and Claude searches with `find` and `grep` through the Bash tool instead... the searches reach your hooks and permission rules as `Bash` calls." | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
+| On Windows, Glob is part of the default tool set | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
+| Tool names are the exact strings used in permission rules, subagent tool lists and hook matchers | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
+| Edit: "`old_string` must appear exactly once"; otherwise more surrounding context or `replace_all: true` | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
+| `Read`, `Grep` and `Glob` do not prompt inside the working directory but still prompt outside it; `Bash` is marked as requiring permission yet runs a built-in read-only command set without prompting | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
+| `Read` reads file contents; `Write` creates or overwrites files; `Bash` executes shell commands; `Edit` makes targeted edits | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
 
 ---
 

@@ -61,7 +61,7 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
 generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
 it goes stale, so it cannot quietly disagree with them.
 
-**Status: 7 of 29 written — Domain 3 complete, Domain 2 started.** A lesson is a link only when it exists. Nothing below is a
+**Status: 11 of 29 written — Domains 2 and 3 complete.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
 plan and stops one being quietly dropped.
 
@@ -80,11 +80,11 @@ plan and stops one being quietly dropped.
 
 | | Task statement | |
 |---|---|---|
-| 2.1 | Design effective tool interfaces with clear descriptions and boundaries | planned |
-| 2.2 | Implement structured error responses for MCP tools | planned |
-| 2.3 | Distribute tools appropriately across agents and configure tool choice | planned |
+| 2.1 | Design effective tool interfaces with clear descriptions and boundaries | [read](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) |
+| 2.2 | Implement structured error responses for MCP tools | [read](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) |
+| 2.3 | Distribute tools appropriately across agents and configure tool choice | [read](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) |
 | 2.4 | Integrate MCP servers into Claude Code and agent workflows | [read](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) |
-| 2.5 | Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively | planned |
+| 2.5 | Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively | [read](course/domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md) |
 
 ### Domain 1 — Agentic Architecture & Orchestration · 27%
 
