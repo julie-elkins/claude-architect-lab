@@ -21,8 +21,11 @@ including what is not yet written, how the course is sourced, and how to run the
 ## Contents
 
 - **TS 1.1** — Lesson 1.1 — The loop, and what is allowed to end it
+- **TS 1.2** — Lesson 1.2 — The coordinator, and why everything goes through it
 - **TS 1.3** — Lesson 1.3 — Spawning a subagent, and what it does not know
+- **TS 1.4** — Lesson 1.4 — Gating a step, and handing off to someone who cannot see the conversation
 - **TS 1.5** — Lesson 1.5 — Hooks, and the default that makes one useless
+- **TS 1.6** — Lesson 1.6 — Fixed pipeline or adaptive plan
 - **TS 1.7** — Lesson 1.7 — Resuming, branching, and what the saved state is no longer true about
 - **TS 2.1** — Lesson 2.1 — The description is the routing logic
 - **TS 2.2** — Lesson 2.2 — An error the agent can act on
@@ -238,6 +241,206 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.1.
 
 ---
 
+# Lesson 1.2 — The coordinator, and why everything goes through it
+
+**Domain 1: Agentic Architecture & Orchestration — 27% of CCAR-F**
+**Task Statement 1.2:** Orchestrate multi-agent systems with coordinator-subagent
+patterns.
+
+Lab artifact: Course Doctor's coordinator deciding which workers a given lesson needs,
+rather than running all of them every time.
+
+## What you will be able to do afterwards
+
+Design a hub-and-spoke system, partition work so two workers do not do the same job, and
+name the failure that comes from decomposing a task too narrowly.
+
+## Why the exam cares
+
+The guide specifies the architecture rather than leaving it open: **hub-and-spoke, where a
+coordinator manages all inter-subagent communication, error handling, and information
+routing.** Workers do not talk to each other.
+
+And it gives a reason that is worth more than the rule: routing everything through the
+coordinator buys **observability, consistent error handling, and controlled information
+flow.** Those are the three things you lose the moment two workers start exchanging
+results directly, and you lose them silently — the system still works, you just cannot see
+what it did.
+
+It also names a failure most people would never think to guard against: **overly narrow
+task decomposition, leading to incomplete coverage of broad topics.** The coordinator can
+be too good at splitting.
+
+## Fundamentals
+
+**Hub-and-spoke.** One central node; all traffic passes through it. *Why it matters here:*
+it is the named architecture. *Depth:* network topology treatments; the trade is the same
+— a single point of visibility and a single point of congestion.
+
+**Isolated context.** Each worker has its own window and its own history. *Why it matters
+here:* workers cannot share by default, which is why the coordinator must pass things
+explicitly. *Depth:* lesson 1.3.
+
+**Partitioning.** Dividing work so the pieces do not overlap. *Why it matters here:* the
+guide names minimising duplication as a skill, and overlap is paid for twice in tokens.
+*Depth:* any treatment of work decomposition.
+
+**Aggregation.** Combining results into one answer. *Why it matters here:* it is where
+attribution gets lost, and where gaps become invisible. *Depth:* Domain 5 TS 5.3 on
+coverage annotations.
+
+**Dynamic routing.** Choosing which components to run based on the request. *Why it
+matters here:* the guide explicitly prefers this over always running the full pipeline.
+*Depth:* lesson 1.6 on decomposition strategy.
+
+## The idea, before any configuration
+
+**The coordinator does four jobs**, and the guide lists them: decompose the task, delegate
+it, aggregate the results, and **decide which workers to invoke based on the complexity of
+the request.** That fourth one is the one people skip. A coordinator that always runs
+every worker is a pipeline with extra steps — it pays for the full fan-out on a request
+that needed one worker.
+
+**Workers never talk to each other.** Not because it would not work, but because the
+moment they do, you cannot see what happened, errors are handled three different ways, and
+information flows in paths nobody designed.
+
+**Partition before you delegate.** Give each worker a distinct subtopic or source type.
+Two workers handed "research this" will overlap, and you pay for the same reading twice
+while still having gaps elsewhere.
+
+**And check your own coverage.** The guide's named skill is an iterative refinement loop:
+the coordinator **evaluates the synthesis output for gaps**, re-delegates with targeted
+queries, and re-invokes synthesis until coverage is sufficient. Not one pass — a loop with
+a coverage test.
+
+## The build
+
+### Step 1 — the shape
+
+```
+                      coordinator
+                     /     |      \
+              reader    fetcher   synthesiser
+```
+
+Every arrow is bidirectional and no arrow connects two workers. The coordinator holds the
+plan; the workers hold their piece and nothing else.
+
+### Step 2 — route on complexity, not habit
+
+```
+A lesson with no cited URLs        -> reader only
+A lesson with citations            -> reader, then fetcher, then synthesiser
+A lesson already marked verified
+  within the threshold             -> nothing; report and stop
+```
+
+Three requests, three different routes. The third is the valuable one: the coordinator's
+best decision is often to run no workers at all, and a pipeline cannot make it.
+
+### Step 3 — partition so nothing is done twice
+
+Checking fifteen lessons, the wrong split is "two workers, both check lessons." The right
+split is by **distinct scope**: worker A takes the configuration domain, worker B the
+tools domain. No overlap, no duplicated fetches, and the join is unambiguous about which
+worker covered what.
+
+### Step 4 — evaluate the aggregate for gaps, then re-delegate
+
+```
+1. delegate: domain 3 lessons -> worker A
+2. delegate: domain 2 lessons -> worker B
+3. aggregate both
+4. ASK: does this cover every lesson I set out to check?
+5. if not: re-delegate the gap with a targeted query
+6. repeat 3-5 until coverage holds
+```
+
+Step 4 is the one that distinguishes this from fan-out-and-hope. A synthesis that reads
+completely and omits three lessons is the failure mode, and only an explicit coverage test
+catches it.
+
+### Step 5 — do not over-split
+
+The guide's named risk, and it is counterintuitive: decomposing too narrowly produces
+**incomplete coverage of a broad topic.** Six workers each given a precise sliver will
+collectively miss everything that falls between the slivers, and each one will report
+success. The join looks complete because every worker completed.
+
+So the coverage test in step 4 is not optional bookkeeping. It is the only thing standing
+between a well-partitioned system and a confidently partial answer.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**A coordinator that always runs the full pipeline is not a coordinator.** The decision of
+*whether* to invoke a worker is the job. If every request takes the same path, you have
+paid for orchestration and bought a sequence.
+
+**Six narrow workers all reporting success can cover less than two broad ones.** This is
+the over-decomposition failure, and it is invisible at the join: nothing failed, so
+nothing is reported. Ask what fell between them.
+
+**Every returned result consumes the coordinator's context.** Fan-out is a context trade.
+Five workers returning verbose findings can leave the coordinator with no room to
+synthesise them, and the synthesis is the whole point.
+
+**Worker-to-worker shortcuts are tempting and cost you the transcript.** When something
+goes wrong in a system where workers talk directly, there is no single place that saw the
+sequence.
+
+**Partition by scope, never by volume.** "Half the work each" produces overlap at the
+boundary and disputes about who covered what. "This domain each" does not.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Always routing through the full pipeline** instead of dynamically selecting which
+> subagents a request needs.
+
+> **Overly narrow task decomposition**, leading to incomplete coverage of broad topics.
+
+And the architectural one, stated as the reason for the rule rather than the rule:
+
+> **Subagent communication that bypasses the coordinator**, losing observability,
+> consistent error handling and controlled information flow.
+
+The exam shape: when one option adds a routing decision and another adds a worker, the
+routing decision is usually the answer — the guide treats *which workers to invoke* as the
+coordinator's defining responsibility.
+
+## What this lesson does not cover
+
+- **How to spawn and configure a worker** — lesson 1.3, and read it alongside this one.
+- **The loop inside a single agent** — TS 1.1.
+- **Enforcement and handoff between steps** — TS 1.4.
+- **Choosing a decomposition pattern** — TS 1.6, which is the strategy to this lesson's
+  mechanics.
+- **Error propagation through the hub** — Domain 5 TS 5.3.
+- **Context budget as a subject** — Domain 5.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 1.2.
+
+| Claim | Source |
+|---|---|
+| Hub-and-spoke architecture where a coordinator manages all inter-subagent communication, error handling and information routing | EG §6, TS 1.2 |
+| Subagents operate with isolated context and do not inherit the coordinator's conversation history automatically | EG §6, TS 1.2 |
+| The coordinator's role covers task decomposition, delegation, result aggregation, and deciding which subagents to invoke based on query complexity | EG §6, TS 1.2 |
+| Risks of overly narrow task decomposition leading to incomplete coverage of broad research topics | EG §6, TS 1.2 |
+| Designing coordinators that analyse query requirements and dynamically select subagents rather than always routing through the full pipeline | EG §6, TS 1.2 |
+| Partitioning scope across subagents to minimise duplication, e.g. distinct subtopics or source types per agent | EG §6, TS 1.2 |
+| Iterative refinement loops where the coordinator evaluates synthesis output for gaps, re-delegates with targeted queries, and re-invokes synthesis until coverage is sufficient | EG §6, TS 1.2 |
+| Routing all subagent communication through the coordinator for observability, consistent error handling and controlled information flow | EG §6, TS 1.2 |
+| A non-fork subagent starts fresh with no conversation history, receiving only a delegation message | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| Each subagent's returned result consumes the parent's context, and each spends its own tokens | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+
+---
+
 # Lesson 1.3 — Spawning a subagent, and what it does not know
 
 **Domain 1: Agentic Architecture & Orchestration — 27% of CCAR-F**
@@ -449,6 +652,193 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.3.
 - [ ] Whether `Task` is a current alias for `Agent`, an Agent SDK name, or stale in the
       exam guide. The lesson teaches the requirement under both names and does not
       resolve which is authoritative for a given exam item.
+
+---
+
+# Lesson 1.4 — Gating a step, and handing off to someone who cannot see the conversation
+
+**Domain 1: Agentic Architecture & Orchestration — 27% of CCAR-F**
+**Task Statement 1.4:** Implement multi-step workflows with enforcement and handoff
+patterns.
+
+Lab artifact: Course Doctor refusing to write a finding until the source fetch has
+returned, and producing a handoff a human can act on without reading the transcript.
+
+## What you will be able to do afterwards
+
+Block a step until its prerequisite has genuinely completed, and write a handoff that is
+useful to someone who was not there.
+
+## Why the exam cares
+
+This task statement contains the sentence that governs half of this exam, and the guide
+states it as a fact rather than advice: **when deterministic compliance is required — its
+example is identity verification before a financial operation — prompt instructions alone
+have a non-zero failure rate.**
+
+Non-zero is the whole problem. A rule that holds 99% of the time is not a prerequisite; it
+is a tendency. So the distinction it draws between **programmatic enforcement** (hooks,
+prerequisite gates) and **prompt-based guidance** is the answer to a whole family of
+items.
+
+The second half is handoff, and the guide's framing is precise about why it is hard: you
+are escalating to **human agents who lack access to the conversation transcript.** They
+cannot read what happened. Whatever they need must be *in* the handoff.
+
+## Fundamentals
+
+**Precondition.** Something that must be true before an operation may run. *Why it matters
+here:* a prerequisite gate is a precondition with teeth. *Depth:* design-by-contract.
+
+**Enforcement versus guidance.** Prevented against requested. *Why it matters here:* it is
+the task statement's central distinction and the course's recurring theme. *Depth:*
+lessons 1.5, 3.1 and 3.4, which are the same line drawn in three other places.
+
+**State machine.** A system where only certain transitions are legal from a given state.
+*Why it matters here:* "refund only after verified customer" is a transition rule, and
+thinking of it that way makes the gate obvious. *Depth:* any treatment of finite state
+machines.
+
+**Handoff.** Transferring work to another party with the context they need. *Why it
+matters here:* the receiving human has no transcript. *Depth:* clinical handover protocols
+such as SBAR are the mature version of this idea.
+
+**Shared context in parallel work.** Several investigations drawing on one body of facts.
+*Why it matters here:* the guide names decomposing a multi-concern request and
+investigating each part in parallel *using shared context*. *Depth:* lesson 1.2.
+
+## The idea, before any code
+
+**Ask whether the requirement is "should" or "must".** Should → prompt. Must → a gate. The
+guide's test is whether compliance has to be *deterministic*, and if it does, no amount of
+instruction wording gets you there.
+
+**Then make the gate test the real thing, not a proxy.** "Blocking `process_refund` until
+`get_customer` has returned a verified customer ID" is the guide's own example, and notice
+what it checks: not that the step *was called*, but that it **returned a verified ID.** A
+gate that checks whether a prior tool ran is satisfied by a prior tool that ran and
+failed.
+
+**For the handoff, write for a stranger.** The guide lists exactly what to compile:
+customer ID, root cause, amount, recommended action. Every item is something the human
+would otherwise have to reconstruct, and one of them — the recommended action — is the
+agent's actual contribution.
+
+## The build
+
+### Step 1 — the gate, and what it checks
+
+Course Doctor must not write a finding about a source it has not successfully fetched.
+The wrong gate:
+
+```
+if fetch_source_was_called: allow write_findings
+```
+
+That passes after a fetch that 404'd. The right gate tests the *result*:
+
+```
+if fetch_source returned a body AND a status of 200: allow write_findings
+else: deny, with the reason
+```
+
+The mechanism is a `PreToolUse` hook — lesson 1.5 covers it, and the one line that matters
+here is `onFailure: "block"`, because a gate that evaporates when its own script breaks is
+not a gate.
+
+### Step 2 — decompose a multi-concern request, then share the context
+
+A lesson with three problems — a dead link, a stale quota and a renamed console path — is
+three investigations. The guide's pattern: split into distinct items, investigate each
+**in parallel using shared context**, then synthesise one resolution.
+
+Shared context is the part that saves you. All three investigations need the lesson text
+and its citation table. Fetched once, passed to each, rather than three workers each
+reading the same file.
+
+### Step 3 — the handoff
+
+When the agent cannot resolve something, what reaches the human is not the transcript. So:
+
+```
+HANDOFF
+  item           lesson 3.1, claim "files above the working directory load at launch"
+  root cause     cited page returns 200 but no longer contains the quoted wording
+  what was tried fetched the URL twice, searched the page for three phrasings
+  recommendation re-read the memory docs and re-quote, or downgrade to OBSERVED
+  not covered    the other five citations in this lesson were not checked
+```
+
+Five fields. Four of them a human would otherwise reconstruct, and the fifth —
+`not covered` — is the one that stops the handoff reading as complete.
+
+### Step 4 — make the gate fire, once
+
+Write the gate, then deliberately violate the prerequisite and watch it refuse. A gate
+that has never refused anything is indistinguishable from a gate with a logic error, and
+both look like a well-behaved system.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**A gate that checks "was it called" is satisfied by a call that failed.** This is the most
+common prerequisite bug and the hardest to see in review, because the code reads exactly
+like the correct version. Test the returned value, not the invocation.
+
+**A handoff without a "what I could not check" line reads as complete.** The human assumes
+the agent covered the rest. That assumption is doing real damage in a support context and
+in a certification context alike.
+
+**"Recommended action" is the agent's contribution.** A handoff with facts and no
+recommendation has moved the problem without reducing it.
+
+**Shared context is cheaper than parallel re-reading.** Three workers each reading the
+same file is three times the tokens for one file. Fetch once, pass it.
+
+**Prompt-based ordering works right up until it does not, and nothing tells you which run
+failed.** That is what non-zero failure rate means in practice: no error, no alert, one
+refund processed without verification.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Prompt instructions where deterministic compliance is required.** Its own example is
+> identity verification before a financial operation, and its own words are that prompt
+> instructions alone have a non-zero failure rate.
+
+And the handoff form:
+
+> **Escalating to a human who lacks the transcript, without compiling what they need.**
+
+On exam day, when one option strengthens an instruction and another adds a hook or a gate,
+the mechanism wins — and this task statement is where the guide says why in the clearest
+language it uses anywhere.
+
+## What this lesson does not cover
+
+- **Hook mechanics** — TS 1.5, including the fail-open default that undoes a gate.
+- **When to escalate at all** — Domain 5 TS 5.2, which is about triggers rather than
+  format.
+- **Error propagation between agents** — Domain 5 TS 5.3.
+- **Decomposition strategy** — TS 1.6.
+- **Coordinator architecture** — TS 1.2.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 1.4.
+
+| Claim | Source |
+|---|---|
+| The difference between programmatic enforcement (hooks, prerequisite gates) and prompt-based guidance for workflow ordering | EG §6, TS 1.4 |
+| When deterministic compliance is required, e.g. identity verification before financial operations, prompt instructions alone have a non-zero failure rate | EG §6, TS 1.4 |
+| Structured handoff protocols for mid-process escalation including customer details, root cause analysis and recommended actions | EG §6, TS 1.4 |
+| Implementing programmatic prerequisites that block downstream tool calls until prerequisite steps have completed, e.g. blocking `process_refund` until `get_customer` has returned a verified customer ID | EG §6, TS 1.4 |
+| Decomposing multi-concern requests into distinct items, investigating each in parallel using shared context, then synthesising a unified resolution | EG §6, TS 1.4 |
+| Compiling structured handoff summaries — customer ID, root cause, refund amount, recommended action — when escalating to human agents who lack access to the conversation transcript | EG §6, TS 1.4 |
+| Hooks give deterministic guarantees where prompt instructions give probabilistic compliance | EG §6, TS 1.5 |
+| A `PreToolUse` hook blocks a tool call; a missing, timed-out or erroring hook script is a non-blocking error and the action proceeds unless `onFailure: "block"` is set | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 
 ---
 
@@ -672,6 +1062,199 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.5.
 | Exit code 2 does not block `PostToolUse`, `PostToolUseFailure`, `PermissionRequest` or `Notification` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | Hooks are configured in `~/.claude/settings.json`, `.claude/settings.json`, `.claude/settings.local.json`, managed policy, plugin `hooks/hooks.json`, or skill and subagent frontmatter | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | Handler types are `command`, `http`, `mcp_tool`, `prompt` and `agent` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+
+---
+
+# Lesson 1.6 — Fixed pipeline or adaptive plan
+
+**Domain 1: Agentic Architecture & Orchestration — 27% of CCAR-F**
+**Task Statement 1.6:** Design task decomposition strategies for complex workflows.
+
+Lab artifact: Course Doctor's per-lesson pass plus a separate cross-lesson pass, because
+one pass cannot do both.
+
+## What you will be able to do afterwards
+
+Choose between a fixed sequence and an adaptive plan for a given task, and say which of
+the two the task's shape demands.
+
+## Why the exam cares
+
+This is the strategy task statement, and the guide frames it as a binary with a clean
+discriminator: **fixed sequential pipelines, which it calls prompt chaining, versus
+dynamic adaptive decomposition based on intermediate findings.**
+
+The discriminator is **predictability**. If you know the steps before you start, chain
+them. If the next step depends on what the last one found, you cannot write the chain —
+you need a plan that generates subtasks as it goes.
+
+And it names one structural pattern worth memorising because it recurs everywhere:
+**per-item local passes plus a separate cross-item integration pass, to avoid attention
+dilution.** One pass trying to do both does neither well.
+
+## Fundamentals
+
+**Prompt chaining.** A fixed sequence where each step's output feeds the next. *Why it
+matters here:* it is one of the two named options. *Depth:* any treatment of pipelines.
+
+**Adaptive decomposition.** Generating the next subtask from what you just learned. *Why
+it matters here:* it is the other option, and the one open-ended work requires. *Depth:*
+planning literature; the mechanism is the same as iterative deepening.
+
+**Attention dilution.** Asking one pass to hold too many concerns at once, so each gets
+less. *Why it matters here:* the guide names it as the reason to split local from
+integration work. *Depth:* Domain 5 TS 5.1 on the lost-in-the-middle effect, which is the
+same problem at the context level.
+
+**Local versus cross-cutting concerns.** Problems inside one item against problems between
+items. *Why it matters here:* they need different passes because they need different
+inputs. *Depth:* the build.
+
+**Prioritisation under discovery.** Ordering work when the dependencies are not known
+upfront. *Why it matters here:* it is the third guide skill, and the reason adaptive plans
+must be re-orderable. *Depth:* any treatment of dependency resolution.
+
+## The idea, before any design
+
+**One question: do you know the steps before you start?**
+
+- **Yes** — a predictable multi-aspect review, a known set of checks, a defined set of
+  files. Chain it. A fixed pipeline is simpler, cheaper, testable, and repeatable.
+- **No** — an open-ended investigation where each finding changes what to look at next.
+  Adapt. A chain written in advance would be a guess about a shape you have not seen.
+
+**Then ask what the task is really made of.** The guide's second pattern is the one people
+miss: when a review covers many items *and* relationships between them, those are two
+passes. A per-file pass finds local problems with full attention on one file. A cross-file
+pass finds the integration problems, and it needs all the files' summaries rather than
+all their contents.
+
+Trying both at once dilutes attention on the local work and starves the integration work
+of the overview it needs.
+
+**And for genuinely open-ended work, the guide gives a three-step shape**: map the
+structure first, identify the high-impact areas, then build a prioritised plan **that
+adapts as dependencies are discovered.** Mapping before planning is the part that makes
+the plan worth anything.
+
+## The build
+
+### Step 1 — chain the predictable part
+
+Checking one lesson's citations is a known sequence:
+
+```
+read the lesson -> extract its cited URLs -> fetch each -> compare -> write findings
+```
+
+Five steps, same every time, each feeding the next. No decision about *what* to do, only
+execution. Chain it, and the chain is testable because its shape never varies.
+
+### Step 2 — split local from cross-cutting
+
+Checking the whole course is not one bigger version of step 1. There are two different
+questions:
+
+```
+PASS A, per lesson   does each claim match its own cited source?
+                     input: one lesson and its citations. Full attention, one item.
+
+PASS B, cross lesson do two lessons contradict each other? Is a task statement
+                     covered twice or not at all? Does a term drift between them?
+                     input: every lesson's SUMMARY, not every lesson's text.
+```
+
+Pass B cannot run inside pass A, because pass A never sees two lessons at once. And pass B
+would be hopeless if given the full text of fifteen lessons — it needs the overview, which
+is exactly what pass A produces.
+
+### Step 3 — adapt when the task is open-ended
+
+"Make this course consistent" has no knowable step list. So:
+
+```
+1. MAP        what lessons exist, which task statements they claim, which cite what
+2. IDENTIFY   where the risk concentrates — lessons with the most uncited claims,
+              task statements claimed twice, terms used differently
+3. PLAN       a prioritised list, built from what step 2 actually found
+4. ADAPT      when fixing one lesson reveals that two others share its error,
+              re-order
+```
+
+Step 4 is the definition of adaptive. A fixed pipeline written at step 0 could not have
+contained it, because the dependency was discovered at step 3.
+
+### Step 4 — do not adapt what you could have chained
+
+The failure in the other direction is real and more expensive than it looks: running an
+adaptive plan over a predictable task means paying a planning step, every time, to
+rediscover a sequence you already knew.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**If you can write the steps down before starting, write them down and chain them.** An
+adaptive plan over a known sequence is a planning tax paid repeatedly for an answer you
+already had.
+
+**A single pass asked to find local *and* cross-cutting problems reliably finds neither
+well.** It is not that it fails — it produces a plausible mix, with the integration
+findings thin and the local findings shallow, and nothing marks which half was shortchanged.
+
+**The cross-cutting pass wants summaries, not sources.** Feeding it everything is the
+intuitive move and it reproduces the attention problem you split the passes to avoid.
+
+**Map before you plan.** A prioritised plan built without first mapping the structure is a
+list of guesses in confident order.
+
+**An adaptive plan needs to be re-orderable, or it is a pipeline with extra ceremony.** If
+discovering a dependency at step 6 cannot change steps 7 through 10, nothing is adapting.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **A single large review pass** instead of per-item local analysis plus a separate
+> cross-item integration pass — the guide's named cost being **attention dilution.**
+
+And the two mismatches, which are the same error in opposite directions:
+
+> **Dynamic decomposition for a predictable workflow**, paying a planning step to
+> rediscover a known sequence.
+
+> **A fixed pipeline for an open-ended investigation**, where the chain was written before
+> anyone knew the shape.
+
+The exam shape: the stem will tell you whether the steps are knowable in advance. That
+sentence is the answer — a "comprehensive review of four known aspects" is a chain, and
+"add tests to a legacy codebase" is not.
+
+## What this lesson does not cover
+
+- **Spawning the workers a decomposition implies** — lesson 1.3.
+- **Coordinator architecture** — lesson 1.2, which is the mechanics to this lesson's
+  strategy.
+- **Plan mode**, which is a Claude Code feature for planning a change; this is about
+  decomposing a workflow. Lesson 3.4.
+- **Iterative refinement with the author in the loop** — lesson 3.5. Related, and that one
+  is about your own iteration rather than an agent's decomposition.
+- **Multi-pass review architecture** — Domain 4 TS 4.6, which takes the same per-item plus
+  integration idea and adds reviewer independence.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 1.6.
+
+| Claim | Source |
+|---|---|
+| When to use fixed sequential pipelines (prompt chaining) versus dynamic adaptive decomposition based on intermediate findings | EG §6, TS 1.6 |
+| Prompt chaining patterns that break reviews into sequential steps, e.g. analyse each file individually then run a cross-file integration pass | EG §6, TS 1.6 |
+| The value of adaptive investigation plans that generate subtasks based on what is discovered at each step | EG §6, TS 1.6 |
+| Selecting prompt chaining for predictable multi-aspect reviews and dynamic decomposition for open-ended investigation tasks | EG §6, TS 1.6 |
+| Splitting large code reviews into per-file local analysis passes plus a separate cross-file integration pass to avoid attention dilution | EG §6, TS 1.6 |
+| Decomposing open-ended tasks such as "add comprehensive tests to a legacy codebase" by first mapping structure, identifying high-impact areas, then creating a prioritised plan that adapts as dependencies are discovered | EG §6, TS 1.6 |
+| Multi-pass review splitting per-file local analysis from cross-file integration passes to avoid attention dilution and contradictory findings | EG §6, TS 4.6 |
 
 ---
 
