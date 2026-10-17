@@ -61,7 +61,7 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
 generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
 it goes stale, so it cannot quietly disagree with them.
 
-**Status: 18 of 29 written — Domains 1, 2 and 3 complete. Domains 4 and 5 remain.** A lesson is a link only when it exists. Nothing below is a
+**Status: 20 of 29 written — Domains 1, 2 and 3 complete; Domain 4 started.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
 plan and stops one being quietly dropped.
 
@@ -104,9 +104,9 @@ plan and stops one being quietly dropped.
 |---|---|---|
 | 4.1 | Design prompts with explicit criteria to improve precision and reduce false positives | planned |
 | 4.2 | Apply few-shot prompting to improve output consistency and quality | planned |
-| 4.3 | Enforce structured output using tool use and JSON schemas | planned |
+| 4.3 | Enforce structured output using tool use and JSON schemas | [lesson 4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) |
 | 4.4 | Implement validation, retry, and feedback loops for extraction quality | planned |
-| 4.5 | Design efficient batch processing strategies | planned |
+| 4.5 | Design efficient batch processing strategies | [lesson 4.5](course/domain-4-prompting-and-output/lesson-4-5-batch-processing.md) |
 | 4.6 | Design multi-instance and multi-pass review architectures | planned |
 
 ### Domain 5 — Context Management & Reliability · 15%

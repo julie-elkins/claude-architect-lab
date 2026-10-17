@@ -31,6 +31,8 @@ including what is not yet written, how the course is sourced, and how to run the
 - **TS 2.2** — Lesson 2.2 — An error the agent can act on
 - **TS 2.3** — Lesson 2.3 — Fewer tools, and forcing the first one
 - **TS 2.4** — Lesson 2.4 — Wiring a server in, and what a populated `/mcp` does not prove
+- **TS 4.3** — Lesson 4.3 — A schema you cannot violate, and the errors it still lets through
+- **TS 4.5** — Lesson 4.5 — Half price, if you can wait a day
 - **TS 2.5** — Lesson 2.5 — The built-in tools, and the two that are not there
 - **TS 3.1** — Lesson 3.1 — Where an instruction lives decides who gets it
 - **TS 3.2** — Lesson 3.2 — Packaging a procedure, and deciding what it may touch
@@ -2235,6 +2237,411 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 2.4.
 | A cached server can show `cached 2h ago · connects on first use · 5 tools` and connects on first call | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | An organisation `ask` control prompts every call in all permission modes, never remembers, and is not skipped by an allow rule; `blocked` filters the tool out before Claude sees it | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | `timeout` is a per-server tool execution timeout overriding `MCP_TOOL_TIMEOUT` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
+
+---
+
+# Lesson 4.3 — A schema you cannot violate, and the errors it still lets through
+
+**Domain 4: Prompt Engineering & Structured Output — 20% of CCAR-F**
+**Task Statement 4.3:** Enforce structured output using tool use and JSON schemas.
+
+Lab artifact: Course Doctor's findings guaranteed parseable, with the fields that may
+legitimately be absent handled so the model cannot invent them.
+
+## What you will be able to do afterwards
+
+Guarantee that output parses, say exactly which class of error that does **not** prevent,
+and design the optional-field question deliberately — because the exam guide and the
+current API documentation give opposite advice about it, for good reasons on both sides.
+
+## Why the exam cares
+
+The guide's position is clear: **tool use with JSON schemas is the most reliable approach
+for guaranteed schema-compliant structured output, eliminating JSON syntax errors.**
+
+And it immediately names the limit, which is the more examinable half: **strict schemas
+eliminate syntax errors but do not prevent semantic errors** — line items that do not sum
+to the total, values in the wrong fields. A valid document that is wrong.
+
+That distinction is the lesson. Everything else is mechanics.
+
+## Fundamentals
+
+**JSON Schema.** A machine-readable description of what a document must contain. *Why it
+matters here:* it is the contract. *Depth:* `json-schema.org`.
+
+**Syntactic versus semantic validity.** Well-formed against actually correct. *Why it
+matters here:* schemas guarantee the first and say nothing about the second. *Depth:* the
+distinction is the same one in compilers — a program that parses and does the wrong thing.
+
+**Constrained decoding.** Restricting token generation so output cannot leave the grammar.
+*Why it matters here:* it is how the current API enforces schemas, and it is stronger than
+validate-then-retry. *Depth:* the structured outputs documentation.
+
+**Nullable versus required.** Whether a field may be absent. *Why it matters here:* the
+tension at the heart of this lesson. *Depth:* the build.
+
+**Enum with an escape hatch.** A closed set plus an explicit "none of these" member. *Why
+it matters here:* it is the reconciliation of that tension. *Depth:* the guide's own
+`"unclear"` and `"other" + detail` patterns.
+
+## The idea, before any schema
+
+**Decide what must be guaranteed, then pick the mechanism that guarantees it.**
+
+The guide's mechanism is a tool whose input schema *is* your output shape: define an
+extraction tool, let the model call it, read the structured data out of the call rather
+than parsing prose. `tool_choice` then controls whether it *must* call — lesson 2.3 covers
+the three settings, and `"auto"` is the one that lets it answer in text instead.
+
+**Then accept what the guarantee does not cover.** A schema cannot tell you the extracted
+total is wrong, that two fields were swapped, or that a confident value was invented. The
+guide's answer is to **build the check into the schema**: extract `calculated_total`
+*alongside* `stated_total` so a mismatch is visible, and add a `conflict_detected` boolean
+for inconsistent sources. You are not validating the model; you are asking it to surface
+the evidence that would reveal its own error.
+
+## The build
+
+### Step 1 — the schema as a tool's input
+
+```json
+{
+  "name": "write_finding",
+  "description": "Record one verification finding for one claim in one lesson.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "claim": {"type": "string"},
+      "source_url": {"type": "string"},
+      "verdict": {
+        "type": "string",
+        "enum": ["supported", "contradicted", "not_in_docs", "not_checked", "unclear"]
+      },
+      "quoted_support": {"type": "string"},
+      "conflict_detected": {"type": "boolean"}
+    },
+    "required": ["claim", "source_url", "verdict", "conflict_detected"]
+  }
+}
+```
+
+Two deliberate choices. `verdict` is an enum with `unclear` in it — the guide's named
+pattern for ambiguous cases. And `conflict_detected` is required, so the model must state
+a position rather than omit the field when the answer is awkward.
+
+### Step 2 — force the call when text would not do
+
+Under `tool_choice: "auto"` the model may answer in prose instead. If you need structure,
+`"any"` guarantees a tool call; a named tool guarantees *which*. The guide's own case is
+`"any"` when several extraction schemas exist and the document type is unknown.
+
+### Step 3 — the optional-field question, and the genuine disagreement
+
+**The exam guide says:** design fields as optional or nullable when source documents may
+not contain the information, *"preventing the model from fabricating values to satisfy
+required fields."*
+
+**The current API documentation says the opposite:** *"Reduce optional parameters. Make
+parameters `required` where possible."* Its reason is mechanical — *"each optional
+parameter roughly doubles a portion of the grammar's state space"* — and there are hard
+limits: **24 optional parameters total across all strict schemas, 16 with union types.**
+
+Both are right about different things. The guide is preventing a hallucinated value; the
+documentation is managing constrained-decoding complexity. **The reconciliation is the
+guide's own other objective:** make the field required and give it an explicit
+"not present" member — an enum with `unclear`, or a nullable type stated once rather than
+a parade of optional fields. The model then *must* answer, and `unclear` is an answer.
+
+For the exam, answer the guide. For a real schema, prefer required fields with explicit
+absent-values and keep your optional count well under the limit.
+
+### Step 4 — know where the guarantee stops
+
+Even under constrained decoding the documentation names three cases where output **may not
+match your schema**:
+
+- **A refusal.** `stop_reason: "refusal"` — safety takes precedence over the schema.
+- **Truncation.** `stop_reason: "max_tokens"` — the output is incomplete.
+- **Enum capitalisation.** A returned value *"may differ from your schema only in
+  capitalisation, typically in the first letter of a word following a space."*
+
+So: check `stop_reason` before trusting the payload, and compare enums
+case-insensitively. Two lines of code, and without them the guarantee has three holes.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**A schema-valid document can be completely wrong, and it looks more trustworthy than
+prose.** That is the actual risk here: structure reads as rigour. The guide's
+`calculated_total` beside `stated_total` is the cheapest guard there is.
+
+**Compare enum values case-insensitively.** The documentation says capitalisation may
+differ, typically on the first letter after a space. A strict string comparison will fail
+on a response that is otherwise exactly right.
+
+**Check `stop_reason` before parsing.** On a refusal or a `max_tokens` truncation the
+payload will not match your schema, and your parser's error will point at the schema
+rather than at the reason.
+
+**Every optional parameter you add has a cost you cannot see.** It roughly doubles part of
+the grammar's state space, and there is a hard ceiling of 24. A schema that compiles
+slowly or errors is usually a schema with too many optionals.
+
+**A required field with an `unclear` member beats an optional field.** The model must take
+a position, and "unclear" is a position you can count. An absent field is indistinguishable
+from a field the model forgot.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Treating schema compliance as correctness.** Strict schemas eliminate syntax errors
+> and do not prevent semantic ones — values that do not sum, fields transposed.
+
+> **Required fields where the source may not contain the information**, which pressures
+> the model to fabricate a value to satisfy the schema.
+
+And the one the documentation adds:
+
+> **Trusting the payload without checking `stop_reason`.** On a refusal or a truncation,
+> output that does not match the schema is the documented behaviour, not a bug.
+
+## What this lesson does not cover
+
+- **`tool_choice` in depth** — lesson 2.3 covers all three settings.
+- **Validation and retry loops** — TS 4.4, which is what you do when the semantic check
+  fails.
+- **Few-shot examples** — TS 4.2, often the better fix for inconsistent *content* where a
+  schema fixes inconsistent *shape*.
+- **Batch processing** — TS 4.5.
+- **The newer dedicated structured-outputs feature** (`output_config.format` and
+  `strict: true` on a tool) beyond the facts above. The exam guide describes the
+  tool-use-plus-schema approach; the current API has a stronger constrained-decoding
+  mechanism. Both are noted; the exam tests the former.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 4.3.
+
+| Claim | Source |
+|---|---|
+| Tool use with JSON schemas is the most reliable approach for guaranteed schema-compliant output, eliminating JSON syntax errors | EG §6, TS 4.3 |
+| `tool_choice: "auto"` may return text instead of calling a tool; `"any"` must call one but chooses which; a named tool forces that tool | EG §6, TS 4.3 |
+| Strict JSON schemas eliminate syntax errors but do not prevent semantic errors, e.g. line items that do not sum to a total, values in wrong fields | EG §6, TS 4.3 |
+| Schema design: required versus optional fields, enum fields with `"other"` plus a detail string for extensible categories | EG §6, TS 4.3 |
+| Setting `tool_choice: "any"` to guarantee structured output when multiple extraction schemas exist and the document type is unknown | EG §6, TS 4.3 |
+| Designing schema fields as optional or nullable when source documents may not contain the information, preventing fabricated values | EG §6, TS 4.3 |
+| Adding enum values like `"unclear"` for ambiguous cases and `"other"` plus detail fields for extensible categorisation | EG §6, TS 4.3 |
+| Extracting `calculated_total` alongside `stated_total` to flag discrepancies, and a `conflict_detected` boolean for inconsistent source data | EG §6, TS 4.4 |
+| Structured outputs enforce schemas by constrained decoding: "Always valid… Type safe… no retries needed for schema violations" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
+| **"Reduce optional parameters. Make parameters `required` where possible."** and "each optional parameter roughly doubles a portion of the grammar's state space" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
+| Hard limits: 24 optional parameters total across strict schemas, 16 parameters with union types | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
+| Required properties appear first, followed by optional properties, regardless of schema order | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
+| Output may not match the schema on a refusal (`stop_reason: "refusal"`), on truncation (`stop_reason: "max_tokens"`), or in enum capitalisation — which "may differ from your schema only in capitalisation, typically in the first letter of a word following a space" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
+
+**Noted tension, stated rather than resolved:**
+
+- The exam guide advises optional/nullable fields to prevent fabrication. The current API
+  documentation advises minimising optional parameters for grammar complexity. They
+  optimise different things; the reconciliation offered in this lesson — a required field
+  with an explicit absent-value member — is the author's, not either source's.
+
+---
+
+# Lesson 4.5 — Half price, if you can wait a day
+
+**Domain 4: Prompt Engineering & Structured Output — 20% of CCAR-F**
+**Task Statement 4.5:** Design efficient batch processing strategies.
+
+Lab artifact: Course Doctor's nightly sweep over every lesson submitted as one batch, and
+the pre-merge check deliberately left synchronous.
+
+## What you will be able to do afterwards
+
+Decide whether a workload belongs on the batch API, size a submission window against an
+SLA you have been given, and recover from a partial failure without resubmitting
+everything.
+
+## Why the exam cares
+
+The guide gives three numbers and one prohibition, and they are the whole decision:
+**50% cost saving, up to a 24-hour processing window, no guaranteed latency SLA.**
+
+Which makes the judgment mechanical. **Blocking workflows cannot use it** — the guide's
+example is a pre-merge check, and a pre-merge check that might take a day is not a check.
+**Non-blocking, latency-tolerant work should**: overnight reports, weekly audits, nightly
+test generation. Half price for work nobody is waiting on.
+
+Then it names a second-order skill that is unusually concrete: **calculating submission
+frequency from an SLA.** Its own worked figure is 4-hour windows to guarantee a 30-hour
+SLA against 24-hour batch processing. That is arithmetic you can be asked to do.
+
+## Fundamentals
+
+**Synchronous versus asynchronous.** Waiting for a reply against submitting and collecting
+later. *Why it matters here:* it is the entire distinction. *Depth:* any treatment of
+message queues.
+
+**Latency tolerance.** How long a result can take before it stops being useful. *Why it
+matters here:* it is the property that decides which API. *Depth:* none needed, but be
+honest about it — most work is more tolerant than it feels.
+
+**SLA arithmetic.** Working backwards from a promise to a schedule. *Why it matters here:*
+the guide asks for it directly. *Depth:* the build.
+
+**Correlation identifier.** A token that ties a response back to its request. *Why it
+matters here:* `custom_id`, and without it a batch of results is anonymous. *Depth:*
+distributed tracing uses the same idea.
+
+**Partial failure.** Some units succeed, others do not. *Why it matters here:* a batch has
+four per-request outcomes and only one is success. *Depth:* the build.
+
+## The idea, before any submission
+
+**Ask one question: is anyone waiting?**
+
+If a human or a pipeline is blocked on the answer, synchronous. If the result is read
+later — a morning report, a weekly audit — batch, and take the 50%.
+
+**Then do the arithmetic rather than guessing a cadence.** If you have promised results
+within 30 hours and processing may take up to 24, your submission window is the
+difference: submit at least every 6 hours, and the guide's own example uses 4 to leave
+margin. The margin is not timidity — processing *"may be slowed down based on current
+demand"*, and under load *"you may see more requests expiring after 24 hours."*
+
+**And design for partial failure from the start**, because resubmitting the whole batch
+to recover three documents is the expensive mistake and the easy one.
+
+## The build
+
+### Step 1 — one request per unit, each with an id
+
+```json
+{"custom_id": "lesson-3-1-claim-04", "params": {...}}
+{"custom_id": "lesson-3-3-claim-11", "params": {...}}
+```
+
+`custom_id` is how a result finds its way home: 1 to 64 characters, alphanumerics, hyphens
+and underscores only. Make it *meaningful* — encode the lesson and the claim — because on
+a partial failure the id is all you have to work out what to resubmit.
+
+Two hard ceilings: **100,000 requests or 256 MB, whichever comes first.** Exceeding the
+size gives a `413 request_too_large`.
+
+### Step 2 — know what a batch cannot do
+
+Three parameters are unsupported: **`stream`**, **`speed`** (fast mode tunes synchronous
+latency, which does not apply), and **`max_tokens: 0`** (cache pre-warming, because the
+ephemeral entry would expire before any follow-up). Every batched request needs
+`max_tokens` of at least 1.
+
+And the structural limit the guide names: **no multi-turn tool calling within a single
+request.** There is no client in the loop during asynchronous processing, so you cannot
+execute a tool mid-request and feed the result back. A batched request is one round trip.
+Note that the documentation frames its exclusions as those three *parameters* rather than
+as this limitation — both descriptions are true, at different levels, and the guide's is
+the architectural one.
+
+### Step 3 — read the four outcomes
+
+Each request ends as one of:
+
+| Outcome | Meaning | Billed? |
+|---|---|---|
+| `succeeded` | Request completed; includes the message result | Yes |
+| `errored` | Invalid request or an internal error; no message created | **No** |
+| `canceled` | You cancelled before it was sent to the model | **No** |
+| `expired` | The batch hit its 24-hour expiry before this request was sent | **No** |
+
+Three of four are free, which is worth knowing before you build cost estimates on
+submitted volume rather than succeeded volume.
+
+Results are available **when all messages have completed or after 24 hours, whichever
+comes first.** So an expiry is not a failure to collect — it is a result you collect with
+the rest.
+
+### Step 4 — resubmit only the failures
+
+The guide's named skill: resubmit **only the failed documents, identified by
+`custom_id`**, with an appropriate modification — its example being chunking a document
+that exceeded context limits. Partial recovery, not a rerun.
+
+### Step 5 — refine on a sample first
+
+The last skill, and the one that saves the most money: **prompt refinement on a sample set
+before batch-processing large volumes**, to maximise first-pass success and avoid iterative
+resubmission. Fifty requests to find out the prompt is wrong beats fifty thousand.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**Make `custom_id` self-describing, not sequential.** `request-0412` tells you nothing on a
+partial failure. `lesson-3-1-claim-04` tells you exactly what to resubmit, and you will be
+reading these ids at the worst possible time.
+
+**You are not billed for `errored`, `canceled` or `expired` requests.** So a cost model
+built on submitted volume overestimates, and — more usefully — a batch that largely expired
+cost you almost nothing. Retry it.
+
+**Expiry is more likely exactly when you are busiest.** Processing slows under demand, so
+the run where you submitted the most is the run most likely to see expiries. Build the
+schedule for the bad day.
+
+**The 24 hours is a ceiling, not an estimate.** Most batches finish in under an hour. Plan
+capacity against the ceiling and your expectations against the hour.
+
+**Test the prompt on fifty before you send fifty thousand.** This is in the guide as a
+skill, and it is the single highest-leverage habit here.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Batch processing a blocking workflow.** Its example is a pre-merge check, and the
+> failure is definitional: a gate that might answer tomorrow is not a gate.
+
+> **Resubmitting an entire batch to recover the failures**, instead of resubmitting the
+> failed `custom_id`s with a modification.
+
+And the one implied by the arithmetic:
+
+> **Choosing a submission cadence by feel instead of from the SLA.** The guide's worked
+> example is 4-hour windows for a 30-hour promise against 24-hour processing. A cadence
+> picked by instinct meets the SLA until the first slow day.
+
+## What this lesson does not cover
+
+- **Prompt caching inside a batch.** Real, and interacts with batching in ways out of
+  scope here; `max_tokens: 0` pre-warming specifically does not work in a batch.
+- **Rate limits**, which apply to both the HTTP requests and to pending requests inside a
+  batch.
+- **Pricing per model.** Model prices change; the 50% relationship is the durable fact.
+- **Structured output in a batch** — TS 4.3, and it composes normally.
+- **Multi-instance review**, which often *is* batchable — TS 4.6.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 4.5.
+
+| Claim | Source |
+|---|---|
+| The Message Batches API: 50% cost savings, up to a 24-hour processing window, no guaranteed latency SLA | EG §6, TS 4.5 |
+| Batch processing suits non-blocking, latency-tolerant workloads (overnight reports, weekly audits, nightly test generation) and is inappropriate for blocking workflows such as pre-merge checks | EG §6, TS 4.5 |
+| The batch API does not support multi-turn tool calling within a single request | EG §6, TS 4.5 |
+| `custom_id` fields correlate batch request and response pairs | EG §6, TS 4.5 |
+| Calculating submission frequency from SLA constraints, e.g. 4-hour windows to guarantee a 30-hour SLA with 24-hour batch processing | EG §6, TS 4.5 |
+| Handling batch failures by resubmitting only the failed documents identified by `custom_id`, with modifications such as chunking documents that exceeded context limits | EG §6, TS 4.5 |
+| Using prompt refinement on a sample set before batch-processing large volumes | EG §6, TS 4.5 |
+| "most batches finishing in less than 1 hour while reducing costs by 50%" | [batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing), read 2026-10-17 |
+| "You can access batch results when all messages have completed or after 24 hours, whichever comes first. Batches expire if processing does not complete within 24 hours." | [batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing), read 2026-10-17 |
+| A batch is limited to 100,000 requests or 256 MB, whichever is reached first; exceeding the size gives `413 request_too_large` | [batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing), read 2026-10-17 |
+| `custom_id` must be 1 to 64 characters matching `^[a-zA-Z0-9_-]{1,64}$` | [batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing), read 2026-10-17 |
+| Unsupported parameters are `stream`, `speed` and `max_tokens: 0`; each batched request needs `max_tokens` of at least 1 | [batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing), read 2026-10-17 |
+| Four per-request outcomes — `succeeded`, `errored`, `canceled`, `expired` — and you are **not billed** for the last three | [batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing), read 2026-10-17 |
+| "processing may be slowed down based on current demand and your request volume. In that case, you may see more requests expiring after 24 hours" | [batch processing](https://platform.claude.com/docs/en/build-with-claude/batch-processing), read 2026-10-17 |
 
 ---
 
