@@ -61,3 +61,30 @@ def test_guide_contains_every_listed_lesson_body():
         # First heading of each lesson must appear in the guide.
         heading = next(l for l in body.splitlines() if l.startswith("# "))
         assert heading[2:].strip() in guide, "missing from guide: %s" % rel
+
+
+def test_every_lesson_claim_is_cited():
+    """Structural citation check: every claim row names a usable source.
+
+    Verified by BREAKING it, three ways: a row citing nothing, a URL with no
+    read date, and a lesson with no Sources section. All three were caught.
+
+    This does NOT verify that a cited page still says what a row claims — only
+    the verify-course-content skill can do that, and it has not been run on
+    these lessons. A passing structural check is not a verified lesson, and
+    conflating the two would be the exact failure the course teaches.
+    """
+    result = subprocess.run(
+        [sys.executable, "scripts/check_citations.py"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_citation_check_declares_what_it_cannot_verify():
+    # If this line is ever removed, a passing check starts implying more than
+    # it establishes.
+    text = (REPO / "scripts" / "check_citations.py").read_text(encoding="utf-8")
+    assert "still SAYS what the row claims" in text

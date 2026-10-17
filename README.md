@@ -61,7 +61,7 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
 generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
 it goes stale, so it cannot quietly disagree with them.
 
-**Status: 6 of 29 written — Domain 3 is complete.** A lesson is a link only when it exists. Nothing below is a
+**Status: 7 of 29 written — Domain 3 complete, Domain 2 started.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
 plan and stops one being quietly dropped.
 
@@ -83,7 +83,7 @@ plan and stops one being quietly dropped.
 | 2.1 | Design effective tool interfaces with clear descriptions and boundaries | planned |
 | 2.2 | Implement structured error responses for MCP tools | planned |
 | 2.3 | Distribute tools appropriately across agents and configure tool choice | planned |
-| 2.4 | Integrate MCP servers into Claude Code and agent workflows | planned |
+| 2.4 | Integrate MCP servers into Claude Code and agent workflows | [read](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) |
 | 2.5 | Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively | planned |
 
 ### Domain 1 — Agentic Architecture & Orchestration · 27%
@@ -144,6 +144,24 @@ I built the machine-learning version of this detector first, in
 to a baseline that flags nothing at all** — F1 0.364 against 0.448. This is the version that
 works, and it works because detection is deterministic and only the judgment is delegated to a
 model. The negative result is why the design looks like this.
+
+## How claims here are checked
+
+Every claim in every lesson names its source — an exam-guide section, or a documentation
+URL **with the date it was read**, because a live link is not a verified claim: pages get
+rewritten under the same URL.
+
+`scripts/check_citations.py` enforces that mechanically and runs in the test suite. It
+was verified by breaking it three ways — a row citing nothing, a URL with no read date,
+and a lesson with no Sources section — and it caught all three. Current state: **72 claim
+rows, 35 cited to the exam guide, 37 to documentation, 6 outstanding and declared as
+unchecked rather than omitted.** `--urls` resolves every cited link; all five currently
+return 200.
+
+**What that does not establish, stated plainly: whether a cited page still says what the
+row claims.** Only reading both does, and the `verify-course-content` skill has not been
+run across these lessons yet. A passing structural check is not a verified lesson, and
+treating one as the other would be the failure this course spends its time on.
 
 ## How this course is sourced, and why that matters here
 
