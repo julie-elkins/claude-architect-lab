@@ -39,10 +39,14 @@ GUIDE = REPO / "GUIDE.md"
 # output it shapes. Domain 1 is the largest slice of the exam and still cannot
 # come first.
 MANIFEST: tuple[tuple[str, str, str], ...] = (
+    ("1.1", "Design and implement agentic loops for autonomous task execution",
+     "domain-1-agentic-architecture/lesson-1-1-agentic-loops.md"),
     ("1.3", "Configure subagent invocation, context passing, and spawning",
      "domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md"),
     ("1.5", "Apply Agent SDK hooks for tool call interception and data normalization",
      "domain-1-agentic-architecture/lesson-1-5-hooks.md"),
+    ("1.7", "Manage session state, resumption, and forking",
+     "domain-1-agentic-architecture/lesson-1-7-session-state.md"),
     ("2.1", "Design effective tool interfaces with clear descriptions and boundaries",
      "domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md"),
     ("2.2", "Implement structured error responses for MCP tools",

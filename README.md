@@ -61,7 +61,7 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
 generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
 it goes stale, so it cannot quietly disagree with them.
 
-**Status: 13 of 29 written — Domains 2 and 3 complete, Domain 1 started.** A lesson is a link only when it exists. Nothing below is a
+**Status: 15 of 29 written — Domains 2 and 3 complete, Domain 1 over half.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
 plan and stops one being quietly dropped.
 
@@ -90,13 +90,13 @@ plan and stops one being quietly dropped.
 
 | TS | Task statement | Lesson |
 |---|---|---|
-| 1.1 | Design and implement agentic loops for autonomous task execution | planned |
+| 1.1 | Design and implement agentic loops for autonomous task execution | [lesson 1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) |
 | 1.2 | Orchestrate multi-agent systems with coordinator-subagent patterns | planned |
 | 1.3 | Configure subagent invocation, context passing, and spawning | [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) |
 | 1.4 | Implement multi-step workflows with enforcement and handoff patterns | planned |
 | 1.5 | Apply Agent SDK hooks for tool call interception and data normalization | [lesson 1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) |
 | 1.6 | Design task decomposition strategies for complex workflows | planned |
-| 1.7 | Manage session state, resumption, and forking | planned |
+| 1.7 | Manage session state, resumption, and forking | [lesson 1.7](course/domain-1-agentic-architecture/lesson-1-7-session-state.md) |
 
 ### Domain 4 — Prompt Engineering & Structured Output · 20%
 
