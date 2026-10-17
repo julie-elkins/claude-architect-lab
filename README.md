@@ -23,6 +23,34 @@ is rarely "what does this feature do" and usually "which of these four defensibl
 right here." The way to get fluent in tradeoffs is to make them. So each episode teaches one
 domain by building one working piece of the same system.
 
+## Certification program update: December 7, 2026
+
+Anthropic has announced that **the Associate – Foundations, Developer – Foundations, and
+Architect – Professional exams will include updated content from December 7, 2026**, with
+updated exam guides available **November 17, 2026**. If you are testing on or after
+December 7 for one of those three, prepare from the updated guide.
+
+**Architect – Foundations — the exam this course prepares for — is not named in that
+announcement.** Three of the four certifications are listed and CCAR-F is not one of them.
+
+Two consequences, stated plainly:
+
+- **This course is built against the guide that remains current for its exam.** Version 1.0,
+  effective July 2026, is what every claim here cites, and the announcement does not
+  supersede it for CCAR-F.
+- **Any study material covering all four certifications will be stale for three of them on
+  December 7.** That is worth knowing if you are using more than one source.
+
+When the updated guides publish on November 17, this course will be re-checked against
+them regardless — if CCAR-F's guide moves at all, the version string in
+[SOURCES.md](SOURCES.md) changes and every claim traced to a section gets re-read. The
+guide's own §18 records its version history, and this repository records which version it
+was written against.
+
+**Verify this yourself before relying on it.** The announcement above is quoted from the
+Anthropic Partner Academy certification pages; the authoritative source is those pages, not
+this README, and an announcement can be revised.
+
 ## The exam, from the published exam guide
 
 | Item | Detail |
@@ -80,6 +108,12 @@ Three more pages, all straight from the parts of the guide nobody reads:
   periods, how the 720 was set, and the renewal that is free **only if you are on time.**
 - **[GLOSSARY.md](GLOSSARY.md)** — the words that mean different things in different
   lessons. "Fork" means three.
+- **[FUNDAMENTALS.md](FUNDAMENTALS.md)** — what this exam sits on top of, and a readiness
+  check. Start here if you are not sure the course is pitched at you. It also explains why
+  the familiar ladder — data engineering, then ML, then AI — **is not this exam's**:
+  fine-tuning, embeddings, RLHF and model internals are all explicitly out of scope, so the
+  stack underneath CCAR-F is software engineering and DevOps, then distributed systems, then
+  model behaviour in production.
 
 **Status: 29 of 29 written. All five domains complete.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
