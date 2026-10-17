@@ -41,8 +41,12 @@ GUIDE = REPO / "GUIDE.md"
 MANIFEST: tuple[tuple[str, str, str], ...] = (
     ("3.1", "Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization",
      "domain-3-configuration/lesson-3-1-claude-md-hierarchy.md"),
+    ("3.2", "Create and configure custom slash commands and skills",
+     "domain-3-configuration/lesson-3-2-commands-and-skills.md"),
     ("3.3", "Apply path-specific rules for conditional convention loading",
      "domain-3-configuration/lesson-3-3-path-specific-rules.md"),
+    ("3.4", "Determine when to use plan mode vs direct execution",
+     "domain-3-configuration/lesson-3-4-plan-mode.md"),
     ("3.5", "Apply iterative refinement techniques for progressive improvement",
      "domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md"),
     ("3.6", "Integrate Claude Code into CI/CD pipelines",

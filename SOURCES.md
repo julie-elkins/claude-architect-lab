@@ -107,12 +107,32 @@ URL and is labelled as such — a behaviour measured on one version is not a doc
 `docs.claude.com` URL and a read date, because the script states these as how the mechanism
 works rather than as what one run did:
 
-- [ ] CLAUDE.md resolution order across enterprise, user, project and subdirectory scope
-- [ ] `.claude/rules/` frontmatter schema and exact glob matching semantics
-- [ ] Skill frontmatter: the full option list, and precisely what `context: fork` isolates
+- [x] **CLAUDE.md hierarchy and loading** — `https://code.claude.com/docs/en/memory`,
+      read 2026-10-17. Files above the working directory load at launch, subdirectory
+      files on demand; a project file does not suppress a parent. **And: there is NO
+      precedence between user and project rules** — "Neither set overrides the other…
+      Claude may follow either one." Cited in lessons 3.1 and 3.3.
+- [ ] `.claude/rules/` frontmatter schema and exact glob matching semantics. **Lesson 3.3
+      deliberately does not state the grammar** because of this.
+- [x] **Skill frontmatter and what `context: fork` isolates** —
+      `https://code.claude.com/docs/en/skills`, read 2026-10-17. A forked skill spawns a
+      subagent that does NOT see conversation history, runs in background by default, and
+      takes `agent: Explore | Plan | general-purpose`. `allowed-tools` PRE-APPROVES;
+      `disallowed-tools` removes from the pool. Cited in lesson 3.2.
 - [ ] `.mcp.json` schema, and whether `${VAR:-default}` is a documented form or incidental
-- [ ] Slash command file format and argument passing
-- [ ] Plan mode: what it permits and what it blocks
+- [x] **Slash command file format** — same page, read 2026-10-17.
+      `.claude/commands/<name>.md` is the LEGACY form, creates the same `/name`, one file,
+      no live reload, no plugin support. Cited in lesson 3.2.
+- [x] **Plan mode: what it permits and what it blocks** —
+      `https://code.claude.com/docs/en/permission-modes`, read 2026-10-17. Reads and
+      exploratory shell commands yes, source edits no. **AND THE FINDING THAT MATTERS:
+      "In interactive terminal sessions with bypass permissions available, Claude Code
+      also doesn't enforce plan mode's blocks."** It keeps its blocks in headless `-p`
+      runs, Agent SDK sessions and the VS Code chat panel. So plan mode is a CONTROL in
+      some contexts and an INSTRUCTION in others. Cited in lesson 3.4.
+- [ ] `@import` syntax. Listed in the exam guide under TS 3.1; searched the memory page
+      2026-10-17 and **not found**. Lesson 3.1 names it as an objective and does not teach
+      it.
 
 ### Episode 1b — Iteration and pipelines (Domain 3, TS 3.5 and TS 3.6)
 

@@ -61,7 +61,7 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
 generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
 it goes stale, so it cannot quietly disagree with them.
 
-**Status: 4 of 29 written.** A lesson is a link only when it exists. Nothing below is a
+**Status: 6 of 29 written — Domain 3 is complete.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
 plan and stops one being quietly dropped.
 
@@ -70,9 +70,9 @@ plan and stops one being quietly dropped.
 | | Task statement | |
 |---|---|---|
 | 3.1 | Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization | [read](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
-| 3.2 | Create and configure custom slash commands and skills | planned |
+| 3.2 | Create and configure custom slash commands and skills | [read](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
 | 3.3 | Apply path-specific rules for conditional convention loading | [read](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) |
-| 3.4 | Determine when to use plan mode vs direct execution | planned |
+| 3.4 | Determine when to use plan mode vs direct execution | [read](course/domain-3-configuration/lesson-3-4-plan-mode.md) |
 | 3.5 | Apply iterative refinement techniques for progressive improvement | [read](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
 | 3.6 | Integrate Claude Code into CI/CD pipelines | [read](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
 
@@ -119,11 +119,10 @@ plan and stops one being quietly dropped.
 | 5.4 | Manage context effectively in large codebase exploration | planned |
 | 5.5 | Design human review workflows and confidence calibration | planned |
 
-**Task statements 3.2 and 3.4 are taught in the meantime by the video script** at
-[course/domain-3-configuration/production/](course/domain-3-configuration/production/),
-which covers 3.1 through 3.4 live. That file is a **production asset** — narration,
-screen directions, a recording checklist — kept because the video is planned. It is not
-the course, and writing those three lessons is the next work.
+**Domain 3 is written in full.** Its video script lives at
+[course/domain-3-configuration/production/](course/domain-3-configuration/production/) —
+a **production asset** covering TS 3.1 through 3.4 as narration, kept because the video
+is planned. It is not the course. Domain 2 is next.
 
 ## The lab: Course Doctor
 
