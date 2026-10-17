@@ -57,14 +57,22 @@ afterwards · why the exam cares · **fundamentals** (skippable — glosses for 
 a refresh for a senior) · the build, with real commands · **tips** the documentation does
 not tell you · the published anti-pattern · what the lesson does not cover · sources.
 
-**Two other ways in.** [Read the whole course as one document](GUIDE.md) if you prefer a
-single page. Or start from [the six exam scenarios](SCENARIOS.md), which is how the exam
-actually presents the material — four scenarios drawn from a published bank of six, with
-every question sitting inside one.
+**Four ways in, depending on what you want.**
 
-**Prefer one long page? [Read the whole course as a single document](GUIDE.md).** It is
-generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
-it goes stale, so it cannot quietly disagree with them.
+- **[STUDY-PATH.md](STUDY-PATH.md)** — start here if you have a date booked. Plans for a
+  week, a weekend and an evening, and the one thing to decide before you book.
+- **[GUIDE.md](GUIDE.md)** — the whole course as one scrollable document. Generated from
+  the lessons below, with a test that fails if it goes stale, so it cannot quietly
+  disagree with them.
+- **[SCENARIOS.md](SCENARIOS.md)** — the six published scenarios and which lessons each
+  needs. This is how the exam presents the material; the table below is how the blueprint
+  organises it.
+- **[THEMES.md](THEMES.md)** — four ideas that recur across domains. Read it last; it is
+  the most useful thing to hold on exam day and it means little before you have seen the
+  instances.
+
+[GLOSSARY.md](GLOSSARY.md) is there for the words that mean different things in different
+lessons — "fork" means three.
 
 **Status: 29 of 29 written. All five domains complete.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a

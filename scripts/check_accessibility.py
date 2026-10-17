@@ -146,8 +146,13 @@ def main(argv: list[str] | None = None) -> int:
                         help="fail on MEDIUM and LOW as well as HIGH")
     args = parser.parse_args(argv)
 
+    # Every markdown document a learner reads. MEASURED 2026-10-17: four
+    # top-level pages were added (SCENARIOS, THEMES, GLOSSARY, STUDY-PATH) and
+    # none was checked, because the list was hand-maintained. Glob the repo root
+    # instead, so a new page is covered by existing.
     targets = sorted(
-        [REPO / "README.md", REPO / "GUIDE.md", REPO / "course" / "README.md"]
+        list(REPO.glob("*.md"))
+        + [REPO / "course" / "README.md"]
         + list((REPO / "course").rglob("lesson*.md"))
     )
     targets = [t for t in targets if t.is_file()]
