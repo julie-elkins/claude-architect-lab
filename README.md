@@ -41,19 +41,89 @@ shorter than most cloud certifications and should shape when you sit it. And the
 gives you percent-correct **per domain** — useful diagnostics, but those section percentages do
 not determine pass or fail. Only the total scaled score does.
 
-## The blueprint, and where each domain is taught
+## The course
 
-| Domain | Content domain | Exam weight | Episode |
-|---|---|---|---|
-| 3 | Claude Code Configuration & Workflows | 20% | [1 — Configuration](course/episode-01-claude-code-configuration/) · [1b — Iteration and pipelines](course/episode-01b-iteration-and-pipelines/) |
-| 2 | Tool Design & MCP Integration | 18% | 2 — The MCP server |
-| 1 | Agentic Architecture & Orchestration | **27%** | 3 — The loop and subagents |
-| 4 | Prompt Engineering & Structured Output | 20% | 4 — Structured output |
-| 5 | Context Management & Reliability | 15% | 5 — Reliability and the honest report |
+**Twenty-nine lessons, one per task statement in the published exam guide.** The guide
+names what it measures, objective by objective, and exam items are written against those
+objectives — so a chapter structure invented on top would be a second thing to keep in
+sync, and the first time it drifted a lesson would teach something the exam does not test.
 
-**The episodes run in dependency order, not weight order.** The tools have to exist before the
-loop that calls them, and the loop before the output it shapes. Domain 1 is the largest slice of
-the exam and gets the longest episode, but it cannot come first.
+**Read in the order below.** It is dependency order, not exam-weight order: the tools
+have to exist before the loop that calls them, and the loop before the output it shapes.
+Domain 1 is the largest slice of the exam and still cannot come first.
+
+Each lesson is a single file you read start to finish: what you will be able to do
+afterwards · why the exam cares · **fundamentals** (skippable — glosses for a newcomer,
+a refresh for a senior) · the build, with real commands · **tips** the documentation does
+not tell you · the published anti-pattern · what the lesson does not cover · sources.
+
+**Prefer one long page? [Read the whole course as a single document](GUIDE.md).** It is
+generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
+it goes stale, so it cannot quietly disagree with them.
+
+**Status: 3 of 29 written.** A lesson is a link only when it exists. Nothing below is a
+stub — fifteen empty files read as abandoned work, where a listed objective reads as a
+plan and stops one being quietly dropped.
+
+### Domain 3 — Claude Code Configuration & Workflows · 20%
+
+| | Task statement | |
+|---|---|---|
+| 3.1 | Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization | [read](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
+| 3.2 | Create and configure custom slash commands and skills | planned |
+| 3.3 | Apply path-specific rules for conditional convention loading | planned |
+| 3.4 | Determine when to use plan mode vs direct execution | planned |
+| 3.5 | Apply iterative refinement techniques for progressive improvement | [read](course/episode-01b-iteration-and-pipelines/lesson.md) |
+| 3.6 | Integrate Claude Code into CI/CD pipelines | [read](course/episode-01b-iteration-and-pipelines/lesson.md) |
+
+### Domain 2 — Tool Design & MCP Integration · 18%
+
+| | Task statement | |
+|---|---|---|
+| 2.1 | Design effective tool interfaces with clear descriptions and boundaries | planned |
+| 2.2 | Implement structured error responses for MCP tools | planned |
+| 2.3 | Distribute tools appropriately across agents and configure tool choice | planned |
+| 2.4 | Integrate MCP servers into Claude Code and agent workflows | planned |
+| 2.5 | Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively | planned |
+
+### Domain 1 — Agentic Architecture & Orchestration · 27%
+
+| | Task statement | |
+|---|---|---|
+| 1.1 | Design and implement agentic loops for autonomous task execution | planned |
+| 1.2 | Orchestrate multi-agent systems with coordinator-subagent patterns | planned |
+| 1.3 | Configure subagent invocation, context passing, and spawning | planned |
+| 1.4 | Implement multi-step workflows with enforcement and handoff patterns | planned |
+| 1.5 | Apply Agent SDK hooks for tool call interception and data normalization | planned |
+| 1.6 | Design task decomposition strategies for complex workflows | planned |
+| 1.7 | Manage session state, resumption, and forking | planned |
+
+### Domain 4 — Prompt Engineering & Structured Output · 20%
+
+| | Task statement | |
+|---|---|---|
+| 4.1 | Design prompts with explicit criteria to improve precision and reduce false positives | planned |
+| 4.2 | Apply few-shot prompting to improve output consistency and quality | planned |
+| 4.3 | Enforce structured output using tool use and JSON schemas | planned |
+| 4.4 | Implement validation, retry, and feedback loops for extraction quality | planned |
+| 4.5 | Design efficient batch processing strategies | planned |
+| 4.6 | Design multi-instance and multi-pass review architectures | planned |
+
+### Domain 5 — Context Management & Reliability · 15%
+
+| | Task statement | |
+|---|---|---|
+| 5.1 | Manage conversation context to preserve critical information across long interactions | planned |
+| 5.2 | Design effective escalation and ambiguity resolution patterns | planned |
+| 5.3 | Implement error propagation strategies across multi-agent systems | planned |
+| 5.4 | Manage context effectively in large codebase exploration | planned |
+| 5.5 | Design human review workflows and confidence calibration | planned |
+
+**Task statements 3.2 through 3.4 are taught in the meantime by the video script** at
+[course/episode-01-claude-code-configuration/](course/episode-01-claude-code-configuration/),
+which covers 3.1 through 3.4 live. That file is a **production asset** — narration,
+screen directions, a recording checklist — kept because the video is planned. It is not
+the course, and writing those three lessons is the next work.
 
 ## The lab: Course Doctor
 
@@ -103,9 +173,9 @@ the plausible mistakes a competent person actually makes. So a published list of
 is a published list of the shapes the wrong answers take. Every episode here teaches the
 anti-patterns alongside the pattern, and names which domain they sit in.
 
-## Status: episode 1 of 5 is built, plus the 1b written lesson
+## The lab: status
 
-The scaffold and the first tool exist and run. **41 tests, 0 skips.**
+The scaffold and the first tool exist and run. **41 tests, 0 skips.** Lesson status is in the course outline above.
 
 ```
 course/               per-episode script and slides, as plain markdown
