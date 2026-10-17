@@ -20,6 +20,8 @@ including what is not yet written, how the course is sourced, and how to run the
 
 ## Contents
 
+- **TS 1.3** — Lesson 1.3 — Spawning a subagent, and what it does not know
+- **TS 1.5** — Lesson 1.5 — Hooks, and the default that makes one useless
 - **TS 2.1** — Lesson 2.1 — The description is the routing logic
 - **TS 2.2** — Lesson 2.2 — An error the agent can act on
 - **TS 2.3** — Lesson 2.3 — Fewer tools, and forcing the first one
@@ -30,6 +32,443 @@ including what is not yet written, how the course is sourced, and how to run the
 - **TS 3.3** — Lesson 3.3 — Rules that only load when they are relevant
 - **TS 3.4** — Lesson 3.4 — Planning first, and when plan mode is not actually a block
 - **TS 3.5 and 3.6** — Lesson 3b — Iterating on purpose, and reviewing without yourself
+
+---
+
+# Lesson 1.3 — Spawning a subagent, and what it does not know
+
+**Domain 1: Agentic Architecture & Orchestration — 27% of CCAR-F**
+**Task Statement 1.3:** Configure subagent invocation, context passing, and spawning.
+
+Lab artifact: Course Doctor's coordinator spawning one worker per lesson, each handed
+everything it needs in its prompt.
+
+## What you will be able to do afterwards
+
+Spawn a subagent, pass it the context it needs, and predict what it will and will not be
+able to see — including the two cases where a tool you granted it is removed anyway.
+
+## Why the exam cares
+
+The guide states the fact everything else in this task statement follows from:
+**subagent context must be explicitly provided in the prompt, because subagents do not
+automatically inherit parent context or share memory between invocations.**
+
+Every failure here descends from forgetting that. A coordinator that says "review the
+lesson we just discussed" has told the worker nothing. The worker has no "just".
+
+There is also a naming discrepancy you need to hold both halves of. See the note in the
+build — it is the kind of thing that decides a question.
+
+## Fundamentals
+
+**Process isolation.** Separate execution with separate state. *Why it matters here:* a
+subagent is an isolated context, which is the whole point and the whole hazard. *Depth:*
+any treatment of process boundaries.
+
+**Explicit versus implicit context.** Information passed deliberately against information
+assumed available. *Why it matters here:* subagents get only what you pass. *Depth:*
+dependency injection is the same discipline in another setting.
+
+**Fan-out and join.** Starting several workers, then combining results. *Why it matters
+here:* parallel spawning is named as a skill, and the join is where attribution gets
+lost. *Depth:* map-reduce.
+
+**Provenance.** Keeping track of where a piece of information came from. *Why it matters
+here:* the guide names separating content from metadata — source URLs, document names,
+page numbers — specifically to preserve attribution across agents. *Depth:* Domain 5
+TS 5.1.
+
+**Allowlist.** An explicit list of what is permitted. *Why it matters here:* a subagent's
+tool list is one, and so is the parent's — and both can be overridden in ways that
+surprise you. *Depth:* lesson 2.3.
+
+## The idea, before any configuration
+
+**Write the worker's prompt as though it has never met you**, because it has not. The
+guide's skill is including *complete findings from prior agents directly in the
+subagent's prompt* — passing the search results and the document analysis into the
+synthesis worker, not a reference to them.
+
+**Separate the content from where it came from.** The guide names structured formats that
+keep source URLs, document names and page numbers distinct from the text, so attribution
+survives being handed on. A worker that receives a wall of prose cannot tell you which
+source a claim came from, and your report then cannot either.
+
+**Say what the worker decides, and what it must not.** The guide's phrasing is
+instructive: coordinator prompts should specify *research goals and quality criteria
+rather than step-by-step procedural instructions*, so the worker can adapt. Goals, not
+choreography — but a named boundary on what it may conclude.
+
+## The build
+
+### Step 1 — the tool that spawns, and the name discrepancy
+
+**The exam guide says the `Task` tool, and names the requirement that `allowedTools`
+include `"Task"` for a coordinator to invoke subagents.**
+
+**The current Claude Code documentation says the `Agent` tool**: "the parent conversation
+needs the `Agent` tool in its allowed tools to spawn subagents," and `Agent` is what the
+tools reference lists — there is no `Task` row in it.
+
+Hold both. The objective being tested is the *requirement* — a coordinator cannot spawn
+workers unless the spawning tool is in its allowed list — and that is true under either
+name. If an exam item names `Task`, answer the guide; if you are configuring a real
+project today, the docs are what your settings file has to match. **A permission rule
+naming a tool that does not exist is not an error. It is silently inert**, which is the
+same failure shape as lesson 2.5's `Grep` rule on macOS.
+
+### Step 2 — define the worker
+
+```yaml
+---
+name: lesson-source-checker
+description: Checks one lesson's cited URLs against the live pages and reports per-claim verdicts
+tools: Read, WebFetch
+model: sonnet
+maxTurns: 12
+---
+
+You check exactly ONE lesson. Everything you need is in this prompt; you cannot
+see the conversation that sent you.
+
+Report per claim: the claim verbatim, the URL, and SUPPORTED, CONTRADICTED,
+NOT IN DOCS, or NOT CHECKED. You never edit a lesson and you never set a
+verified date.
+```
+
+`name` and `description` are required — the description is what the parent matches on to
+delegate. `tools` is an allowlist, `disallowedTools` a denylist, and `maxTurns` caps the
+agentic turns, after which **the output is marked partial** rather than silently truncated.
+
+### Step 3 — the two ways a granted tool disappears anyway
+
+This is the part that costs an afternoon.
+
+**A background subagent keeps only a restricted set.** The documentation is blunt:
+"Claude Code removes every other built-in tool from a background subagent, whether
+inherited **or listed in the `tools` field**." So a `tools:` entry you wrote can be
+stripped, and nothing about the definition tells you that happened.
+
+**Nesting removes the spawning tool.** There is a depth limit, three layers by default,
+and the spawning tool is automatically removed at it. A worker that was supposed to
+delegate further simply cannot, and the symptom is that it does the work itself.
+
+### Step 4 — spawn several at once
+
+The guide's skill is **emitting multiple spawn calls in a single coordinator response
+rather than across separate turns.** One response, several workers, genuinely concurrent.
+Spread across turns they serialise, and you have paid for parallelism you did not get.
+
+Two costs to know: each worker's returned result consumes your context, and each spends
+its own tokens. Fan-out is a context trade, not a free speed-up.
+
+### Step 5 — fork when the background is the point
+
+A fork is the opposite case: it **inherits the entire conversation** — same system
+prompt, tools, model and message history — and runs in the background while you continue.
+Use it when a fresh worker would need so much background that writing the prompt costs
+more than sharing the context. Its tool calls stay out of your conversation and only the
+result comes back.
+
+## Tips
+
+Things the documentation does not tell you.
+
+**"Review what we just discussed" is the single most common subagent bug.** The worker
+has no conversation. It is not a vague instruction — it is an instruction referring to
+nothing, and the worker will confidently invent a subject.
+
+**A tool listed in `tools:` can still be absent at runtime.** Background restriction and
+the depth limit both remove tools without complaint. If a worker reports it cannot do
+something you granted, check whether it is backgrounded or nested before debugging the
+definition.
+
+**`maxTurns` marks output partial rather than failing.** So a truncated result looks like
+a result. Read the marker, or treat an unexpectedly thin answer as suspect.
+
+**Pass findings, not references to findings.** "Use the search results" works in your head
+and not in a prompt. The guide says include the complete findings directly, and it means
+it.
+
+**Parallel spawning must be one response, not several turns.** The difference is invisible
+in the transcript afterwards and the wall-clock cost is large.
+
+## The anti-pattern
+
+From the guide's objectives for this domain:
+
+> **Assuming a subagent inherits parent context.**
+
+And the one the documentation adds:
+
+> **Treating a tool list as what the worker will have.**
+
+Both are the same shape as everything else in this course: a configuration that reads
+correctly and does not hold. The definition says `tools: Read, WebFetch, Bash`; the
+backgrounded worker has a different set; nothing says so.
+
+## What this lesson does not cover
+
+- **Coordinator architecture and hub-and-spoke routing** — TS 1.2.
+- **The agentic loop and its termination** — TS 1.1.
+- **Hooks** — TS 1.5.
+- **Task decomposition strategy** — TS 1.6.
+- **Session resumption and `fork_session`** — TS 1.7. A fork of the *conversation* here is
+  not the same as forking a *session*.
+- **Context budget as a subject** — Domain 5.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 1.3.
+
+| Claim | Source |
+|---|---|
+| The `Task` tool is the mechanism for spawning subagents, and `allowedTools` must include `"Task"` for a coordinator to invoke them | EG §6, TS 1.3 |
+| Subagent context must be explicitly provided in the prompt; subagents do not inherit parent context or share memory between invocations | EG §6, TS 1.3 |
+| An agent definition carries descriptions, system prompts and tool restrictions per subagent type | EG §6, TS 1.3 |
+| Fork-based session management explores divergent approaches from a shared baseline | EG §6, TS 1.3 |
+| Including complete findings from prior agents directly in the subagent's prompt | EG §6, TS 1.3 |
+| Using structured formats to separate content from metadata — source URLs, document names, page numbers — to preserve attribution | EG §6, TS 1.3 |
+| Spawning parallel subagents by emitting multiple spawn calls in a single coordinator response rather than across separate turns | EG §6, TS 1.3 |
+| Coordinator prompts should specify research goals and quality criteria rather than step-by-step procedural instructions | EG §6, TS 1.3 |
+| **The documentation names the `Agent` tool, not `Task`:** "the parent conversation needs the `Agent` tool in its allowed tools to spawn subagents" | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| A non-fork subagent starts fresh: no conversation history, no previous file reads, receiving only a delegation message | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| A fork inherits the entire conversation — same system prompt, tools, model and message history | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| Required fields `name` and `description`; optional `tools`, `disallowedTools`, `model`, `permissionMode`, `maxTurns`, `skills`, `memory`, `background` | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| `maxTurns` caps agentic turns and the output is marked partial | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| "Claude Code removes every other built-in tool from a background subagent, whether inherited or listed in the `tools` field" | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| The spawning tool is automatically removed at the depth limit, three layers by default | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| A returned subagent result consumes the parent's context, and each subagent spends its own tokens | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+
+**Outstanding:**
+
+- [ ] Whether `Task` is a current alias for `Agent`, an Agent SDK name, or stale in the
+      exam guide. The lesson teaches the requirement under both names and does not
+      resolve which is authoritative for a given exam item.
+
+---
+
+# Lesson 1.5 — Hooks, and the default that makes one useless
+
+**Domain 1: Agentic Architecture & Orchestration — 27% of CCAR-F**
+**Task Statement 1.5:** Apply Agent SDK hooks for tool call interception and data
+normalization.
+
+Lab artifact: a hook that normalises the timestamp formats Course Doctor's sources return,
+and one that refuses a write outside the project.
+
+## What you will be able to do afterwards
+
+Choose between a hook and a prompt instruction for a given requirement, intercept a tool
+call to block or rewrite it, normalise a tool result before the model sees it — and
+configure a hook so that a broken one fails closed instead of disappearing.
+
+That last clause is the most important sentence in this lesson.
+
+## Why the exam cares
+
+The guide states the distinction plainly: **hooks give deterministic guarantees; prompt
+instructions give probabilistic compliance.** And it makes the consequence explicit —
+when deterministic compliance is required, for example identity verification before a
+financial operation, *prompt instructions alone have a non-zero failure rate.*
+
+So the exam item writes itself. A business rule must always hold; one option strengthens
+the prompt and another adds a hook. The hook is the answer, and the guide says why.
+
+Its named uses are both here: **interception** — blocking a tool call that violates
+policy — and **normalisation** — transforming a tool result before the model processes it.
+
+## Fundamentals
+
+**Determinism.** The same input always producing the same result. *Why it matters here:*
+it is the single property that separates a hook from an instruction. *Depth:* none
+needed; the word is doing the work.
+
+**Interception.** Code that runs between a caller and a callee and may alter or stop the
+call. *Why it matters here:* that is `PreToolUse`. *Depth:* middleware in any web
+framework is the same pattern.
+
+**Normalisation.** Converting varied representations of the same thing into one shape.
+*Why it matters here:* the guide's own example is Unix timestamps, ISO 8601 and numeric
+status codes arriving from different tools. *Depth:* any ETL treatment.
+
+**Fail-open versus fail-closed.** What a broken control does: allow by default, or deny
+by default. *Why it matters here:* **this decides whether your hook is a control at all.**
+*Depth:* the build below, and it is the lesson.
+
+**Exit codes.** A number a process returns to signal outcome. *Why it matters here:* a
+hook signals a block with a specific one. *Depth:* `man 3 exit`.
+
+## The idea, before any configuration
+
+**Ask whether the requirement is "should" or "must".** A convention that is usually
+followed belongs in instructions. A rule that must hold every time — a prerequisite, a
+spend ceiling, a refusal — belongs in a hook, because an instruction has a failure rate
+and a hook does not.
+
+This is the third time this course has drawn that line: a `CLAUDE.md` is context not a
+control (lesson 3.1), plan mode is not enforced in every context (lesson 3.4), and here
+is the mechanism that actually enforces.
+
+**Then ask what happens when the hook itself breaks.** Almost nobody asks this, and the
+default answer is not the one you want. See step 3.
+
+## The build
+
+### Step 1 — intercept, and block
+
+`PreToolUse` runs before a tool call. It blocks by **exiting 2**:
+
+```bash
+#!/bin/bash
+# Refuse a write outside the project root.
+if [[ "$TARGET" != "$CLAUDE_PROJECT_DIR"* ]]; then
+  echo "Blocked: write outside the project root" >&2
+  exit 2
+fi
+exit 0   # no decision; the normal permission flow applies
+```
+
+Or structurally, which is clearer when you want to say why:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "Write outside the project root"
+  }
+}
+```
+
+`permissionDecision` takes `allow`, `deny`, `ask` or `defer`.
+
+### Step 2 — normalise, and rewrite
+
+`PostToolUse` runs after a successful call and can **replace the output the model sees**:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "updatedToolOutput": "fetched_at: 2026-10-17T14:02:00Z"
+  }
+}
+```
+
+That is the guide's data-normalisation objective, exactly: heterogeneous formats from
+different tools, converted to one shape before the agent reasons about them. `PreToolUse`
+has the mirror image, `updatedInput`, for rewriting a call's arguments on the way in.
+
+### Step 3 — the default that makes a hook decorative
+
+Read this carefully. When a hook script is **missing**, **times out**, **cannot start**, or
+**exits non-zero with anything other than 2**, the documented default is:
+
+> **Non-blocking error; the action proceeds.**
+
+The user sees a `hook error` notice in the transcript. The tool call runs anyway.
+
+So a hook whose path is wrong, whose interpreter is missing, or which crashes on an edge
+case **is not a control. It is a comment.** And a session with a broken hook looks like a
+session doing fine — which is the exact failure this whole course keeps circling.
+
+**The fix is one key:**
+
+```json
+{
+  "type": "command",
+  "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/check-write.sh",
+  "onFailure": "block"
+}
+```
+
+With `onFailure: "block"`, every one of those four cases blocks the action instead of
+waving it through. **If the hook enforces a rule that must hold, it needs this line.**
+Without it you have chosen fail-open, whether you meant to or not.
+
+### Step 4 — know which events a block even applies to
+
+Exit code 2 blocks `PreToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `PreCompact`
+and a few others. It **does not** block `PostToolUse`, `PostToolUseFailure`,
+`PermissionRequest` or `Notification`.
+
+Which means: you cannot undo a tool call from `PostToolUse`. By then it has run. You can
+rewrite what the model is told about it, and that is all. If something must not happen,
+the hook belongs on `PreToolUse`.
+
+## Tips
+
+Things the documentation does not tell you plainly enough.
+
+**Verify a hook by firing it, once, deliberately, the day you write it.** A hook that has
+never fired is indistinguishable from a hook with a wrong path — in both cases nothing
+happens and nothing complains.
+
+**A hook that crashes is worse than no hook, because you believe you have one.** This is
+the practical reason `onFailure: "block"` exists, and the reason to prefer a tiny hook
+script over a clever one.
+
+**`PostToolUse` cannot prevent anything.** People reach for it because it is where the
+result is. The call already happened.
+
+**Normalise at the boundary, not in the prompt.** Asking the model to cope with three
+timestamp formats works until the fourth arrives. A hook converting them is deterministic
+and the model never sees the variety.
+
+**A hook in subagent frontmatter is scoped to that subagent.** Handy, and easy to forget
+when you are looking for why a rule does not apply in the main session.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Relying on prompt instructions for compliance that must be guaranteed.**
+
+The guide's own case is identity verification before a financial operation, and its
+phrasing is the thing to remember: prompt instructions alone have a *non-zero failure
+rate*. For a rule that must hold, non-zero is the whole problem.
+
+And the one the documentation hands you, which no exam item will ask and which will cost
+you more in practice:
+
+> **A hook without `onFailure: "block"` that was meant to enforce something.**
+
+It enforces while it works and evaporates the moment it does not, silently. That is
+fail-open by default, and it is a choice you make by omission.
+
+## What this lesson does not cover
+
+- **Prerequisite gating across a workflow** — TS 1.4, which uses hooks as its mechanism.
+- **Every hook event.** There are over thirty; this covers the two the task statement
+  names plus the failure semantics.
+- **Hook handler types beyond `command`.** `http`, `mcp_tool`, `prompt` and `agent` all
+  exist.
+- **Permission rules**, which are a different mechanism with a different default.
+- **Observability.** A hook that blocked leaves a record; whether anything records a hook
+  that *ran and allowed* is a different question, and an important one.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 1.5.
+
+| Claim | Source |
+|---|---|
+| Hook patterns such as `PostToolUse` intercept tool results for transformation before the model processes them | EG §6, TS 1.5 |
+| Hook patterns intercept outgoing tool calls to enforce compliance rules, e.g. blocking refunds above a threshold | EG §6, TS 1.5 |
+| Hooks give deterministic guarantees; prompt instructions give probabilistic compliance | EG §6, TS 1.5 |
+| When deterministic compliance is required, prompt instructions alone have a non-zero failure rate | EG §6, TS 1.4 |
+| Implementing `PostToolUse` hooks to normalise heterogeneous formats — Unix timestamps, ISO 8601, numeric status codes — from different MCP tools | EG §6, TS 1.5 |
+| Choosing hooks over prompt-based enforcement when business rules require guaranteed compliance | EG §6, TS 1.5 |
+| `PreToolUse` runs before a tool call; `PostToolUse` after it succeeds | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| A `PreToolUse` hook blocks by exiting 2, or by returning `permissionDecision` of `allow`, `deny`, `ask` or `defer` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| `PostToolUse` can replace output via `updatedToolOutput`; `PreToolUse` can rewrite arguments via `updatedInput` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| **A missing script, a timeout, a failure to start, or a non-zero exit other than 2 is a NON-BLOCKING error and the action proceeds** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| **`onFailure: "block"` makes each of those cases block the action instead** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| Exit code 2 does not block `PostToolUse`, `PostToolUseFailure`, `PermissionRequest` or `Notification` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| Hooks are configured in `~/.claude/settings.json`, `.claude/settings.json`, `.claude/settings.local.json`, managed policy, plugin `hooks/hooks.json`, or skill and subagent frontmatter | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| Handler types are `command`, `http`, `mcp_tool`, `prompt` and `agent` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 
 ---
 

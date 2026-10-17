@@ -54,11 +54,29 @@ IMAGE = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
 HEADING = re.compile(r"^(#{1,6})\s+\S", re.MULTILINE)
 TABLE_HEADER = re.compile(r"^\|(?P<cells>.+)\|\s*$\n^\|[\s:|-]+\|\s*$", re.MULTILINE)
 BARE_FENCE = re.compile(r"^```\s*$", re.MULTILINE)
+FENCED_BLOCK = re.compile(r"^```.*?^```", re.MULTILINE | re.DOTALL)
+
+
+def strip_fences(text: str) -> str:
+    """Blank out fenced code blocks, preserving line count.
+
+    MEASURED 2026-10-17: without this, a shell comment inside a code block —
+    `# Refuse a write outside the project root.` — was counted as an h1 and
+    reported as a skipped heading level. A false positive is worse than no
+    check, because it teaches the reader to ignore the real ones. Line count is
+    preserved so any future line-numbered finding stays accurate.
+    """
+    return FENCED_BLOCK.sub(
+        lambda m: "\n" * m.group(0).count("\n"), text
+    )
 
 
 def check_file(path: pathlib.Path) -> list[tuple[str, str]]:
     """Return a list of (severity, message)."""
-    text = path.read_text(encoding="utf-8")
+    raw = path.read_text(encoding="utf-8")
+    # Headings, links and images inside a fenced block are examples, not
+    # document structure. Fence counting below deliberately uses the raw text.
+    text = strip_fences(raw)
     name = str(path.relative_to(REPO))
     out: list[tuple[str, str]] = []
 
@@ -110,8 +128,8 @@ def check_file(path: pathlib.Path) -> list[tuple[str, str]]:
     # 5. Untagged code fences. Count opening fences only: a bare ``` is a
     #    closing fence half the time, so this is an upper bound and is
     #    reported as LOW for that reason.
-    bare = len(BARE_FENCE.findall(text))
-    tagged = len(re.findall(r"^```\S+", text, re.MULTILINE))
+    bare = len(BARE_FENCE.findall(raw))
+    tagged = len(re.findall(r"^```\S+", raw, re.MULTILINE))
     if bare > tagged:
         out.append((
             "LOW",
