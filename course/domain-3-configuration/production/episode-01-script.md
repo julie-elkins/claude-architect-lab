@@ -3,9 +3,9 @@
 > checklist. It is kept in the repository because the video is still planned.
 >
 > **If you are here to learn, read the written lessons instead:**
-> [the course front page](../README.md) lists all of them. This script covers task
+> [the course front page](../../README.md) lists all of them. This script covers task
 > statements 3.1 through 3.4; the written lesson for **TS 3.1** is
-> [here](../domain-3-configuration/lesson-3-1-claude-md-hierarchy.md), and 3.2 through
+> [here](../lesson-3-1-claude-md-hierarchy.md), and 3.2 through
 > 3.4 are being written.
 
 # Episode 1 — Configuration is the exam's quietest 20%

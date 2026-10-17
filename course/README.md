@@ -7,12 +7,18 @@ exists that does not.
 
 ## What is in here
 
+Organised by exam domain, one folder per domain:
+
 - **`domain-*/lesson-*.md`** — the written lessons. These are the course. Each is a
-  single file you read start to finish.
-- **`episode-*/script.md` and `episode-*/slides.md`** — **production assets**, not
-  lessons: spoken narration, screen directions, slide bodies and a recording checklist
-  for the video version. Kept because the video is planned. You do not need them to take
-  the course, and each opens with a header saying so.
+  single file you read start to finish, and each is named for the task statement it
+  covers.
+- **`domain-*/production/`** — **production assets**, not lessons: spoken narration,
+  screen directions, slide bodies and a recording checklist for the video version of
+  that domain. Kept because the video is planned. You do not need them to take the
+  course, and each opens with a header saying so.
+
+Reading the whole course in one scroll instead: **[GUIDE.md](../GUIDE.md)**, generated
+from these lessons.
 
 ## The shape every lesson follows
 

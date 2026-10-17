@@ -133,7 +133,7 @@ def read_material(path: str, root: Path) -> MaterialReading:
             message="No path was given.",
             guidance=(
                 "Pass a path to a material file, relative to the materials root, "
-                "for example 'course/episode-01-claude-code-configuration/script.md'."
+                "for example 'course/domain-3-configuration/production/episode-01-script.md'."
             ),
         )
 

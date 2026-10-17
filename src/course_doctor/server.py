@@ -146,7 +146,7 @@ def read_material_file(
         Field(
             description=(
                 "Path to ONE material file, relative to the materials root -- for "
-                "example 'course/episode-01-claude-code-configuration/script.md'. "
+                "example 'course/domain-3-configuration/production/episode-01-script.md'. "
                 "A directory refuses rather than reading everything under it, and an "
                 "absolute path or one containing '..' that escapes the root refuses "
                 "too: passing either gets you a refusal, not a wider search. A wrong "
