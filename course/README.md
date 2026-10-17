@@ -16,7 +16,7 @@ a senior) · the build with real commands · **tips** the documentation does not
 
 ## Status
 
-**2 of 29 written.** Nothing below is a stub — a lesson appears as a link only when it
+**3 of 29 written.** Nothing below is a stub — a lesson appears as a link only when it
 exists. The rest are listed so you can see the shape of the whole thing, and so I
 cannot quietly drop one.
 
@@ -24,17 +24,18 @@ cannot quietly drop one.
 
 | | Task statement | Lesson |
 |---|---|---|
-| 3.1 | Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization | planned |
+| 3.1 | Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization | [written](domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
 | 3.2 | Create and configure custom slash commands and skills | planned |
 | 3.3 | Apply path-specific rules for conditional convention loading | planned |
 | 3.4 | Determine when to use plan mode vs direct execution | planned |
 | 3.5 | Apply iterative refinement techniques for progressive improvement | [written](episode-01b-iteration-and-pipelines/lesson.md) |
 | 3.6 | Integrate Claude Code into CI/CD pipelines | [written](episode-01b-iteration-and-pipelines/lesson.md) |
 
-TS 3.1 through 3.4 are currently covered by the **video script** at
+**TS 3.2 through 3.4 are not written yet.** They are taught in the video script at
 [episode-01-claude-code-configuration/](episode-01-claude-code-configuration/), which
-teaches all four mechanisms live. It is a shooting script rather than a written lesson,
-and splitting it into four `lesson.md` files is the next work.
+covers 3.1 through 3.4 live. That file is a **production asset** — narration, screen
+directions, a recording checklist — kept because the video is planned, and not the
+course. Writing those three lessons is the next work.
 
 ## Domain 2 — Tool Design & MCP Integration (18%)
 
