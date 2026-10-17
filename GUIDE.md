@@ -37,6 +37,11 @@ including what is not yet written, how the course is sourced, and how to run the
 - **TS 4.4** — Lesson 4.4 — Retrying what a retry can fix
 - **TS 4.5** — Lesson 4.5 — Half price, if you can wait a day
 - **TS 4.6** — Lesson 4.6 — The author is the worst reviewer
+- **TS 5.1** — Lesson 5.1 — What a summary quietly throws away
+- **TS 5.2** — Lesson 5.2 — When to stop trying
+- **TS 5.3** — Lesson 5.3 — Two ways to be wrong about a failure
+- **TS 5.4** — Lesson 5.4 — When the session starts talking about typical patterns
+- **TS 5.5** — Lesson 5.5 — What a 97% hides
 - **TS 2.5** — Lesson 2.5 — The built-in tools, and the two that are not there
 - **TS 3.1** — Lesson 3.1 — Where an instruction lives decides who gets it
 - **TS 3.2** — Lesson 3.2 — Packaging a procedure, and deciding what it may touch
@@ -3389,6 +3394,932 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 4.6.
 | Running verification passes where the model self-reports confidence alongside each finding to enable calibrated review routing | EG §6, TS 4.6 |
 | A session that generated code is less effective at reviewing its own changes than an independent review instance | EG §6, TS 3.6 |
 | A fork inherits the entire conversation, where a non-fork subagent starts fresh with no conversation history | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+
+---
+
+# Lesson 5.1 — What a summary quietly throws away
+
+**Domain 5: Context Management & Reliability — 15% of CCAR-F**
+**Task Statement 5.1:** Manage conversation context to preserve critical information
+across long interactions.
+
+Lab artifact: Course Doctor's case-facts block, carried outside the summarised history.
+
+## What you will be able to do afterwards
+
+Keep the facts that must survive a long session out of the summary — and place a long input
+so the middle of it is not where your important findings live.
+
+## Why the exam cares
+
+The guide names two failure modes that are invisible while they happen.
+
+**Progressive summarisation risk:** condensing **numerical values, percentages, dates and
+customer-stated expectations** into vague summaries. A summary that says "the customer
+discussed a refund" has lost the amount, the date and the order number — and reads
+perfectly well.
+
+**The "lost in the middle" effect:** models *"reliably process information at the beginning
+and end of long inputs but may omit findings from middle sections."* So a long aggregated
+input is not uniformly attended, and where you put something changes whether it is used.
+
+Both are examinable because both have cheap, specific remedies.
+
+## Fundamentals
+
+**Progressive summarisation.** Replacing older history with a shorter version, repeatedly.
+*Why it matters here:* each pass loses detail, and the losses compound. *Depth:* lesson 1.1
+on compaction.
+
+**Position effects.** Where something sits in a long input affects how reliably it is used.
+*Why it matters here:* the lost-in-the-middle finding. *Depth:* the retrieval literature on
+positional bias.
+
+**Transactional fact.** A precise value — an amount, a date, an identifier. *Why it matters
+here:* exactly the class a summary destroys. *Depth:* the build.
+
+**Context layer.** A block of information carried separately from the conversation rather
+than inside it. *Why it matters here:* it is the remedy. *Depth:* the build.
+
+**Signal-to-token ratio.** How much of what a tool returns is relevant. *Why it matters
+here:* the guide's own figure — 40+ fields per lookup when 5 matter. *Depth:* lesson 2.2.
+
+## The idea, before any design
+
+**Decide what must survive, and keep it outside the thing that shrinks.**
+
+A summary is lossy by construction, so the answer is not a better summary. It is a
+**persistent facts block** — amounts, dates, order numbers, statuses — included in every
+prompt *outside* the summarised history. The summary can compress the narrative; the facts
+are not part of the narrative.
+
+**Then trim at the source.** A tool returning forty fields when five are relevant spends
+the other thirty-five in every subsequent turn, because context accumulates. Trim before
+it lands, not after it is a problem.
+
+**And place long inputs deliberately.** Key findings at the beginning, explicit section
+headers through the detail. You are not making it prettier — you are keeping important
+material out of the position where it is least reliably read.
+
+## The build
+
+### Step 1 — the facts block
+
+```
+CASE FACTS (carried in every prompt; not part of summarised history)
+  corpus        121 chunks at ~/course-corpus-content
+  depths set    62 of 121, MLA only
+  verified      0 of 121
+  threshold     365 days
+  lessons       24 of 29 written
+```
+
+Five lines, every one a value a summary would turn into "most of the corpus has been
+processed."
+
+### Step 2 — trim the tool output before it accumulates
+
+```
+RETURNED       path, text, hash, size, mtime, encoding, mode, inode, 34 more fields
+KEPT           path, text, hash
+```
+
+Three fields instead of forty. The other thirty-seven were paid for once on arrival and
+again on every turn after.
+
+### Step 3 — place the long input
+
+```
+1  KEY FINDINGS         (first — the part that must be read)
+2  ## Lesson 3.1        explicit header
+3  ## Lesson 3.3        explicit header
+   ...
+N  WHAT WAS NOT COVERED (last — the other reliable position)
+```
+
+Findings first, headers throughout, coverage last. Both ends used on purpose, and nothing
+important buried at 60%.
+
+### Step 4 — make upstream agents return structure, not prose
+
+Two guide skills that pair: require subagents to include **metadata — dates, source
+locations, methodological context — in structured outputs**, and modify upstream agents to
+return **structured data rather than verbose content** when the downstream agent has a
+limited budget.
+
+A worker that returns three paragraphs forces the synthesiser to spend budget re-reading
+them. One that returns `{claim, url, verdict, date}` does not.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**A summary that reads well has still lost your numbers.** Fluency is not the signal. Check
+whether a specific amount, date or identifier survived — those go first and they go
+silently.
+
+**Trim tool output at the boundary, not when context gets tight.** By the time it is tight
+the fields are already in every prior turn, and you cannot retroactively un-spend them.
+
+**Put what must be read first or last.** The middle of a long input is the least reliable
+place for anything load-bearing, and it is where chronological ordering naturally puts your
+most recent findings.
+
+**"Not covered" belongs at the end, where it will be read.** Buried in the middle it is
+decorative.
+
+**A facts block is cheap and almost nobody writes one.** Five lines in every prompt, and it
+is the difference between a session that still knows the threshold on turn forty and one
+that has been told "a threshold was discussed."
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Progressive summarisation that condenses numerical values, percentages, dates and
+> stated expectations into vague summaries.**
+
+> **Tool results accumulating in context disproportionately to their relevance** — the
+> guide's own example being 40+ fields per lookup when only 5 are relevant.
+
+And the positional one:
+
+> **Treating a long input as uniformly attended.** Models process the beginning and end
+> reliably and *"may omit findings from middle sections."*
+
+## What this lesson does not cover
+
+- **Compaction mechanics and `/compact`** — lesson 5.4.
+- **Escalation when context runs out** — lesson 5.2 is about escalation triggers, which are
+  a different subject.
+- **Error context across agents** — lesson 5.3.
+- **Session resumption** — lesson 1.7. This lesson is about one long session; that one is
+  about crossing between sessions.
+- **Prompt caching**, which makes a stable facts block cheaper and is out of scope here.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 5.1.
+
+| Claim | Source |
+|---|---|
+| Progressive summarisation risks condensing numerical values, percentages, dates and customer-stated expectations into vague summaries | EG §6, TS 5.1 |
+| The "lost in the middle" effect: models reliably process information at the beginning and end of long inputs but may omit findings from middle sections | EG §6, TS 5.1 |
+| Tool results accumulate in context and consume tokens disproportionately to their relevance, e.g. 40+ fields per order lookup when only 5 are relevant | EG §6, TS 5.1 |
+| The importance of passing complete conversation history in subsequent API requests to maintain coherence | EG §6, TS 5.1 |
+| Extracting transactional facts — amounts, dates, order numbers, statuses — into a persistent "case facts" block included in each prompt, outside summarised history | EG §6, TS 5.1 |
+| Trimming verbose tool outputs to only relevant fields before they accumulate | EG §6, TS 5.1 |
+| Placing key findings summaries at the beginning of aggregated inputs and organising detailed results with explicit section headers to mitigate position effects | EG §6, TS 5.1 |
+| Requiring subagents to include metadata — dates, source locations, methodological context — in structured outputs to support accurate downstream synthesis | EG §6, TS 5.1 |
+| Modifying upstream agents to return structured data rather than verbose content when downstream agents have limited context budgets | EG §6, TS 5.1 |
+| Context does not reset between turns; everything accumulates, and compaction replaces older messages with a summary so early instructions may not be preserved | [agent loop docs](https://code.claude.com/docs/en/agent-sdk/agent-loop), read 2026-10-17 |
+
+---
+
+# Lesson 5.2 — When to stop trying
+
+**Domain 5: Context Management & Reliability — 15% of CCAR-F**
+**Task Statement 5.2:** Design effective escalation and ambiguity resolution patterns.
+
+Lab artifact: Course Doctor asking which lesson you meant instead of picking the closest
+match.
+
+## What you will be able to do afterwards
+
+Name the three legitimate escalation triggers, and say why the two most intuitive ones are
+both unreliable.
+
+## Why the exam cares
+
+The guide lists the real triggers and then rules out the popular ones.
+
+**Legitimate:** a request for a human, a **policy exception or gap** — and it says
+explicitly *not just complex cases* — and an inability to make meaningful progress.
+
+**Unreliable:** *"sentiment-based escalation and self-reported confidence scores are
+unreliable proxies for actual case complexity."* Both are the obvious implementations.
+Sentiment measures how the person sounds, not how hard the case is; a confidence score
+measures a word.
+
+And the sharpest rule, because it inverts a natural instinct: **honour an explicit request
+for a human immediately, without first attempting investigation.** The helpful move — let
+me just try one thing — is the wrong answer.
+
+## Fundamentals
+
+**Escalation.** Handing a case to a human. *Why it matters here:* the subject. *Depth:*
+lesson 1.4 for the handoff format, which is the other half.
+
+**Proxy measure.** Something easy to observe standing in for something that matters. *Why
+it matters here:* sentiment and self-reported confidence are both proxies for complexity,
+and the guide says both are bad ones. *Depth:* measurement validity; a proxy is only as
+good as its correlation.
+
+**Policy gap.** The rules do not address this case. *Why it matters here:* a named trigger,
+and distinct from the case being hard. *Depth:* the build.
+
+**Ambiguity resolution.** Deciding what to do when the input matches several things. *Why
+it matters here:* the guide's answer is "ask", not "choose well". *Depth:* the build.
+
+**Calibration.** Whether stated confidence tracks actual accuracy. *Why it matters here:*
+uncalibrated confidence is exactly why it fails as a trigger. *Depth:* lesson 5.5.
+
+## The idea, before any criteria
+
+**Three triggers, and none of them is "this is hard."**
+
+- **They asked for a human.** Escalate now. Not after one attempt.
+- **Policy is silent or ambiguous** about what they are asking. The guide's own example is
+  competitor price matching where policy covers only own-site adjustments. Not a hard case
+  — an *unaddressed* one.
+- **No meaningful progress is possible.** Distinct from slow.
+
+**Two things that feel like triggers and are not.** Sentiment: an annoyed person with a
+simple problem and a calm one with an impossible problem both get mishandled. Self-reported
+confidence: it is a word the model produces, and unless calibrated against labelled
+outcomes it carries little about difficulty.
+
+**And when the input is ambiguous, ask.** The guide is specific: multiple matches require
+**clarification — requesting additional identifiers — rather than heuristic selection.**
+Picking the closest match is confident and sometimes wrong, and nothing marks which.
+
+## The build
+
+### Step 1 — the criteria, with examples
+
+```
+ESCALATE IMMEDIATELY
+  the user asks for a person          -> hand off now; no investigation first
+  policy is silent on the request     -> e.g. a claim type the criteria do not cover
+  no progress is possible             -> the source does not exist; access is refused
+
+DO NOT ESCALATE ON
+  frustration alone, where the issue is within capability
+    -> acknowledge it, offer the resolution, escalate only if they reiterate
+  the case merely being complex
+  a low self-reported confidence score
+```
+
+Few-shot examples per branch, per the guide's skill — and lesson 4.2's rule applies: the
+example that earns its place is the ambiguous one, the frustrated user with a solvable
+problem.
+
+### Step 2 — frustration is not a trigger, and it is not nothing
+
+The guide's wording is careful: **acknowledge the frustration while offering resolution
+when the issue is within capability, escalating only if the customer reiterates their
+preference.** Both halves. Not ignoring it, and not escalating on it.
+
+### Step 3 — ask, do not guess
+
+```
+AMBIGUOUS   "check the configuration lesson"
+            three lessons mention configuration
+
+WRONG       pick the one with the closest title
+RIGHT       "Three lessons match: 3.1 hierarchy, 3.2 commands and skills,
+             3.3 path-specific rules. Which, or all three?"
+```
+
+A heuristic selection is a decision the user did not make and cannot see. The ask costs one
+turn.
+
+### Step 4 — hand off properly
+
+Escalation is only half done when you decide to escalate. Lesson 1.4 has the format: the
+item, the root cause, what was tried, the recommendation, and what was **not** covered. The
+receiving human has no transcript.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**"Let me just try one thing first" after someone asks for a human is the named wrong
+answer.** It reads as diligence and it is the behaviour the guide rules out.
+
+**Sentiment escalation misroutes in both directions.** Calm impossible cases stay with the
+agent; irritated trivial ones go to a human. Both are expensive and only one is visible.
+
+**A policy gap is not a hard case.** This is the distinction people collapse. The rules not
+covering something is a reason to escalate even when the answer seems obvious — because
+"seems obvious" is the agent making policy.
+
+**Asking for a clarifying identifier is cheaper than being wrong once.** One extra turn
+against an action taken on the wrong record.
+
+**Low confidence routes; it does not trigger.** Lesson 4.6's distinction, again. Confidence
+can decide *who looks at it*; it should not decide *whether to escalate*.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Sentiment-based escalation** and **self-reported confidence scores** as proxies for
+> case complexity — both named unreliable.
+
+> **Attempting investigation before honouring an explicit request for a human.**
+
+> **Heuristic selection among multiple matches** instead of requesting an additional
+> identifier.
+
+Exam shape: when one option escalates on how the person sounds or on a confidence number,
+and another escalates on a policy gap or an explicit request, the second is the answer.
+
+## What this lesson does not cover
+
+- **The handoff format** — lesson 1.4, and escalation without it moves the problem rather
+  than reducing it.
+- **Error propagation between agents** — lesson 5.3. An error is not an escalation.
+- **Confidence calibration** — lesson 5.5, which is what would make a confidence number
+  mean something.
+- **Human review routing at scale** — also 5.5.
+- **Anything about a specific support product.** The guide's examples are customer-service
+  shaped; the reasoning is not.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 5.2.
+
+| Claim | Source |
+|---|---|
+| Appropriate escalation triggers: customer requests for a human, policy exceptions or gaps — not just complex cases — and inability to make meaningful progress | EG §6, TS 5.2 |
+| The distinction between escalating immediately when a customer explicitly demands it versus offering to resolve when the issue is straightforward | EG §6, TS 5.2 |
+| Sentiment-based escalation and self-reported confidence scores are unreliable proxies for actual case complexity | EG §6, TS 5.2 |
+| Multiple customer matches require clarification — requesting additional identifiers — rather than heuristic selection | EG §6, TS 5.2 |
+| Adding explicit escalation criteria with few-shot examples demonstrating when to escalate versus resolve autonomously | EG §6, TS 5.2 |
+| Honouring explicit customer requests for human agents immediately without first attempting investigation | EG §6, TS 5.2 |
+| Acknowledging frustration while offering resolution when the issue is within capability, escalating only if the customer reiterates their preference | EG §6, TS 5.2 |
+| Escalating when policy is ambiguous or silent on the specific request, e.g. competitor price matching where policy addresses only own-site adjustments | EG §6, TS 5.2 |
+| Instructing the agent to ask for additional identifiers when tool results return multiple matches rather than selecting on heuristics | EG §6, TS 5.2 |
+| Structured handoff summaries for escalation to humans who lack the conversation transcript | EG §6, TS 1.4 |
+
+---
+
+# Lesson 5.3 — Two ways to be wrong about a failure
+
+**Domain 5: Context Management & Reliability — 15% of CCAR-F**
+**Task Statement 5.3:** Implement error propagation strategies across multi-agent systems.
+
+Lab artifact: a Course Doctor worker that recovers what it can, propagates what it cannot,
+and a synthesis that says where it had no sources.
+
+## What you will be able to do afterwards
+
+Propagate a failure with enough context for a coordinator to decide — and avoid both of the
+named anti-patterns, which are opposites.
+
+## Why the exam cares
+
+The guide names two anti-patterns in the same breath, and they pull in opposite directions:
+
+> **"silently suppressing errors (returning empty results as success) or terminating
+> entire workflows on single failures are both anti-patterns"**
+
+Which tells you the answer is neither extreme, and that is the examinable judgment. Recover
+locally, propagate what you cannot resolve, and never let a failure render as a clean
+result.
+
+It also repeats the distinction from lesson 2.2 because it matters more at system scale:
+**access failures versus valid empty results.** A timeout and a query that legitimately
+matched nothing are both "no data" to a coordinator that cannot tell them apart.
+
+## Fundamentals
+
+**Error propagation.** Passing a failure upward with context. *Why it matters here:* the
+subject. *Depth:* exception-chaining practice in any language.
+
+**Local recovery.** Handling a transient failure where it happened. *Why it matters here:*
+the guide's preferred first response. *Depth:* retry patterns; lesson 4.4 for the limits.
+
+**Partial result.** What you did get before failing. *Why it matters here:* it is the
+difference between a useful failure and "failed". *Depth:* the build.
+
+**Coverage annotation.** Marking which parts of an answer are well-supported and which have
+gaps. *Why it matters here:* the guide's named skill, and the thing that stops a thin
+report reading as complete. *Depth:* the build.
+
+**Fail loudly versus fail silently.** Whether a problem announces itself. *Why it matters
+here:* "returning empty results as success" is the silent version, and it is named. *Depth:*
+lesson 2.2.
+
+## The idea, before any code
+
+**Three layers, in order.**
+
+**Recover locally** what is transient — a timeout, a rate limit, a flaky connection. The
+coordinator does not need to know about a retry that worked.
+
+**Propagate with context** what you cannot resolve. The guide lists what to include:
+**failure type, what was attempted, partial results, and potential alternatives.** Four
+things, and the coordinator cannot make an intelligent recovery decision from fewer.
+"Search unavailable" is the guide's own example of a status that hides everything useful.
+
+**Annotate the aggregate.** When the synthesis is written, mark which findings are
+well-supported and which topic areas have gaps **because sources were unavailable.** Absent
+that, a report missing a third of its subject reads exactly like a complete one.
+
+**And keep the two "no data" cases distinct at every layer.** A failed access needs a retry
+decision. A valid empty result is an answer. Lesson 2.2's rule — different types, not one
+type with a flag — holds here, because a flag survives one hop and gets dropped at the
+next.
+
+## The build
+
+### Step 1 — the worker's reply when it cannot finish
+
+```json
+{
+  "status": "unresolved",
+  "failure_type": "fetch_timeout",
+  "attempted": "GET https://code.claude.com/docs/en/memory, twice, 20s timeout",
+  "partial_results": [
+    {"claim": "files above load at launch", "verdict": "supported"}
+  ],
+  "alternatives_not_tried": ["the cached copy in the workspace", "the llms.txt index"],
+  "not_covered": ["four remaining claims in this lesson"]
+}
+```
+
+Five fields past the status, and each answers a question the coordinator would otherwise
+have to guess: what broke, what was tried, what survived, what else exists, what is
+missing.
+
+### Step 2 — distinguish the two empties
+
+```
+lesson cites nothing                 -> {"urls": [], "urls_found": 0}   a FINDING
+the lesson file could not be read    -> a Refusal object                a FAILURE
+```
+
+Two types. A coordinator receiving the first reports "this lesson cites no sources." A
+coordinator receiving the second knows nothing was checked.
+
+### Step 3 — recover locally, and say that you did
+
+```
+attempt 1   timeout
+attempt 2   200
+report      {"status": "ok", "retries": 1}
+```
+
+The retry worked, so it is not an error — but recording it is how you find out later that
+one source times out constantly.
+
+### Step 4 — annotate the synthesis
+
+```
+FINDINGS           11 claims checked across 3 lessons
+WELL SUPPORTED     8 claims, each with a quoted span and a read date
+GAPS               3 claims in lesson 3.3 — the rules frontmatter page was
+                   unreachable in both attempts, so NONE of them was checked
+NOT ATTEMPTED      lessons 4.x and 5.x were outside this run's scope
+```
+
+Two of those four blocks exist to stop the first one being read as the whole picture.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**"Returning empty results as success" is the failure you will actually ship.** It is not
+laziness — it is what happens when the error path returns the same shape as the success
+path. Make them different types and it becomes impossible.
+
+**Terminating the workflow on one failure is the overcorrection, and it is equally named.**
+Fourteen lessons checked and one unreachable page should not discard the fourteen.
+
+**A failure reply without `attempted` forces the coordinator to re-derive it.** Which it
+will do by retrying, which is the thing you were trying to inform.
+
+**`alternatives_not_tried` is the field nobody includes and the coordinator most wants.**
+It is the difference between "this is impossible" and "this route failed."
+
+**A report with no "gaps" section is claiming complete coverage whether you meant to or
+not.** Silence reads as healthy. Writing the section is the only way to say otherwise.
+
+## The anti-pattern
+
+Quoted, because the guide names both and they are opposites:
+
+> **"silently suppressing errors (returning empty results as success) or terminating
+> entire workflows on single failures are both anti-patterns"**
+
+And the information-hiding one:
+
+> **A generic error status that hides context from the coordinator** — "search unavailable"
+> being the guide's own example.
+
+Exam shape: when one option swallows the error and another aborts everything, both are
+wrong; look for the one that recovers locally and propagates with context.
+
+## What this lesson does not cover
+
+- **One tool's error shape** — lesson 2.2, which is this at single-tool scale.
+- **Retry policy and its limits** — lesson 4.4.
+- **Escalating to a human** — lesson 5.2. An unresolved error is not automatically an
+  escalation.
+- **Coordinator architecture** — lesson 1.2, which is why all this flows through one place.
+- **Observability of the system as a whole**, which is a real subject and not in this task
+  statement's objectives.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 5.3.
+
+| Claim | Source |
+|---|---|
+| Structured error context — failure type, attempted query, partial results, alternative approaches — enables intelligent coordinator recovery decisions | EG §6, TS 5.3 |
+| The distinction between access failures (timeouts needing retry decisions) and valid empty results (successful queries with no matches) | EG §6, TS 5.3 |
+| Generic error statuses such as "search unavailable" hide valuable context from the coordinator | EG §6, TS 5.3 |
+| Silently suppressing errors by returning empty results as success, and terminating entire workflows on single failures, are both anti-patterns | EG §6, TS 5.3 |
+| Returning structured error context including failure type, what was attempted, partial results and potential alternatives | EG §6, TS 5.3 |
+| Subagents implementing local recovery for transient failures and propagating only errors they cannot resolve, including what was attempted and partial results | EG §6, TS 5.3 |
+| Structuring synthesis output with coverage annotations indicating which findings are well-supported versus which topic areas have gaps due to unavailable sources | EG §6, TS 5.3 |
+| The MCP `isError` flag and the four-way error taxonomy | EG §6, TS 2.2 |
+
+---
+
+# Lesson 5.4 — When the session starts talking about typical patterns
+
+**Domain 5: Context Management & Reliability — 15% of CCAR-F**
+**Task Statement 5.4:** Manage context effectively in large codebase exploration.
+
+Lab artifact: Course Doctor's exploration findings written to a scratchpad, so phase two
+does not depend on phase one still being in context.
+
+## What you will be able to do afterwards
+
+Recognise context degradation by its symptom, persist findings across a context boundary,
+and design an exploration that survives a crash.
+
+## Why the exam cares
+
+The guide describes the symptom precisely, and it is the most useful sentence in the task
+statement: in extended sessions **models start giving inconsistent answers and referencing
+"typical patterns" rather than the specific classes discovered earlier.**
+
+That is a diagnostic. When an agent stops naming the class it read an hour ago and starts
+describing what such a class usually looks like, the specific knowledge is gone. Nothing
+announces it — the answers stay fluent and become generic.
+
+The remedies it names are all forms of *getting findings out of the conversation*:
+scratchpad files, subagent delegation, summarising between phases, and structured state
+exports for crash recovery.
+
+## Fundamentals
+
+**Context degradation.** Reliability falling as a session lengthens. *Why it matters here:*
+the subject, and it has a recognisable symptom. *Depth:* lesson 5.1's position effects are
+one mechanism.
+
+**Scratchpad.** A file the agent writes findings to and reads back. *Why it matters here:*
+it is the named remedy, and it works because a file is not a context window. *Depth:* the
+build.
+
+**Delegation for isolation.** Handing verbose work to a worker so only its conclusion
+returns. *Why it matters here:* exploration is almost entirely verbose reading. *Depth:*
+lesson 1.3.
+
+**Phase boundary.** A deliberate point where you summarise before continuing. *Why it
+matters here:* the guide's skill of summarising one phase before spawning the next.
+*Depth:* the build.
+
+**Manifest.** A record of where each component's state was written. *Why it matters here:*
+the named crash-recovery mechanism. *Depth:* the build.
+
+## The idea, before any exploration
+
+**Get the findings out of the conversation.**
+
+Every remedy here is a variant of that. A scratchpad puts them in a file. A subagent keeps
+the reading out of your window entirely and returns a summary. A phase summary converts a
+long exploration into a short statement before the next phase starts. A manifest puts state
+somewhere a new process can find it.
+
+**Delegate the reading, keep the coordination.** The guide's framing: subagents investigate
+specific questions — *"find all test files", "trace refund flow dependencies"* — while the
+main agent preserves high-level understanding. Specific questions, because a worker given a
+vague brief returns a vague summary and you have spent the tokens anyway.
+
+**Summarise at the boundary, not at the end.** Summarise phase one's findings and **inject
+them into phase two's initial context.** At the end, the summary has nothing to inform.
+
+**And design for the crash**, because a long exploration is exactly the thing that dies
+halfway. Each agent exports its state to a known location; the coordinator loads a manifest
+on resume.
+
+## The build
+
+### Step 1 — recognise the symptom
+
+```
+EARLY   "materials.py defines read_material_file, which returns MaterialReadingResult
+         and refuses with a Refusal carrying error, message and guidance"
+
+LATER   "the library module typically exposes a read function that returns a result
+         object, with errors handled in the usual way"
+```
+
+The second answer is not wrong. It is *generic*, and the specific knowledge it replaced is
+gone. That shift is the signal to persist and reset, not to ask again more firmly.
+
+### Step 2 — the scratchpad
+
+```
+FINDINGS.md   (written as discovered, read back when needed)
+  materials.py   read_material_file -> MaterialReadingResult | Refusal
+                 bounds: 1 MiB, path confined to COURSE_DOCTOR_ROOT
+  contracts.py   Diagnostics.what_it_does_not_show, populated on success
+  server.py      one tool; thin adapter; converts MaterialRefused to a payload
+```
+
+Written once as discovered, re-read on demand. Nothing here depends on the session still
+remembering it.
+
+### Step 3 — delegate the verbose phase
+
+```
+coordinator  "which lessons cite a URL that no other lesson cites?"
+             -> subagent reads 23 lesson files
+             -> returns a 6-line answer
+```
+
+Twenty-three files read, six lines in the coordinator's context. Lesson 1.3's rule applies:
+the worker needs the question in full because it cannot see the conversation.
+
+### Step 4 — summarise between phases, and keep a manifest
+
+```
+PHASE 1  map the corpus          -> summary injected into phase 2's opening prompt
+PHASE 2  check the citations     -> state exported to state/phase2.json
+MANIFEST state/manifest.json     -> names each phase's output file
+
+on resume: load the manifest, read the completed phases, start at the first gap
+```
+
+`/compact` is the in-session relief valve for a window filling with discovery output — the
+guide names it — but a compaction is lossy, and a scratchpad written before compacting is
+not.
+
+## Tips
+
+Things that cost somebody an hour.
+
+**"Typically" is the tell.** When an agent that was naming specific classes starts
+describing what such classes usually do, stop asking and start persisting. Pushing harder
+produces more confident generic answers.
+
+**Write the scratchpad as you discover, not at the end.** At the end you are summarising
+from a degraded context, which is the thing you were trying to work around.
+
+**Give a worker a specific question.** "Explore the codebase" returns a summary of
+everything and nothing. "Find every call site of `read_material_file`" returns a list.
+
+**Summarise before spawning the next phase, not after finishing.** The summary's job is to
+inform phase two; produced at the end it informs nobody.
+
+**A manifest is cheap and you will only value it once.** The run that dies at hour two is
+the one where you find out whether phase one's output was written somewhere findable.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Letting an extended session degrade** until it references typical patterns rather than
+> the specific classes it discovered, instead of persisting findings across context
+> boundaries.
+
+> **Exploring in the main agent's context** when a subagent could isolate the verbose
+> output and return a summary.
+
+And the one implied by the manifest skill:
+
+> **A long exploration with no state exported anywhere.** It works until it does not, and
+> then the whole thing restarts.
+
+## What this lesson does not cover
+
+- **Position effects and summarisation risk** — lesson 5.1.
+- **Spawning and configuring workers** — lesson 1.3.
+- **Session resumption** — lesson 1.7. This is crash recovery within a planned
+  exploration; that is returning to a saved conversation.
+- **The built-in search tools and incremental reading** — lesson 2.5, which is the
+  tool-level version of the same discipline.
+- **Checkpointing**, which rewinds rather than persisting forward.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 5.4.
+
+| Claim | Source |
+|---|---|
+| Context degradation in extended sessions: models start giving inconsistent answers and referencing "typical patterns" rather than specific classes discovered earlier | EG §6, TS 5.4 |
+| The role of scratchpad files for persisting key findings across context boundaries | EG §6, TS 5.4 |
+| Subagent delegation for isolating verbose exploration output while the main agent coordinates high-level understanding | EG §6, TS 5.4 |
+| Structured state persistence for crash recovery: each agent exports state to a known location and the coordinator loads a manifest on resume | EG §6, TS 5.4 |
+| Spawning subagents to investigate specific questions, e.g. "find all test files", "trace refund flow dependencies" | EG §6, TS 5.4 |
+| Having agents maintain scratchpad files recording key findings and referencing them for subsequent questions to counteract degradation | EG §6, TS 5.4 |
+| Summarising key findings from one exploration phase before spawning subagents for the next, injecting summaries into initial context | EG §6, TS 5.4 |
+| Designing crash recovery using structured agent state exports (manifests) that the coordinator loads on resume | EG §6, TS 5.4 |
+| Using `/compact` to reduce context usage during extended exploration when context fills with verbose discovery output | EG §6, TS 5.4 |
+| A non-fork subagent starts fresh with no conversation history and only its final result returns to the parent | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+
+---
+
+# Lesson 5.5 — What a 97% hides
+
+**Domain 5: Context Management & Reliability — 15% of CCAR-F**
+**Task Statement 5.5:** Design human review workflows and confidence calibration.
+
+Lab artifact: Course Doctor's accuracy reported per lesson type and per field, not as one
+number.
+
+## What you will be able to do afterwards
+
+Say what an aggregate accuracy figure does not tell you, sample high-confidence output so
+the measurement means something, and calibrate a confidence score against labelled data
+rather than trusting it.
+
+## Why the exam cares
+
+This is the last task statement of the exam and it is the one that decides whether anything
+else was real. The guide's framing is a warning: **aggregate accuracy metrics, its example
+being 97% overall, may mask poor performance on specific document types or fields.**
+
+Ninety-seven percent is a number that stops questions. It can be 97% overall and 60% on one
+document type that happens to be a fifth of your volume, and nothing about the headline
+says so.
+
+Its remedies are a measurement programme rather than a prompt change: **stratified random
+sampling** of the high-confidence population, **accuracy analysed by document type and by
+field**, and **field-level confidence calibrated using labelled validation sets** before
+human review is reduced.
+
+## Fundamentals
+
+**Aggregate versus segmented metric.** One number against a number per population. *Why it
+matters here:* the whole warning. *Depth:* any treatment of Simpson's paradox, which is the
+formal version of this.
+
+**Stratified random sampling.** Sampling within defined strata rather than across the whole
+population. *Why it matters here:* a simple random sample of everything barely touches a
+rare-but-important segment. *Depth:* standard sampling theory.
+
+**Calibration.** Whether a stated confidence matches observed accuracy — if things marked
+90% confident are right 90% of the time, the score is calibrated. *Why it matters here:*
+without it a confidence score is a word. *Depth:* calibration curves and reliability
+diagrams.
+
+**Labelled validation set.** Cases where the right answer is known independently. *Why it
+matters here:* it is the only thing you can calibrate against. *Depth:* the build.
+
+**Automation threshold.** The confidence level above which no human looks. *Why it matters
+here:* it is the decision this whole task statement exists to inform. *Depth:* the build.
+
+## The idea, before any measurement
+
+**Never let one number stand for a system.** Report by segment — document type, field,
+source — because that is where the variance lives. The guide's instruction is to validate
+accuracy **by document type and field segment before automating high-confidence
+extractions**, and the order matters: segment first, then automate.
+
+**Sample inside the population you are about to trust.** The temptation is to sample the
+low-confidence cases, because that is where the errors are expected. But those are already
+going to a human. The question that matters is *what is wrong in the batch nobody will
+look at* — so stratified random sampling **of high-confidence extractions**, which is the
+guide's own wording, and it is counterintuitive on purpose.
+
+**Calibrate rather than assume.** A field-level confidence score is only a routing signal
+once you have compared it against labelled outcomes. Before that it is a number the model
+produced, and lesson 5.2 already told you self-reported confidence is an unreliable proxy.
+**This lesson is how it stops being one.**
+
+## The build
+
+### Step 1 — segment the metric
+
+```
+OVERALL            94%  (the number that stops questions)
+
+BY LESSON TYPE
+  cited to docs    98%
+  cited to guide   96%
+  OBSERVED claims  71%   <- a fifth of the corpus
+BY FIELD
+  verdict          97%
+  quoted_support   99%
+  read date        68%   <- nobody checked these
+```
+
+Same data, two segments, and the 94% was hiding both. The two low cells are where the work
+is, and neither is visible in the headline.
+
+### Step 2 — sample the population you are about to stop checking
+
+```
+population      claims marked high confidence   (812)
+sample          stratified: 20 per lesson type, randomly within each
+label           a human decides each, independently
+measure         error rate per stratum, and any NEW error pattern
+```
+
+Two outputs. The error rate tells you whether automation is safe; the novel patterns tell
+you what your criteria do not yet cover — and that second one is why the sample has to be
+*random within strata* rather than chosen.
+
+### Step 3 — calibrate the score
+
+```
+confidence   n     actually correct
+high         812   96%     -> roughly calibrated
+medium       240   81%     -> roughly calibrated
+low           94   79%     -> NOT calibrated: barely different from medium
+```
+
+Low confidence predicting 79% means the score is not separating the cases you most wanted
+it to separate. That is a finding about your *instrument*, and until it is fixed, routing
+on low confidence routes near-randomly.
+
+### Step 4 — set the threshold from the measurement
+
+```
+automate        high confidence AND lesson type in (cited-to-docs, cited-to-guide)
+human review    everything OBSERVED, regardless of confidence
+human review    any missing read date, regardless of confidence
+```
+
+Two of those three rules come from the segmentation, not the confidence score. That is the
+point: the segment can override the score, because the segment is where the variance was.
+
+## Tips
+
+Things that cost somebody an hour, or considerably more.
+
+**An aggregate accuracy figure is a claim about a population you have not described.** Ask
+"97% of what, split how?" before anything else. Nobody asks, because 97% sounds settled.
+
+**Sample the high-confidence batch, not the low one.** The low-confidence cases are going
+to a human anyway. The unexamined population is the only one where an error survives.
+
+**A confidence score is a word until it is calibrated.** And when you do calibrate it, the
+useful finding is often that two adjacent levels barely differ — which means the score is
+not separating what you needed separated.
+
+**Report the denominator with every rate.** "96% accurate" on 25 sampled claims is a
+different statement from the same figure on 812, and the number alone cannot tell you
+which.
+
+**A segment can override a confidence score, and usually should.** If one document type is
+weak, route all of it to review regardless of how confident the model is about any
+individual case — because the weakness is in the type, not in the instance.
+
+**Re-measure after changing the prompt.** A calibration is a property of one configuration.
+Change the criteria and the mapping from score to accuracy moves, silently.
+
+## The anti-pattern
+
+From the guide's objectives:
+
+> **Relying on an aggregate accuracy metric** that may mask poor performance on specific
+> document types or fields.
+
+> **Reducing human review before validating accuracy by document type and field segment.**
+
+> **Routing on field-level confidence that has not been calibrated against a labelled
+> validation set.**
+
+Exam shape: when one option quotes an overall accuracy figure as grounds for automating and
+another segments or samples first, the second is the answer. The guide treats the aggregate
+as actively misleading rather than merely incomplete.
+
+## What this lesson does not cover
+
+- **Escalation triggers** — lesson 5.2, which rules out *uncalibrated* confidence as a
+  trigger. This lesson is how it earns its place as a routing signal.
+- **Confidence self-reporting in a review architecture** — lesson 4.6.
+- **Defining the criteria being measured** — lesson 4.1. Calibrating a vague criterion
+  measures how consistently it is misapplied.
+- **Statistical sample-size calculation.** The guide names stratified random sampling and
+  does not give sizes; neither does this lesson, and a number invented here would be worse
+  than none.
+- **Inter-rater agreement**, which is the right tool when the human labels are themselves
+  uncertain, and is outside the guide's objectives.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §6, TS 5.5.
+
+| Claim | Source |
+|---|---|
+| The risk that aggregate accuracy metrics, e.g. 97% overall, may mask poor performance on specific document types or fields | EG §6, TS 5.5 |
+| Stratified random sampling for measuring error rates in high-confidence extractions and detecting novel error patterns | EG §6, TS 5.5 |
+| Field-level confidence scores calibrated using labelled validation sets for routing review attention | EG §6, TS 5.5 |
+| The importance of validating accuracy by document type and field segment before automating high-confidence extractions | EG §6, TS 5.5 |
+| Implementing stratified random sampling of high-confidence extractions for ongoing error-rate measurement and novel pattern detection | EG §6, TS 5.5 |
+| Analysing accuracy by document type and field to verify consistent performance across all segments before reducing human review | EG §6, TS 5.5 |
+| Having models output field-level confidence scores, then calibrating review thresholds using labelled validation sets | EG §6, TS 5.5 |
+| Routing extractions with low model confidence or ambiguous/contradictory source documents to human review, prioritising limited reviewer capacity | EG §6, TS 5.5 |
+| Self-reported confidence scores are unreliable proxies for complexity — which is what calibration against labelled data addresses | EG §6, TS 5.2 |
 
 ---
 

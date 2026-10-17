@@ -61,7 +61,7 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
 generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
 it goes stale, so it cannot quietly disagree with them.
 
-**Status: 24 of 29 written — Domains 1, 2, 3 and 4 complete. Domain 5 remains.** A lesson is a link only when it exists. Nothing below is a
+**Status: 29 of 29 written. All five domains complete.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
 plan and stops one being quietly dropped.
 
@@ -113,11 +113,11 @@ plan and stops one being quietly dropped.
 
 | TS | Task statement | Lesson |
 |---|---|---|
-| 5.1 | Manage conversation context to preserve critical information across long interactions | planned |
-| 5.2 | Design effective escalation and ambiguity resolution patterns | planned |
-| 5.3 | Implement error propagation strategies across multi-agent systems | planned |
-| 5.4 | Manage context effectively in large codebase exploration | planned |
-| 5.5 | Design human review workflows and confidence calibration | planned |
+| 5.1 | Manage conversation context to preserve critical information across long interactions | [lesson 5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md) |
+| 5.2 | Design effective escalation and ambiguity resolution patterns | [lesson 5.2](course/domain-5-context-and-reliability/lesson-5-2-escalation.md) |
+| 5.3 | Implement error propagation strategies across multi-agent systems | [lesson 5.3](course/domain-5-context-and-reliability/lesson-5-3-error-propagation.md) |
+| 5.4 | Manage context effectively in large codebase exploration | [lesson 5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) |
+| 5.5 | Design human review workflows and confidence calibration | [lesson 5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md) |
 
 **Domain 3 is written in full.** Its video script lives at
 [course/domain-3-configuration/production/](course/domain-3-configuration/production/) —
