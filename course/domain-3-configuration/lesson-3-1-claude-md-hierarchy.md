@@ -119,10 +119,33 @@ matching file is in play. `paths: ["tests/**/*"]` keeps your testing conventions
 context while you are editing something else. Lesson 3.3 is the full treatment; what
 matters here is that it is the documented alternative to one large file.
 
-The guide also names **`@import`** for referencing external files to keep `CLAUDE.md`
-modular — importing a standards file into each package's instructions. See the sources
-note below: that syntax is in the exam guide and I have not yet located it in the
-documentation, so it is listed as an objective and not yet taught here.
+### Step 3b — imports, and the thing they do not do
+
+The exam guide calls this "the `@import` syntax", which is what made it hard to find:
+**there is no `@import` keyword.** The syntax is `@` followed by a path.
+
+```
+@./standards/testing.md
+@~/.claude/my-personal-conventions.md
+```
+
+Relative paths resolve **relative to the file containing the import**, not the working
+directory. Imports can nest, to a maximum depth of four hops. A path with spaces needs a
+backslash before each space, and a path in quotes **is not imported at all**. Import
+parsing skips code spans and fenced blocks, so `` `@README` `` in backticks stays literal
+while `@README` outside them imports the file.
+
+**And here is the fact that changes how you use it: imports do not reduce context cost.**
+The documentation is explicit — they *"help you organize a long file but don't reduce its
+context cost, because imported files also load at launch."*
+
+So `@import` is a **tidiness** mechanism. If what you need is less context, the answer is
+path-scoped rules, which load only on matching files — lesson 3.3. Those two are easy to
+confuse and only one of them saves anything.
+
+One more: an import whose path resolves **outside** your working directory is an *external*
+import. The first time Claude Code meets one in a project it shows an approval dialog, and
+**if you decline, the imports stay disabled and the dialog does not appear again.**
 
 ### Step 4 — look at what actually loaded
 
@@ -192,7 +215,8 @@ beat an option offering stronger instructions.
   guide's objectives for TS 3.1, so it is out of scope here — and I have an unresolved
   note claiming a `CLAUDE.md` suppresses it entirely, which that table may contradict.
   Unresolved is recorded as unresolved.
-- **`@import`** — an objective, not yet traced to documentation. See sources.
+- **Symlinked rules directories**, and how Cowork sessions skip some external imports.
+  Real, and past this task statement.
 
 ## Sources
 
@@ -211,13 +235,19 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.1.
 | "Claude treats them as context, not enforced configuration. To block an action regardless of what Claude decides, use a PreToolUse hook instead." | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | "Neither set overrides the other: if a user rule and a project rule conflict, Claude may follow either one" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Over-length warning at startup and in `/status`; separate combined-length warning; each CLAUDE.md, rules file and `@path` import counts separately | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| The syntax is `@path/to/import`, not a literal `@import`; imported files are expanded and loaded at launch alongside the referencing CLAUDE.md | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Relative import paths resolve relative to the file containing the import, not the working directory; imports nest to a maximum depth of four hops | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| A path with spaces needs a backslash before each space; a quoted path is not imported at all; import parsing skips code spans and fenced blocks | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Imports "help you organize a long file but don't reduce its context cost, because imported files also load at launch" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| An import resolving outside the working directory is external and prompts for approval once; declining disables them and the dialog does not reappear | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Target under 200 lines per CLAUDE.md file | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 
 **Outstanding, and stated rather than papered over:**
 
-- [ ] **`@import` syntax.** The exam guide lists it under TS 3.1. Searched the memory
-      documentation on 2026-10-17 and did not find it. It may be on another page, named
-      differently, or the guide and the docs may disagree. **Not taught until resolved** —
-      teaching a syntax from memory is the failure this course is about.
+**Citation closed 2026-10-17.** The reason the first search failed is worth recording:
+the exam guide calls it "the `@import` syntax" and there is no `@import` keyword — the
+syntax is `@` followed by a path. Searching for the guide's label found nothing; searching
+for the mechanism found it immediately. **A label is not an identifier.**
 - [ ] The `AGENTS.md` per-combination table, for the scope note above.
 
 **Verified by running it, 2026-10-13**, and now corroborated by the documentation above —

@@ -57,6 +57,11 @@ afterwards · why the exam cares · **fundamentals** (skippable — glosses for 
 a refresh for a senior) · the build, with real commands · **tips** the documentation does
 not tell you · the published anti-pattern · what the lesson does not cover · sources.
 
+**Two other ways in.** [Read the whole course as one document](GUIDE.md) if you prefer a
+single page. Or start from [the six exam scenarios](SCENARIOS.md), which is how the exam
+actually presents the material — four scenarios drawn from a published bank of six, with
+every question sitting inside one.
+
 **Prefer one long page? [Read the whole course as a single document](GUIDE.md).** It is
 generated from the lessons below by `scripts/build_guide.py`, and the test suite fails if
 it goes stale, so it cannot quietly disagree with them.
@@ -162,6 +167,24 @@ return 200.
 row claims.** Only reading both does, and the `verify-course-content` skill has not been
 run across these lessons yet. A passing structural check is not a verified lesson, and
 treating one as the other would be the failure this course spends its time on.
+
+## Going deeper, in my own public work
+
+Several lessons touch a problem I have built and published something about. These are not
+required reading and they are not polished teaching material — they are the working
+artifacts, with their measurements and their negative results intact.
+
+| Lesson | Repository | What it adds |
+|---|---|---|
+| [1.5 hooks](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) · [3.1 context vs control](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) | [fail-closed](https://github.com/julie-elkins/fail-closed) | Written standards for agent tooling and a staging guard that ships registered rather than as a template, because a guard whose script is missing never warns and never fires |
+| [2.1 tool interfaces](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) · [2.2 structured errors](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) | [mcp-server-design-guide](https://github.com/julie-elkins/mcp-server-design-guide) | A 15-point standard for MCP servers, and the four failures you only find by audit |
+| [5.3 error propagation](course/domain-5-context-and-reliability/lesson-5-3-error-propagation.md) | [k8s-triage-agent](https://github.com/julie-elkins/k8s-triage-agent) | A read-only triage agent whose stated design goal is reporting what it could **not** check |
+| [5.4 exploration](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) · [4.1 criteria](course/domain-4-prompting-and-output/lesson-4-1-explicit-criteria.md) | [course-corpus](https://github.com/julie-elkins/course-corpus) | Indexing content you have already written, where a missing verification date reports UNKNOWN and never CURRENT |
+| [5.5 calibration](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md) | [abstention-eval](https://github.com/julie-elkins/abstention-eval) · [nl2sql-eval](https://github.com/julie-elkins/nl2sql-eval) · [llm-eval-validity](https://github.com/julie-elkins/llm-eval-validity) | Measuring what a model declines to answer, and validating an evaluation harness the way a certification exam is validated |
+| The lab's premise | [driftwood](https://github.com/julie-elkins/driftwood) | Detecting documentation that has silently stopped being true — **including the published negative result** where it lost to a baseline that flags nothing, which is why Course Doctor's detection is deterministic |
+
+That last row is the one worth clicking. The reason this course's lab is designed the way
+it is, is a measurement that went against the interesting approach.
 
 ## Accessibility
 

@@ -4635,10 +4635,33 @@ matching file is in play. `paths: ["tests/**/*"]` keeps your testing conventions
 context while you are editing something else. Lesson 3.3 is the full treatment; what
 matters here is that it is the documented alternative to one large file.
 
-The guide also names **`@import`** for referencing external files to keep `CLAUDE.md`
-modular — importing a standards file into each package's instructions. See the sources
-note below: that syntax is in the exam guide and I have not yet located it in the
-documentation, so it is listed as an objective and not yet taught here.
+### Step 3b — imports, and the thing they do not do
+
+The exam guide calls this "the `@import` syntax", which is what made it hard to find:
+**there is no `@import` keyword.** The syntax is `@` followed by a path.
+
+```
+@./standards/testing.md
+@~/.claude/my-personal-conventions.md
+```
+
+Relative paths resolve **relative to the file containing the import**, not the working
+directory. Imports can nest, to a maximum depth of four hops. A path with spaces needs a
+backslash before each space, and a path in quotes **is not imported at all**. Import
+parsing skips code spans and fenced blocks, so `` `@README` `` in backticks stays literal
+while `@README` outside them imports the file.
+
+**And here is the fact that changes how you use it: imports do not reduce context cost.**
+The documentation is explicit — they *"help you organize a long file but don't reduce its
+context cost, because imported files also load at launch."*
+
+So `@import` is a **tidiness** mechanism. If what you need is less context, the answer is
+path-scoped rules, which load only on matching files — lesson 3.3. Those two are easy to
+confuse and only one of them saves anything.
+
+One more: an import whose path resolves **outside** your working directory is an *external*
+import. The first time Claude Code meets one in a project it shows an approval dialog, and
+**if you decline, the imports stay disabled and the dialog does not appear again.**
 
 ### Step 4 — look at what actually loaded
 
@@ -4708,7 +4731,8 @@ beat an option offering stronger instructions.
   guide's objectives for TS 3.1, so it is out of scope here — and I have an unresolved
   note claiming a `CLAUDE.md` suppresses it entirely, which that table may contradict.
   Unresolved is recorded as unresolved.
-- **`@import`** — an objective, not yet traced to documentation. See sources.
+- **Symlinked rules directories**, and how Cowork sessions skip some external imports.
+  Real, and past this task statement.
 
 ## Sources
 
@@ -4727,13 +4751,19 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.1.
 | "Claude treats them as context, not enforced configuration. To block an action regardless of what Claude decides, use a PreToolUse hook instead." | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | "Neither set overrides the other: if a user rule and a project rule conflict, Claude may follow either one" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Over-length warning at startup and in `/status`; separate combined-length warning; each CLAUDE.md, rules file and `@path` import counts separately | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| The syntax is `@path/to/import`, not a literal `@import`; imported files are expanded and loaded at launch alongside the referencing CLAUDE.md | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Relative import paths resolve relative to the file containing the import, not the working directory; imports nest to a maximum depth of four hops | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| A path with spaces needs a backslash before each space; a quoted path is not imported at all; import parsing skips code spans and fenced blocks | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Imports "help you organize a long file but don't reduce its context cost, because imported files also load at launch" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| An import resolving outside the working directory is external and prompts for approval once; declining disables them and the dialog does not reappear | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Target under 200 lines per CLAUDE.md file | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 
 **Outstanding, and stated rather than papered over:**
 
-- [ ] **`@import` syntax.** The exam guide lists it under TS 3.1. Searched the memory
-      documentation on 2026-10-17 and did not find it. It may be on another page, named
-      differently, or the guide and the docs may disagree. **Not taught until resolved** —
-      teaching a syntax from memory is the failure this course is about.
+**Citation closed 2026-10-17.** The reason the first search failed is worth recording:
+the exam guide calls it "the `@import` syntax" and there is no `@import` keyword — the
+syntax is `@` followed by a path. Searching for the guide's label found nothing; searching
+for the mechanism found it immediately. **A label is not an identifier.**
 - [ ] The `AGENTS.md` per-combination table, for the scope note above.
 
 **Verified by running it, 2026-10-13**, and now corroborated by the documentation above —
@@ -5030,6 +5060,22 @@ is the point.
 Course Doctor has two sets of conventions that should not travel together: how its MCP
 tools are written, and how its tests are written.
 
+### Step 0 — the grammar, now that it is documented
+
+`paths` is the **only** field Claude Code reads from a rule. Any other field is ignored
+without an error. It accepts a YAML list or a comma-separated string, and the frontmatter
+is stripped before the rule is loaded.
+
+A path-scoped rule loads when Claude uses Read, Write or Edit on a matching file — and
+also when it views one with a Bash command that counts as a read, like `cat` or `head`.
+**A rule with no `paths` field loads unconditionally.**
+
+Brace expansion works and has a budget: `src/**/*.{ts,tsx}` expands to two patterns, and
+a rule's whole `paths` list shares a ceiling of 1,000 expanded patterns and 4 MiB. A
+pattern that would exceed it **is used unexpanded, so its literal braces match nothing.**
+And `[` starts a bracket expression, so `photos [2024/**` is invalid and matches nothing
+while the rule's other patterns keep working; escape it as `photos \[2024/**`.
+
 ### Step 1 — a rule scoped by pattern
 
 ```
@@ -5073,9 +5119,20 @@ Then edit something under `tests/`. The test rule arrives. Then edit a file matc
 neither pattern. It should not.
 
 **Verifying only the matching case tells you something loaded. It does not tell you the
-pattern is doing the selecting.** A glob with a typo matches nothing, loads nothing, and
-reports nothing — and a rule that never fires looks exactly like a rule you have not
-needed yet.
+pattern is doing the selecting.**
+
+And there are **two failure modes, in opposite directions**, which is why testing the
+non-match is not optional:
+
+- **Valid YAML, bad glob.** The pattern matches nothing, the rule never loads, and nothing
+  reports it. A rule that never fires looks exactly like a rule you have not needed yet.
+- **Invalid YAML.** This one is worse and it is the documented behaviour: *"If the YAML
+  between the markers doesn't parse, Claude Code ignores the frontmatter and loads the rule
+  as if it had no `paths`."* So a typo in the frontmatter does not disable the rule — **it
+  makes the rule universal**, loaded on every file, which is the exact opposite of the
+  context saving you wrote it for.
+
+`claude --debug` shows the parse error. Nothing else will.
 
 ### Step 3 — choose deliberately, and write down which
 
@@ -5104,6 +5161,11 @@ not a precedence puzzle; it is a bug, and the fix is removing the conflict.
 Splitting one long instruction file into six rules files does not reduce the total if
 they all match the file you are editing — it only helps when they *don't*. Splitting by
 topic and splitting by path are different moves, and only the second buys context back.
+
+**A broken frontmatter makes a rule apply everywhere, not nowhere.** This is the one to
+remember, because the intuition runs the other way. A rule you meant to scope to tests,
+with a YAML typo, is now in context on every task — and it still works, so nothing
+complains.
 
 **Pin the pattern you expect to change.** `tests/**/*` is a directory assumption wearing
 a glob. The day tests move next to their code, the rule silently stops matching. A
@@ -5135,11 +5197,9 @@ you believe it is handled.
 ## What this lesson does not cover
 
 - **CLAUDE.md hierarchy and scoping** — lesson 3.1, and worth reading first.
-- **The exact frontmatter schema and glob matching semantics.** Named as outstanding in
-  the sources below. The `paths` key and the two example patterns are from the exam
-  guide; I have not yet traced the full schema to a documentation page, so this lesson
-  teaches the *decision* and demonstrates the *behaviour* rather than asserting the
-  grammar.
+- **Symlinked rule directories.** `.claude/rules/` supports symlinks for sharing rules
+  across projects, and a symlink pointing outside the working directory is treated as an
+  external import needing approval. Real, and beyond this task statement.
 - **Hooks.** A rule is context; a hook is a control. Lesson 3.1 covers the distinction,
   Domain 1 TS 1.5 covers hooks.
 - **Context budget as a subject** — Domain 5.
@@ -5159,6 +5219,13 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.3.
 | "Neither set overrides the other: if a user rule and a project rule conflict, Claude may follow either one" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Each CLAUDE.md, rules file and `@path` import counts separately toward the combined-length warning | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | `.claude/rules/` organises topic-specific rule files as an alternative to a monolithic CLAUDE.md | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| `[` starts a bracket expression; an invalid one matches nothing while the rule's other patterns keep working, and a literal `[` is escaped as `\[` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Brace expansion shares a budget of 1,000 expanded patterns and 4 MiB; a pattern exceeding it is used unexpanded and its literal braces match nothing | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| "If the YAML between the markers doesn't parse, Claude Code ignores the frontmatter and loads the rule as if it had no `paths`." `claude --debug` shows the parse error | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| A path-scoped rule loads on Read, Write or Edit of a matching file, and on a Bash command that counts as a read such as `cat` or `head` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| A rule without a `paths` field loads unconditionally | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| `paths` accepts a YAML list or a comma-separated string | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| `paths` is the only field Claude Code reads from a rule; any other field is ignored without an error, and the frontmatter is stripped before loading | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 
 **Verified by running it, 2026-10-13** — recorded as `OBSERVED`, a weaker claim than a
 citation:
@@ -5167,10 +5234,10 @@ citation:
   had been touched. This is the lesson's central claim and it is demonstrable rather
   than asserted.
 
-**Outstanding:**
-
-- [ ] The `.claude/rules/` frontmatter schema and exact glob matching semantics, from a
-      documentation page. Until then this lesson does not state the grammar.
+**Citation closed 2026-10-17**, and it corrected this lesson rather than confirming it:
+the first version taught that a bad pattern makes a rule silently absent. The documented
+behaviour for *invalid YAML* is the opposite — the rule loads unconditionally. Both failure
+modes are now taught.
 
 ---
 

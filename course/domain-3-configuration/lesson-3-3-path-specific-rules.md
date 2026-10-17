@@ -79,6 +79,22 @@ is the point.
 Course Doctor has two sets of conventions that should not travel together: how its MCP
 tools are written, and how its tests are written.
 
+### Step 0 — the grammar, now that it is documented
+
+`paths` is the **only** field Claude Code reads from a rule. Any other field is ignored
+without an error. It accepts a YAML list or a comma-separated string, and the frontmatter
+is stripped before the rule is loaded.
+
+A path-scoped rule loads when Claude uses Read, Write or Edit on a matching file — and
+also when it views one with a Bash command that counts as a read, like `cat` or `head`.
+**A rule with no `paths` field loads unconditionally.**
+
+Brace expansion works and has a budget: `src/**/*.{ts,tsx}` expands to two patterns, and
+a rule's whole `paths` list shares a ceiling of 1,000 expanded patterns and 4 MiB. A
+pattern that would exceed it **is used unexpanded, so its literal braces match nothing.**
+And `[` starts a bracket expression, so `photos [2024/**` is invalid and matches nothing
+while the rule's other patterns keep working; escape it as `photos \[2024/**`.
+
 ### Step 1 — a rule scoped by pattern
 
 ```
@@ -122,9 +138,20 @@ Then edit something under `tests/`. The test rule arrives. Then edit a file matc
 neither pattern. It should not.
 
 **Verifying only the matching case tells you something loaded. It does not tell you the
-pattern is doing the selecting.** A glob with a typo matches nothing, loads nothing, and
-reports nothing — and a rule that never fires looks exactly like a rule you have not
-needed yet.
+pattern is doing the selecting.**
+
+And there are **two failure modes, in opposite directions**, which is why testing the
+non-match is not optional:
+
+- **Valid YAML, bad glob.** The pattern matches nothing, the rule never loads, and nothing
+  reports it. A rule that never fires looks exactly like a rule you have not needed yet.
+- **Invalid YAML.** This one is worse and it is the documented behaviour: *"If the YAML
+  between the markers doesn't parse, Claude Code ignores the frontmatter and loads the rule
+  as if it had no `paths`."* So a typo in the frontmatter does not disable the rule — **it
+  makes the rule universal**, loaded on every file, which is the exact opposite of the
+  context saving you wrote it for.
+
+`claude --debug` shows the parse error. Nothing else will.
 
 ### Step 3 — choose deliberately, and write down which
 
@@ -153,6 +180,11 @@ not a precedence puzzle; it is a bug, and the fix is removing the conflict.
 Splitting one long instruction file into six rules files does not reduce the total if
 they all match the file you are editing — it only helps when they *don't*. Splitting by
 topic and splitting by path are different moves, and only the second buys context back.
+
+**A broken frontmatter makes a rule apply everywhere, not nowhere.** This is the one to
+remember, because the intuition runs the other way. A rule you meant to scope to tests,
+with a YAML typo, is now in context on every task — and it still works, so nothing
+complains.
 
 **Pin the pattern you expect to change.** `tests/**/*` is a directory assumption wearing
 a glob. The day tests move next to their code, the rule silently stops matching. A
@@ -184,11 +216,9 @@ you believe it is handled.
 ## What this lesson does not cover
 
 - **CLAUDE.md hierarchy and scoping** — lesson 3.1, and worth reading first.
-- **The exact frontmatter schema and glob matching semantics.** Named as outstanding in
-  the sources below. The `paths` key and the two example patterns are from the exam
-  guide; I have not yet traced the full schema to a documentation page, so this lesson
-  teaches the *decision* and demonstrates the *behaviour* rather than asserting the
-  grammar.
+- **Symlinked rule directories.** `.claude/rules/` supports symlinks for sharing rules
+  across projects, and a symlink pointing outside the working directory is treated as an
+  external import needing approval. Real, and beyond this task statement.
 - **Hooks.** A rule is context; a hook is a control. Lesson 3.1 covers the distinction,
   Domain 1 TS 1.5 covers hooks.
 - **Context budget as a subject** — Domain 5.
@@ -208,6 +238,13 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.3.
 | "Neither set overrides the other: if a user rule and a project rule conflict, Claude may follow either one" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Each CLAUDE.md, rules file and `@path` import counts separately toward the combined-length warning | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | `.claude/rules/` organises topic-specific rule files as an alternative to a monolithic CLAUDE.md | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| `[` starts a bracket expression; an invalid one matches nothing while the rule's other patterns keep working, and a literal `[` is escaped as `\[` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Brace expansion shares a budget of 1,000 expanded patterns and 4 MiB; a pattern exceeding it is used unexpanded and its literal braces match nothing | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| "If the YAML between the markers doesn't parse, Claude Code ignores the frontmatter and loads the rule as if it had no `paths`." `claude --debug` shows the parse error | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| A path-scoped rule loads on Read, Write or Edit of a matching file, and on a Bash command that counts as a read such as `cat` or `head` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| A rule without a `paths` field loads unconditionally | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| `paths` accepts a YAML list or a comma-separated string | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| `paths` is the only field Claude Code reads from a rule; any other field is ignored without an error, and the frontmatter is stripped before loading | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 
 **Verified by running it, 2026-10-13** — recorded as `OBSERVED`, a weaker claim than a
 citation:
@@ -216,7 +253,7 @@ citation:
   had been touched. This is the lesson's central claim and it is demonstrable rather
   than asserted.
 
-**Outstanding:**
-
-- [ ] The `.claude/rules/` frontmatter schema and exact glob matching semantics, from a
-      documentation page. Until then this lesson does not state the grammar.
+**Citation closed 2026-10-17**, and it corrected this lesson rather than confirming it:
+the first version taught that a bad pattern makes a rule silently absent. The documented
+behaviour for *invalid YAML* is the opposite — the rule loads unconditionally. Both failure
+modes are now taught.
