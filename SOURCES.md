@@ -118,17 +118,27 @@ works rather than as what one run did:
 
 | Claim | Source |
 |---|---|
-| Iterative refinement for progressive work is tested | EG §6, TS 3.5 |
-| Claude Code in CI/CD pipelines is tested | EG §6, TS 3.6 |
-| Episode 1 covers TS 3.1 through 3.4; these two are the remainder of the domain | EG §6, read against Episode 1's table above |
+| Concrete input/output examples beat prose when prose is read inconsistently | EG §6, TS 3.5 |
+| "Be conservative" style instructions fail to improve precision | EG §6, TS 3.5 and TS 4.1 |
+| Test-driven iteration: suite first, then share failures | EG §6, TS 3.5 |
+| The interview pattern surfaces unanticipated considerations | EG §6, TS 3.5 |
+| Interacting issues in one message; independent issues sequentially | EG §6, TS 3.5 |
+| `-p` / `--print` runs Claude Code non-interactively in pipelines | EG §6, TS 3.6 |
+| `--output-format json` and `--json-schema` enforce structured output in CI | EG §6, TS 3.6 |
+| CLAUDE.md supplies project context to a CI-invoked run | EG §6, TS 3.6 |
+| A session that generated code is less effective at reviewing its own changes | EG §6, TS 3.6 |
+| Including prior findings avoids duplicate PR comments on re-run | EG §6, TS 3.6 |
+| Episode 1 covers TS 3.1 through 3.4; these two are the remainder of the domain | EG §6 |
+
+**Exam guide version read: 1.0, effective July 2026.** The guide states it is subject to
+change without notice, so the version string is re-read before any episode is published.
 
 **Still needs a documentation citation before Episode 1b is published** — each needs a
 `docs.claude.com` URL and a read date:
 
-- [ ] The non-interactive invocation form, and what it does and does not read from config
-- [ ] How permissions are supplied to a run with no terminal attached
-- [ ] Whether any stop-condition flag (iteration cap, timeout, budget) is a documented
-      contract or incidental behaviour
+- [ ] CLI reference: `-p` / `--print`, `--output-format`, `--json-schema`
+- [ ] CLAUDE.md and memory documentation, for the CI-context mechanism
+- [ ] Any documented guidance on independent review instances
 
 Everything in that lesson's Tips section is **OBSERVED**, not cited — behaviour measured on
 one version, which is a weaker claim than a documentation URL and is labelled as such. The

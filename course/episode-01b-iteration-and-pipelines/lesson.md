@@ -1,229 +1,252 @@
-# Lesson 3b — Working in increments, and running without a human
+# Lesson 3b — Iterating on purpose, and reviewing without yourself
 
 **Domain 3: Claude Code Configuration & Workflows — 20% of CCAR-F**
-Covers **TS 3.5** (iterative refinement for progressive work) and **TS 3.6** (Claude
-Code in CI/CD pipelines). Episode 1 covers TS 3.1 through 3.4; these two are the rest
-of the domain.
+Covers **TS 3.5** (iterative refinement techniques for progressive improvement) and
+**TS 3.6** (integrate Claude Code into CI/CD pipelines). Episode 1 covers TS 3.1
+through 3.4; these two complete the domain.
 
-Written lesson. Lab artifact: the Course Doctor scaffold gains a non-interactive run
-and a stop condition.
+Written lesson. Lab artifact: Course Doctor gains a non-interactive invocation that
+emits schema-valid JSON.
 
 ## What you will be able to do afterwards
 
-Split a task into increments an agent can be checked between, and run that agent in a
-pipeline where nobody is watching — knowing in advance what ends the run.
+Get a better result on the second attempt for a stated reason rather than by
+rephrasing, and run the same agent in a pipeline where its output is parsed by a
+machine instead of read by you.
 
 ## Why the exam cares
 
-These two task statements are a third of Domain 3 and they are the two that look
-least like configuration, which is why they get skipped.
+These two are a third of Domain 3 and they are the two that look least like
+configuration, so they get skipped.
 
-They are also the two where a wrong answer is expensive rather than embarrassing. Plan
-mode, from TS 3.4, is about the cost of a wrong *direction*. These are about the cost
-of a wrong direction **nobody is there to notice** — which is a different question and
-has a different answer.
+They also share a single idea, which is the reason to teach them together: **the
+quality of what you get back is set by what you put in front of the model, not by how
+firmly you ask.** TS 3.5 is that idea applied to your own iteration. TS 3.6 is the same
+idea applied when there is no human in the loop to iterate at all.
 
-Expect judgment items, not recall. "A pipeline runs an agent nightly against a
-repository. Which configuration prevents an unbounded run?" has four defensible-looking
-options and one correct one.
+Expect judgment items. "A reviewer's prose instructions produce inconsistent severity
+classifications. What is the most effective fix?" has four plausible options, and the
+tempting one — write firmer instructions — is the wrong answer the guide names.
 
 ## Fundamentals
 
-Skip what you know. Here so a newcomer has somewhere to go and a senior gets the
+Skip what you know. Here so a newcomer has somewhere to go and a senior gets a
 one-line refresh.
 
-**Idempotence.** An operation you can run twice with the same result as running it
-once. *Why it matters here:* an increment that is not idempotent cannot be safely
-retried, and a pipeline's first instinct on failure is to retry. *Depth:* any
-treatment of REST method semantics explains it cleanly.
+**Few-shot examples.** Showing two or three worked input/output pairs instead of
+describing the transformation. *Why it matters here:* the guide states concrete
+examples are the most effective way to communicate an expected transformation when
+prose is interpreted inconsistently. This is Domain 4's central subject and it arrives
+here first. *Depth:* Domain 4, TS 4.2.
 
-**Checkpointing.** Saving a known-good state you can resume from or roll back to.
-*Why it matters here:* it is what makes an increment a decision point rather than just
-a smaller chunk of the same gamble. *Depth:* database transaction logs are the
-canonical version.
+**Test-driven development.** Write the failing test first, then make it pass. *Why it
+matters here:* TS 3.5 names test-driven iteration explicitly — write the suite
+covering expected behaviour, edge cases and performance, then iterate by *sharing the
+failures*. The test output is the specific feedback that prose cannot be. *Depth:* any
+TDD treatment; the mechanics transfer unchanged.
 
-**Non-interactive execution.** Running a program with no terminal attached, so there
-is no one to answer a prompt. *Why it matters here:* a permission prompt in a pipeline
-does not ask anybody anything — it blocks or fails, and the pipeline reports something
-unhelpful. *Depth:* the distinction between a login shell and a batch job; `ssh
-somehost command` versus `ssh somehost`.
+**Non-interactive execution.** Running a program with no terminal attached, so nothing
+can answer a prompt. *Why it matters here:* this is what `-p` is for, and it is why an
+interactive invocation in CI hangs rather than fails. *Depth:* the distinction between
+a login shell and a batch job — `ssh host command` versus `ssh host`.
 
-**Exit codes.** A number a process returns to say whether it succeeded. Zero is
-success; anything else is not. *Why it matters here:* a pipeline step's pass or fail is
-this number and nothing else, so an agent that fails politely while returning zero
-reports success. *Depth:* `man 3 exit`, and your CI system's documentation on step
-failure.
+**JSON Schema.** A machine-readable description of what a JSON document must contain.
+*Why it matters here:* `--json-schema` is how a CI step gets output it can parse
+rather than prose it has to scrape. *Depth:* `json-schema.org`; Domain 4 TS 4.3 treats
+it as a subject.
 
-**Stop conditions.** A stated rule for what ends a run — an iteration count, a budget,
-a goal test, a timeout. *Why it matters here:* this is the central idea of both task
-statements. An agentic loop without one does not stop because it is finished; it stops
-because something external killed it. *Depth:* Domain 1 treats termination as its own
-subject, and the exam guide's anti-patterns for it are published.
+**Reviewer independence.** The idea that the author of a thing is the worst person to
+check it. *Why it matters here:* the guide states that a session which generated code
+is less effective at reviewing its own changes than an independent instance. This is
+the same reason human code review exists, and it is the most transferable idea in the
+lesson. *Depth:* Domain 4 TS 4.6 covers multi-instance review architectures.
 
-**Least astonishment in automation.** An unattended process should fail loudly rather
-than succeed quietly. *Why it matters here:* the whole second half of this lesson.
+**Idempotence.** An operation that can be run twice with the same result as once.
+*Why it matters here:* a CI step that re-runs on every push must not post the same
+finding twice, which is why prior findings go into context. *Depth:* REST method
+semantics explain it cleanly.
 
-## The idea, before any files
+## The idea, before any commands
 
-Two questions, and they are the same question asked at different scales.
+**For iteration: replace the adjective with an artifact.**
 
-**For iteration: what do I want to be able to see before the next step runs?** The
-reason to work in increments is not that smaller is safer. It is that an increment
-creates a *place to look* — a diff, a test result, a report — before the next decision
-compounds on the last one. An increment nobody inspects is just a slower monolith.
+The instinct when a result is wrong is to describe the problem better. The guide says
+the opposite works: give a concrete input and the output you expected. Two or three
+pairs beats a paragraph, because a paragraph can be read several ways and a pair
+cannot.
 
-So the unit is not "a small task." It is **one complete thing you can judge.** A
-vertical slice that runs end to end beats a horizontal layer that cannot be evaluated
-until the layer above it exists.
+The same move in three forms, all named in TS 3.5:
 
-**For pipelines: what ends this run, and who finds out?** An unattended agent has
-three properties or it should not run: you can see what it did, you can undo it, and
-something stops it. Most pipeline failures in this area are the third one missing,
-because the first two are easy to add and the third requires deciding a number.
+- A **worked example** instead of a description of the transformation.
+- A **failing test** instead of a description of the bug.
+- An **interview** — have Claude ask you questions before implementing — instead of a
+  description of the requirements, when you are in a domain unfamiliar enough that you
+  do not yet know what you have left out.
 
-And the sharp edge: **a run nobody watched that reported success is not evidence of
-success.** It is evidence that nothing raised an error, which is also what a
-no-op looks like.
+And one decision that is genuinely a judgment call: **when problems interact, put them
+all in one message; when they are independent, fix them one at a time.** Interacting
+fixes applied sequentially fight each other, and each round undoes the last.
+
+**For pipelines: the human is not there, so the contract has to be explicit.**
+
+Three things change when nobody is watching. There is no one to answer a prompt, so
+interactive mode hangs. There is no one to read prose, so output has to be parseable.
+And there is no one to notice that the reviewer and the author are the same session —
+which the guide calls out as a real degradation, not a stylistic preference.
 
 ## The build
 
-### Part one — increments with a place to look
+### Part one — iterate with artifacts
 
-Take the Course Doctor work and slice it so each step is judgeable.
-
-Wrong shape, and it is the tempting one:
+Course Doctor's drift report is returning inconsistent severities. The tempting fix:
 
 ```
-1. Write all the output models
-2. Write all the tools
-3. Write all the tests
+"Be more conservative about what you flag as high severity."
 ```
 
-Nothing is runnable until step three. There is no place to look in between.
-
-Right shape:
-
-```
-1. One tool, end to end, with its bounds and its test   -> runs, provable
-2. Second tool, same                                    -> runs, provable
-3. The coordinator that calls both                      -> runs, provable
-```
-
-Each increment is one complete path. After step one you can run the thing and read a
-real result. That is the difference the task statement is about.
-
-Make the checkpoint explicit, so the place to look is a command and not a habit:
+The guide specifically names this shape as ineffective — "be conservative" and "only
+report high-confidence findings" do not improve precision. Replace it with examples:
 
 ```
-./scripts/run-tests.sh && git add -p && git commit
+Example 1
+  input:  a lesson citing a quota of 10 GB; the doc now says 20 GB
+  output: severity HIGH, reason "numeric claim contradicted by current doc"
+
+Example 2
+  input:  a lesson citing a console path that has been renamed
+  output: severity MEDIUM, reason "navigation changed, concept intact"
+
+Example 3
+  input:  a lesson whose cited page 404s
+  output: severity UNKNOWN, reason "could not verify; not evidence of error"
 ```
 
-Three verbs in order: prove, inspect, record. `git add -p` is the inspection — it puts
-each hunk in front of you rather than staging whatever happens to be there.
+Three pairs, and the third is doing the most work — it demonstrates the
+ambiguous case, which is what the guide says few-shot examples are for.
 
-### Part two — a run with no human in it
-
-Non-interactive execution needs three things decided before it starts.
-
-**One. Permissions must be settled in advance.** In a pipeline there is nobody to
-approve a prompt. Every tool the run needs has to be permitted before the run, and
-anything not permitted has to fail rather than wait.
-
-**Two. A stop condition has to be stated.** Pick the one that matches what you are
-afraid of: a wall-clock timeout if you fear a hang, an iteration cap if you fear a
-loop, a budget if you fear cost. Write it into the invocation, not into a comment.
-
-**Three. The exit code has to mean something.** Decide what makes the step fail — any
-finding, or only an error? Both are defensible and they are different products. A
-drift checker that fails the build on any stale citation is a gate; one that reports
-and exits zero is a dashboard. Choose deliberately, because the pipeline cannot.
-
-Then make the artifact outlive the run:
+Then the test-driven form. Write the assertion first:
 
 ```
-./scripts/run-tests.sh > ci-report.txt 2>&1; echo "exit=$?" >> ci-report.txt
+./scripts/run-tests.sh 2>&1 | tail -20
 ```
 
-Redirect both streams and record the exit code in the file. A log that omits the exit
-code cannot distinguish a clean run from a crashed one after the fact, and the one time
-you need it is the one time nobody was watching.
+Share the failure text, not a description of it. The test output names the expected
+value, the actual value and the line — three facts your paragraph would have
+approximated.
+
+### Part two — run it with no human in it
+
+Non-interactive, with machine-readable output:
+
+```
+claude -p "Check the lessons in course/ against their cited sources" \
+  --output-format json \
+  --json-schema schema/findings.json
+```
+
+Three flags, three jobs. `-p` (`--print`) runs without an interactive session, so
+nothing waits for input. `--output-format json` makes the result parseable.
+`--json-schema` constrains it to a shape your pipeline already knows how to read, so a
+later step can post findings as inline comments without scraping prose.
+
+**And `CLAUDE.md` is how the CI run learns about your project** — testing standards,
+fixture conventions, review criteria. A CI-invoked run has no conversation history to
+draw on, so whatever is not in the repository's instructions is not available to it.
+That is the same hierarchy from episode 1, doing its most load-bearing work in the
+place you cannot watch.
+
+Then the part people get wrong. **Do not have the session that generated the code
+review it.** Run the review as an independent invocation with no prior context. And
+when re-running after new commits, include the previous findings in context with an
+instruction to report only new or still-unaddressed issues — otherwise every push
+posts the same comments again.
 
 ## Tips
 
-Things that cost somebody an hour.
+Things that cost somebody an hour. None is in the documentation.
 
-**A permission prompt in CI is not a prompt, it is a hang.** The run sits there until
-the job times out, and the failure message names the timeout rather than the
-permission. If a pipeline step mysteriously takes exactly as long as your CI timeout,
-look for an unapproved tool before anything else.
+**An interactive invocation in CI is not a failure, it is a hang.** The job sits until
+the CI timeout, and the error names the timeout rather than the missing `-p`. If a step
+takes exactly as long as your timeout setting, suspect the flag before anything else.
 
-**Redirect stderr or you will lose the only useful line.** `> log.txt` captures stdout
-and leaves the traceback on a stream nobody saved. `2>&1` costs four characters and is
-the difference between debugging a failure and re-running it blind.
+**"Be more conservative" is the instruction that feels like a fix and is not.** It
+reads as a tightening and changes nothing measurable. The guide names it. When you
+catch yourself adding an adverb to a prompt, you want an example instead.
 
-**A crashed guard is invisible in a way a refusing guard is not.** A check that *blocks*
-something leaves a record of the refusal. A check that *errors out* can let the action
-through and write nothing at all — so a transcript with a broken guard looks identical
-to one with no guard configured. Nothing passive tells you a guard is still armed; only
-running a verifier does.
+**Redirect stderr or you lose the only useful line.** `> log.txt` saves stdout and
+leaves the traceback on a stream nobody captured. `2>&1` is four characters.
 
-**Name the stop condition in the invocation, not the documentation.** A cap written in
-a README is a cap nobody enforces. The question the exam asks is which configuration
-prevents an unbounded run, and the answer is never "we agreed not to."
+**Re-running a review without the prior findings duplicates every comment.** The second
+run has no memory of the first, so it is not repeating itself — it is seeing the
+repository for the first time, again. Feeding yesterday's findings in is what makes it
+incremental.
 
-**A quiet report is not a clean run.** When an unattended run produces no findings, the
-first thing to establish is whether it looked. An empty result and a run that never
-started are the same output, and the second one is more common than people expect.
+**The third few-shot example is the one that earns its place.** Two examples show the
+format. The third, covering the ambiguous case, is what lets the model generalise
+rather than pattern-match — which is the difference the guide is pointing at.
 
 ## The anti-pattern
 
-The exam guide names anti-patterns for this domain explicitly, and the shape to
-recognise here is:
+The guide names these explicitly, and the shapes to recognise are:
 
-> **An unattended run with no stated stop condition.**
+> **Firmer prose where a concrete example is needed.**
 
-Three forms, all of which look like working automation:
+"Be conservative", "only report high-confidence findings", "be more careful about
+severity" — all named as failing to improve precision compared to specific categorical
+criteria. On exam day, if one option is an adverb and another is an input/output pair,
+the pair is the answer.
 
-- **A cap in prose.** Agreed in a document, enforced by nothing.
-- **A stop condition that is a side effect.** The run ends when the CI job times out,
-  so the timeout *is* your stop condition — chosen by your CI provider's default rather
-  than by you.
-- **A success that means "no error raised."** The step exits zero, the dashboard is
-  green, and nothing distinguishes a clean pass from a run that did no work.
+> **Self-review in the generating session.**
 
-And the related iteration anti-pattern:
+Asking the same instance to check its own work, or reaching for a "review your output
+carefully" instruction, instead of an independent instance with no reasoning context.
+The failure is not that the model is careless; it is that it retains the reasoning that
+produced the thing and is therefore unlikely to question it.
 
-> **Increments that cannot be evaluated individually.**
+> **Sequential fixes for interacting problems.**
 
-Slicing by layer rather than by path produces three steps where nothing is runnable
-until the third. That is not iterative refinement. It is a monolith delivered in
-instalments, and it fails the task statement for exactly the reason the exam cares
-about: there was never a place to look.
+Fixing three issues one at a time when each change affects the others, so every round
+partially undoes the last. The published distinction is interacting versus independent,
+and it decides the batching.
 
 ## What this lesson does not cover
 
-- **Loop termination as an architectural subject.** That is Domain 1, where the exam
-  guide publishes two specific anti-patterns for it, and it is covered there.
-- **A specific CI provider's syntax.** The task statement is about Claude Code in a
-  pipeline, not about any one pipeline. The exit-code and stream-redirection ideas
-  transfer; the YAML does not.
-- **Cost figures.** No spend numbers appear here. Any figure would be from one
-  person's usage on one set of tasks, and presenting it as a planning number would be
-  worse than giving none.
-- **Secrets handling in CI.** Adjacent and genuinely important; the env-var reference
-  pattern in episode 1 is the part that belongs to this domain.
-- **Whether your pipeline should run an agent at all.** Out of scope, and a fair
-  question.
+- **Few-shot prompting as a subject.** Introduced here because TS 3.5 depends on it;
+  Domain 4 TS 4.2 is where it is taught properly.
+- **JSON Schema design.** Same — used here, taught in Domain 4 TS 4.3.
+- **Multi-instance review architecture.** The *why* is here because TS 3.6 names it;
+  the architecture is Domain 4 TS 4.6.
+- **Batch processing.** Adjacent and tempting to bolt on. It is Domain 4 TS 4.5, and
+  the Message Batches API has its own latency and tool-calling constraints.
+- **A specific CI provider's syntax.** The task statement is Claude Code in a pipeline,
+  not any one pipeline. The flags transfer; the YAML does not.
+- **Cost figures.** None appear here. Any number would be one person's usage.
 
 ## Sources
 
-- CCAR-F exam guide, Domain 3, **TS 3.5** (iterative refinement for progressive work)
-  and **TS 3.6** (Claude Code in CI/CD pipelines) — both already recorded in
-  `SOURCES.md` under Episode 1's claim table, EG §6.
-- **Needs a documentation citation before publication**, consistent with the six items
-  already listed as outstanding in `SOURCES.md`: the non-interactive invocation form,
-  how permissions are supplied to a run with no terminal, and whether any stop-condition
-  flag is a documented contract or incidental behaviour. Record URL and read date.
-- Everything in the Tips section is **OBSERVED** rather than cited — measured behaviour
-  on one version, which is a weaker claim than a documentation URL and is labelled as
-  such, matching the convention already used in `SOURCES.md`.
+CCAR-F exam guide **Version 1.0, effective July 2026**, §6:
+
+| Claim | Source |
+|---|---|
+| Concrete input/output examples beat prose when prose is read inconsistently | EG §6, TS 3.5 |
+| "Be conservative" style instructions fail to improve precision | EG §6, TS 3.5 and TS 4.1 |
+| Test-driven iteration: suite first, then share failures | EG §6, TS 3.5 |
+| The interview pattern surfaces unanticipated considerations | EG §6, TS 3.5 |
+| Interacting issues in one message; independent issues sequentially | EG §6, TS 3.5 |
+| `-p` / `--print` runs Claude Code non-interactively in pipelines | EG §6, TS 3.6 |
+| `--output-format json` and `--json-schema` enforce structured output in CI | EG §6, TS 3.6 |
+| CLAUDE.md supplies project context to a CI-invoked run | EG §6, TS 3.6 |
+| A session that generated code is less effective at reviewing its own changes | EG §6, TS 3.6 |
+| Including prior findings avoids duplicate PR comments on re-run | EG §6, TS 3.6 |
+
+**Official documentation links — REQUIRED BEFORE PUBLICATION, not yet fetched.** Each
+needs a URL and a read date, and per this repo's rule a live link is not a verified
+claim: the page has to still say what the row claims. Deliberately left unfilled rather
+than written from memory, which is the failure this course is about.
+
+- [ ] CLI reference: `-p` / `--print`, `--output-format`, `--json-schema`
+- [ ] CLAUDE.md and memory documentation, for the CI-context mechanism
+- [ ] Any documented guidance on independent review instances
+
+Everything in **Tips** is `OBSERVED`, not cited — behaviour measured on one version,
+a weaker claim than a documentation URL, labelled as such per the existing convention.
