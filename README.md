@@ -71,8 +71,15 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
   the most useful thing to hold on exam day and it means little before you have seen the
   instances.
 
-[GLOSSARY.md](GLOSSARY.md) is there for the words that mean different things in different
-lessons — "fork" means three.
+Three more pages, all straight from the parts of the guide nobody reads:
+
+- **[SCOPE.md](SCOPE.md)** — the appendix. What may appear, what is explicitly tested, and
+  **sixteen topics the guide says will not appear at all.** The out-of-scope list is the
+  cheapest thing in this repository: it tells you what to stop studying.
+- **[EXAM-DAY.md](EXAM-DAY.md)** — registration, Pearson VUE, ID rules, retake waiting
+  periods, how the 720 was set, and the renewal that is free **only if you are on time.**
+- **[GLOSSARY.md](GLOSSARY.md)** — the words that mean different things in different
+  lessons. "Fork" means three.
 
 **Status: 29 of 29 written. All five domains complete.** A lesson is a link only when it exists. Nothing below is a
 stub — fifteen empty files read as abandoned work, where a listed objective reads as a
