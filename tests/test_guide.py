@@ -88,3 +88,30 @@ def test_citation_check_declares_what_it_cannot_verify():
     # it establishes.
     text = (REPO / "scripts" / "check_citations.py").read_text(encoding="utf-8")
     assert "still SAYS what the row claims" in text
+
+
+def test_no_screen_reader_defects():
+    """The markdown structure IS the accessibility layer for this course.
+
+    A blind learner uses a screen reader, which navigates by heading, skips,
+    re-reads and searches -- so the work is structural, and structural defects
+    are checkable. Verified by reintroducing all three HIGH defects: eleven
+    links labelled 'read', a blank table column header, and an image with no
+    alt text. All three caught, exit 1, exit 0 clean.
+
+    HIGH only. LOW findings are reported and not gated: the bare-code-fence
+    count is an upper bound because a closing fence is also bare, and gating on
+    a metric that overcounts teaches people to ignore the check.
+    """
+    result = subprocess.run(
+        [sys.executable, "scripts/check_accessibility.py"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_accessibility_check_declares_what_it_cannot_verify():
+    text = (REPO / "scripts" / "check_accessibility.py").read_text(encoding="utf-8")
+    assert "No mechanical defects is not an accessible course" in text

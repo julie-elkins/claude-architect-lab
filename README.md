@@ -25,7 +25,7 @@ domain by building one working piece of the same system.
 
 ## The exam, from the published exam guide
 
-| | |
+| Item | Detail |
 |---|---|
 | Exam code | CCAR-F |
 | Items | 60, multiple-choice and multiple-response (each item states how many to select) |
@@ -67,28 +67,28 @@ plan and stops one being quietly dropped.
 
 ### Domain 3 — Claude Code Configuration & Workflows · 20%
 
-| | Task statement | |
+| TS | Task statement | Lesson |
 |---|---|---|
-| 3.1 | Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization | [read](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
-| 3.2 | Create and configure custom slash commands and skills | [read](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
-| 3.3 | Apply path-specific rules for conditional convention loading | [read](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) |
-| 3.4 | Determine when to use plan mode vs direct execution | [read](course/domain-3-configuration/lesson-3-4-plan-mode.md) |
-| 3.5 | Apply iterative refinement techniques for progressive improvement | [read](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
-| 3.6 | Integrate Claude Code into CI/CD pipelines | [read](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
+| 3.1 | Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization | [lesson 3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
+| 3.2 | Create and configure custom slash commands and skills | [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
+| 3.3 | Apply path-specific rules for conditional convention loading | [lesson 3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) |
+| 3.4 | Determine when to use plan mode vs direct execution | [lesson 3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md) |
+| 3.5 | Apply iterative refinement techniques for progressive improvement | [lesson 3.5](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
+| 3.6 | Integrate Claude Code into CI/CD pipelines | [lesson 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
 
 ### Domain 2 — Tool Design & MCP Integration · 18%
 
-| | Task statement | |
+| TS | Task statement | Lesson |
 |---|---|---|
-| 2.1 | Design effective tool interfaces with clear descriptions and boundaries | [read](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) |
-| 2.2 | Implement structured error responses for MCP tools | [read](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) |
-| 2.3 | Distribute tools appropriately across agents and configure tool choice | [read](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) |
-| 2.4 | Integrate MCP servers into Claude Code and agent workflows | [read](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) |
-| 2.5 | Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively | [read](course/domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md) |
+| 2.1 | Design effective tool interfaces with clear descriptions and boundaries | [lesson 2.1](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) |
+| 2.2 | Implement structured error responses for MCP tools | [lesson 2.2](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) |
+| 2.3 | Distribute tools appropriately across agents and configure tool choice | [lesson 2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) |
+| 2.4 | Integrate MCP servers into Claude Code and agent workflows | [lesson 2.4](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) |
+| 2.5 | Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively | [lesson 2.5](course/domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md) |
 
 ### Domain 1 — Agentic Architecture & Orchestration · 27%
 
-| | Task statement | |
+| TS | Task statement | Lesson |
 |---|---|---|
 | 1.1 | Design and implement agentic loops for autonomous task execution | planned |
 | 1.2 | Orchestrate multi-agent systems with coordinator-subagent patterns | planned |
@@ -100,7 +100,7 @@ plan and stops one being quietly dropped.
 
 ### Domain 4 — Prompt Engineering & Structured Output · 20%
 
-| | Task statement | |
+| TS | Task statement | Lesson |
 |---|---|---|
 | 4.1 | Design prompts with explicit criteria to improve precision and reduce false positives | planned |
 | 4.2 | Apply few-shot prompting to improve output consistency and quality | planned |
@@ -111,7 +111,7 @@ plan and stops one being quietly dropped.
 
 ### Domain 5 — Context Management & Reliability · 15%
 
-| | Task statement | |
+| TS | Task statement | Lesson |
 |---|---|---|
 | 5.1 | Manage conversation context to preserve critical information across long interactions | planned |
 | 5.2 | Design effective escalation and ambiguity resolution patterns | planned |
@@ -162,6 +162,27 @@ return 200.
 row claims.** Only reading both does, and the `verify-course-content` skill has not been
 run across these lessons yet. A passing structural check is not a verified lesson, and
 treating one as the other would be the failure this course spends its time on.
+
+## Accessibility
+
+This is a written course, so **the markdown structure is the accessibility layer.** A
+blind learner using a screen reader navigates by heading, skips, re-reads, changes speed
+and searches — none of which an audio recording allows. So the work here is structural.
+
+`scripts/check_accessibility.py` runs in the test suite and fails on three things that
+make content unusable rather than merely awkward: **ambiguous link text**, because screen
+readers offer a "list all links" mode where several links labelled `read` are
+indistinguishable; **blank table column headers**, because the header is announced with
+every cell and reads as "blank"; and **images with no alt text**. It also reports skipped
+heading levels and untagged code fences.
+
+Every rule exists because this repository had the defect. Measured before the fix:
+**eleven links labelled `read`, and three tables with a blank first column header.** The
+check was then verified by reintroducing all three.
+
+**What that does not establish:** whether the prose reads sensibly aloud, whether alt text
+is any good, or whether meaning is carried by emphasis alone. Those need a person, ideally
+one who uses a screen reader. No mechanical defects is not an accessible course.
 
 ## How this course is sourced, and why that matters here
 

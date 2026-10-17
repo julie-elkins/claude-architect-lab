@@ -17,7 +17,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # Episode 1: 41 tests, 0 skips. Update this when an episode adds tests.
-EXPECTED_TESTS=47
+EXPECTED_TESTS=49
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then
