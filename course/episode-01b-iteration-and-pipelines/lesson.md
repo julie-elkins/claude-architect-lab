@@ -149,6 +149,23 @@ nothing waits for input. `--output-format json` makes the result parseable.
 `--json-schema` constrains it to a shape your pipeline already knows how to read, so a
 later step can post findings as inline comments without scraping prose.
 
+Three more flags decide what happens when the run misbehaves, and all three are
+documented and print-mode only:
+
+```
+claude -p "..." --max-turns 10 --max-budget-usd 2.00 --permission-prompts none
+```
+
+`--max-turns` limits agentic turns and **exits with an error** when the limit is
+reached. `--max-budget-usd` stops the run once estimated spend reaches the amount —
+note *estimated*, against a client-side figure that can differ from your bill, and
+spend can pass the cap, so leave headroom. `--permission-prompts none` says nobody can
+answer, so Claude Code denies prompts rather than waiting on them.
+
+That last one matters more than it looks. By default in print mode, prompts go to the
+Agent SDK host or a `--permission-prompt-tool`. If neither exists, you want the denial
+rather than the wait.
+
 **And `CLAUDE.md` is how the CI run learns about your project** — testing standards,
 fixture conventions, review criteria. A CI-invoked run has no conversation history to
 draw on, so whatever is not in the repository's instructions is not available to it.
@@ -165,9 +182,11 @@ posts the same comments again.
 
 Things that cost somebody an hour. None is in the documentation.
 
-**An interactive invocation in CI is not a failure, it is a hang.** The job sits until
-the CI timeout, and the error names the timeout rather than the missing `-p`. If a step
-takes exactly as long as your timeout setting, suspect the flag before anything else.
+**A missing `-p` in CI costs you the whole timeout, not a fast failure.** Without print
+mode there is no one to answer a permission prompt, and the job's error names the
+timeout rather than the flag. If a step takes exactly as long as your timeout setting,
+suspect the invocation before anything else — and pass `--permission-prompts none` so a
+prompt becomes a denial instead of a wait.
 
 **"Be more conservative" is the instruction that feels like a fix and is not.** It
 reads as a tightening and changes nothing measurable. The guide names it. When you
@@ -238,14 +257,26 @@ CCAR-F exam guide **Version 1.0, effective July 2026**, §6:
 | CLAUDE.md supplies project context to a CI-invoked run | EG §6, TS 3.6 |
 | A session that generated code is less effective at reviewing its own changes | EG §6, TS 3.6 |
 | Including prior findings avoids duplicate PR comments on re-run | EG §6, TS 3.6 |
+| `-p` / `--print`: "Print response without interactive mode" | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
+| `--output-format` takes `text`, `json`, `stream-json`; print mode only | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
+| `--json-schema` returns validated JSON matching a schema; print mode only | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
+| `--max-turns` limits agentic turns and exits with an error at the limit | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
+| `--max-budget-usd` stops on ESTIMATED spend; spend can pass the cap | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
+| `--permission-prompts none` denies prompts when nobody can answer | [CLI reference](https://code.claude.com/docs/en/cli-reference), read 2026-10-17 |
 
 **Official documentation links — REQUIRED BEFORE PUBLICATION, not yet fetched.** Each
 needs a URL and a read date, and per this repo's rule a live link is not a verified
 claim: the page has to still say what the row claims. Deliberately left unfilled rather
 than written from memory, which is the failure this course is about.
 
-- [ ] CLI reference: `-p` / `--print`, `--output-format`, `--json-schema`
-- [ ] CLAUDE.md and memory documentation, for the CI-context mechanism
+- [x] **CLI reference** — `-p`/`--print`, `--output-format`, `--json-schema`,
+      `--max-turns`, `--max-budget-usd`, `--permission-prompts`. Fetched and quoted
+      2026-10-17: https://code.claude.com/docs/en/cli-reference
+- [ ] `/docs/en/headless` — "Turn off permission prompts in unattended runs", and bare
+      mode. Named by the CLI reference; not yet fetched.
+- [ ] CLAUDE.md and memory documentation, for the CI-context mechanism —
+      https://code.claude.com/docs/en/memory (fetched 2026-10-17 for Domain 3 facts;
+      the CI-context claim specifically is not yet confirmed from it)
 - [ ] Any documented guidance on independent review instances
 
 Everything in **Tips** is `OBSERVED`, not cited — behaviour measured on one version,
