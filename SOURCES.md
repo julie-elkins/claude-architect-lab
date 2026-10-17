@@ -114,6 +114,27 @@ works rather than as what one run did:
 - [ ] Slash command file format and argument passing
 - [ ] Plan mode: what it permits and what it blocks
 
+### Episode 1b — Iteration and pipelines (Domain 3, TS 3.5 and TS 3.6)
+
+| Claim | Source |
+|---|---|
+| Iterative refinement for progressive work is tested | EG §6, TS 3.5 |
+| Claude Code in CI/CD pipelines is tested | EG §6, TS 3.6 |
+| Episode 1 covers TS 3.1 through 3.4; these two are the remainder of the domain | EG §6, read against Episode 1's table above |
+
+**Still needs a documentation citation before Episode 1b is published** — each needs a
+`docs.claude.com` URL and a read date:
+
+- [ ] The non-interactive invocation form, and what it does and does not read from config
+- [ ] How permissions are supplied to a run with no terminal attached
+- [ ] Whether any stop-condition flag (iteration cap, timeout, budget) is a documented
+      contract or incidental behaviour
+
+Everything in that lesson's Tips section is **OBSERVED**, not cited — behaviour measured on
+one version, which is a weaker claim than a documentation URL and is labelled as such. The
+lesson states no cost or spend figure, deliberately: any number would be one person's usage
+on one set of tasks.
+
 ## Verification procedure
 
 Before any episode is published:

@@ -19,6 +19,50 @@ Ships: the Course Doctor repo scaffold, working, from empty
 
 ---
 
+## Fundamentals
+
+Not spoken on camera. This block is for the written lesson and the episode
+description — it gives a learner new to the stack somewhere to go, and a senior
+engineer a one-line refresh of something they have not touched in years. Skippable
+by design: nothing in the script below depends on having read it.
+
+**Configuration hierarchy.** Settings resolve across levels — user, project, and
+subdirectory — and where a rule lives decides who it applies to. *Why it matters
+here:* this is the whole of mechanism one, and the exam's question is always "who
+does it apply to," never "how important is it." *Depth:* any tool with both a home
+dotfile and a committed config — `git`, `ssh`, `editorconfig` — teaches the same
+resolution idea.
+
+**Glob patterns.** The `*`, `**` and `?` wildcards that match file paths. `src/**/*.py`
+means every Python file at any depth under `src`. *Why it matters here:* a
+path-specific rule's frontmatter is a glob, and a glob that matches nothing produces
+a rule that never loads and never complains. *Depth:* `man 7 glob`, or your shell's
+own pattern documentation.
+
+**The context window as a budget.** Everything loaded — instructions, files, history
+— occupies a finite space, and what you spend is not available for the work.
+*Why it matters here:* it is the entire reason path-specific rules exist. Loading API
+conventions while editing a test file is not untidy, it is expensive. *Depth:* this
+is Domain 5's material, where it is the primary subject rather than a consequence.
+
+**Environment variables.** Named values supplied by the shell rather than written
+into a file. *Why it matters here:* `.mcp.json` is committed, so credentials go in as
+references and the environment supplies the secret. *Depth:* the twelve-factor
+config chapter is the clearest short statement of why.
+
+**Process isolation.** Running work in a separate context so its intermediate state
+does not persist into yours. *Why it matters here:* that is what a forked skill does
+— thirty files read, one answer returned, no debris. *Depth:* any treatment of
+subprocess isolation; the concept transfers directly.
+
+**MCP — the Model Context Protocol.** A standard for handing a model your own tools:
+a client talks to a server, the server advertises tools, the client calls them.
+*Why it matters here:* mechanism four configures *where the server comes from*;
+writing one is episode two. *Depth:* the protocol specification at
+`modelcontextprotocol.io`.
+
+---
+
 ## Script
 
 ```
@@ -211,6 +255,39 @@ comes from sitting the exam.
 
 Repo link is below.
 ```
+
+---
+
+## Tips
+
+Not spoken on camera — these belong in the written lesson and the episode notes.
+Each one is something the documentation does not tell you.
+
+**Test the non-matching case, or you have not tested the rule.** This is in the
+script for a reason and it generalises past globs: confirming a rule fires tells you
+something loaded. Only confirming it *does not* fire on a non-match tells you the
+pattern is doing the selecting. A glob with a typo matches nothing, loads nothing,
+and reports nothing.
+
+**An unset environment variable gives you a server that registers and then fails at
+call time.** The reference in `.mcp.json` resolves to nothing, configuration looks
+complete, `/mcp` looks populated, and the failure arrives mid-task on the first call.
+Check the variable is actually exported in the shell you launched from, not just
+present in a dotfile you have not sourced.
+
+**Both MCP scopes are live at once, so a personal server can quietly duplicate a team
+one.** That is the intended behaviour — it is how you trial a server without pushing
+it on anyone — but it means two entries doing the same job is a normal-looking state
+rather than an error, and you will debug the wrong one.
+
+**A subdirectory `CLAUDE.md` is the hardest instruction to find later.** When a rule
+is applying and you cannot see where it came from, the project-level file is the first
+place you look and a nested one is the last. Knowing they exist is most of the fix.
+
+**Forking a skill costs you the follow-up question.** You get the conclusion without
+the debris, which is the point — but the detail is gone, so you cannot then ask "which
+of those thirty files was it?" without running the work again. Decide which you need
+before you fork, not after.
 
 ---
 

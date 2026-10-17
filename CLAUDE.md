@@ -9,7 +9,7 @@ Architect – Foundations exam. **Code here is read by people learning this stac
 clarity outranks cleverness, and a comment earns its place by teaching something
 rather than by defending a decision.
 
-## Status: episode 1 of 5
+## Status: episode 1 of 5, plus 1b
 
 One tool, `read_material_file`: read a lesson file, hash it, list the URLs it cites.
 Nothing fetches anything yet. 41 tests, 0 skips.
@@ -17,6 +17,7 @@ Nothing fetches anything yet. 41 tests, 0 skips.
 | Episode | Exam domain | Weight | Ships |
 |---|---|---|---|
 | 1 | 3 — Claude Code Configuration & Workflows | 20% | this scaffold, one tool |
+| 1b | 3 — same domain, TS 3.5 and TS 3.6 | — | written lesson only; no new code |
 | 2 | 2 — Tool Design & MCP Integration | 18% | the real tool surface, error taxonomy |
 | 3 | 1 — Agentic Architecture & Orchestration | **27%** | the loop, coordinator, subagents |
 | 4 | 4 — Prompt Engineering & Structured Output | 20% | JSON schema, validation-retry |

@@ -45,7 +45,7 @@ not determine pass or fail. Only the total scaled score does.
 
 | Domain | Content domain | Exam weight | Episode |
 |---|---|---|---|
-| 3 | Claude Code Configuration & Workflows | 20% | [1 — Configuration](course/episode-01-claude-code-configuration/) |
+| 3 | Claude Code Configuration & Workflows | 20% | [1 — Configuration](course/episode-01-claude-code-configuration/) · [1b — Iteration and pipelines](course/episode-01b-iteration-and-pipelines/) |
 | 2 | Tool Design & MCP Integration | 18% | 2 — The MCP server |
 | 1 | Agentic Architecture & Orchestration | **27%** | 3 — The loop and subagents |
 | 4 | Prompt Engineering & Structured Output | 20% | 4 — Structured output |
@@ -103,7 +103,7 @@ the plausible mistakes a competent person actually makes. So a published list of
 is a published list of the shapes the wrong answers take. Every episode here teaches the
 anti-patterns alongside the pattern, and names which domain they sit in.
 
-## Status: episode 1 of 5 is built
+## Status: episode 1 of 5 is built, plus the 1b written lesson
 
 The scaffold and the first tool exist and run. **41 tests, 0 skips.**
 
