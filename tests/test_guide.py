@@ -115,3 +115,47 @@ def test_no_screen_reader_defects():
 def test_accessibility_check_declares_what_it_cannot_verify():
     text = (REPO / "scripts" / "check_accessibility.py").read_text(encoding="utf-8")
     assert "No mechanical defects is not an accessible course" in text
+
+
+def test_guide_includes_the_program_notice_from_the_readme():
+    """The December 7 notice is extracted from the README, not duplicated.
+
+    Two copies of a notice drift, and the first time they do a reader is told
+    something no longer true. Single-sourcing makes drift impossible; this test
+    catches the other failure -- the heading being renamed, so the guide
+    silently stops carrying the notice while the README still has it.
+    """
+    sys.path.insert(0, str(REPO / "scripts"))
+    import build_guide
+
+    guide = (REPO / "GUIDE.md").read_text(encoding="utf-8")
+    assert build_guide.NOTICE_HEADING in guide
+    # Whitespace-normalised, because the phrase spans a line wrap in the source
+    # and asserting on wrapped prose breaks on any reflow -- a test that fails
+    # when a paragraph is rewrapped teaches people to stop trusting the suite.
+    flat = " ".join(guide.split())
+    assert "is not named in that announcement" in flat
+
+
+def test_guide_includes_the_prerequisite_stack():
+    flat = " ".join((REPO / "GUIDE.md").read_text(encoding="utf-8").split())
+    assert "What this exam sits on top of" in flat
+    # The correction that makes the page worth having.
+    assert "is not this exam's" in flat
+
+
+def test_a_renamed_notice_heading_fails_loudly():
+    """Extraction must raise rather than emit nothing.
+
+    A notice that quietly vanishes from the guide is worse than one never
+    written, because the README still carries it and nothing says they disagree.
+    """
+    sys.path.insert(0, str(REPO / "scripts"))
+    import build_guide
+
+    try:
+        build_guide.extract_section(REPO / "README.md", "## A heading that does not exist")
+    except ValueError as exc:
+        assert "not found" in str(exc)
+    else:
+        raise AssertionError("extract_section silently returned on a missing heading")

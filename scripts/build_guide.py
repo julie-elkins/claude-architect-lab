@@ -35,6 +35,18 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 COURSE = REPO / "course"
 GUIDE = REPO / "GUIDE.md"
 
+# Front matter included before the lessons, so the single-document reading path
+# is genuinely self-contained rather than linking back out -- the clicking in and
+# out of files is the thing GUIDE.md exists to avoid.
+#
+# Both are EXTRACTED from their own source file rather than duplicated here. Two
+# copies of a notice drift, and the first time they do a reader is told something
+# that is no longer true. The staleness check covers this automatically: editing
+# either source makes `--check` fail until the guide is rebuilt.
+NOTICE_SOURCE = REPO / "README.md"
+NOTICE_HEADING = "## Certification program update: December 7, 2026"
+PREFACE = REPO / "FUNDAMENTALS.md"
+
 # Dependency order: tools before the loop that calls them, the loop before the
 # output it shapes. Domain 1 is the largest slice of the exam and still cannot
 # come first.
@@ -113,18 +125,48 @@ python3 scripts/build_guide.py
 The test suite checks this file against the lessons, so a stale guide fails the build
 rather than quietly disagreeing with the course.
 
-Lessons are in **dependency order**, not exam-weight order. See the
-[repository README](README.md) for the exam details, the full 29-task-statement outline
-including what is not yet written, how the course is sourced, and how to run the lab.
+It opens with the current program notice and the prerequisite stack, then the lessons in
+**dependency order** rather than exam-weight order. See the [repository README](README.md)
+for the exam details, the full 29-task-statement outline, how the course is sourced, and
+how to run the lab. [SCENARIOS.md](SCENARIOS.md) indexes the same lessons by the six
+published exam scenarios, and [THEMES.md](THEMES.md) names the four ideas that recur
+across domains.
 
 ---
 
 """
 
 
+def extract_section(path: pathlib.Path, heading: str) -> str:
+    """Pull one `## heading` section out of a markdown file, up to the next `## `.
+
+    Raises if the heading is gone, rather than silently emitting nothing. A
+    notice that quietly disappears from the guide is worse than one that was
+    never there, because the README still carries it and the two now disagree.
+    """
+    text = path.read_text(encoding="utf-8")
+    start = text.find(heading)
+    if start == -1:
+        raise ValueError(
+            "heading %r not found in %s -- the guide cannot include a section "
+            "that has been renamed or removed" % (heading, path.name)
+        )
+    rest = text[start + len(heading):]
+    end = rest.find("\n## ")
+    return (heading + (rest if end == -1 else rest[:end])).strip()
+
+
 def build() -> str:
     """Return the full guide text, or raise if a listed lesson is missing."""
     parts = [HEADER]
+
+    # The program-update notice, lifted from the README so there is one copy.
+    parts.append(extract_section(NOTICE_SOURCE, NOTICE_HEADING) + "\n\n---\n\n")
+
+    # Prerequisites, in full, before any lesson.
+    if not PREFACE.is_file():
+        raise FileNotFoundError("preface missing: %s" % PREFACE)
+    parts.append(PREFACE.read_text(encoding="utf-8").strip() + "\n\n---\n\n")
 
     covered: dict[str, list[str]] = {}
     for ts, _title, rel in MANIFEST:
