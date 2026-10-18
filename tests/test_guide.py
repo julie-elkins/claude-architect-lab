@@ -84,10 +84,66 @@ def test_every_lesson_claim_is_cited():
 
 
 def test_citation_check_declares_what_it_cannot_verify():
-    # If this line is ever removed, a passing check starts implying more than
-    # it establishes.
+    # If this disclaimer is ever removed, a passing check starts implying more than
+    # it establishes. Pinned on the imperative rather than one sentence: an earlier
+    # version of this test asserted an exact phrase, and rewording the output to
+    # report verification COVERAGE broke it while making the output stricter. That
+    # is a test pinning the prose instead of the property.
     text = (REPO / "scripts" / "check_citations.py").read_text(encoding="utf-8")
-    assert "still SAYS what the row claims" in text
+    assert "Structural citation != verified" in text
+    assert "not a pass" in text
+
+
+def _coverage_module():
+    sys.path.insert(0, str(REPO / "scripts"))
+    import check_citations
+
+    return check_citations
+
+
+def test_a_missing_verification_record_reports_zero_verified_not_an_error():
+    """Deleting the record must make the course look LESS verified, never more.
+
+    This is the load-bearing direction. A verification store that errors when
+    absent gets worked around; one that defaults to "everything is fine" is the
+    failure this whole course is about. Measured once for real, by accident: the
+    URLs in VERIFICATION.md were first written without an `https://` scheme, the
+    regex matched nothing, and the checker reported 0 of 13 verified rather than
+    claiming coverage it did not have.
+    """
+    mod = _coverage_module()
+    original = mod.VERIFICATION
+    try:
+        mod.VERIFICATION = REPO / "no-such-verification-file.md"
+        assert mod.verified_pages() == {}
+    finally:
+        mod.VERIFICATION = original
+
+
+def test_the_real_record_verifies_some_pages_and_not_the_ones_it_disclaims():
+    """The positive direction, pinned beside the negative one.
+
+    A regex loose enough to match any URL anywhere in VERIFICATION.md would
+    promote the eight pages that file lists as NOT re-verified — flattering the
+    count using the very text that admits the gap. So assert both halves: the
+    five in the table are found, and at least one named in the outstanding prose
+    is not.
+
+    MEASURED 2026-10-18, and the first version of this test was worthless. A
+    mutant replacing the anchored row pattern with "any URL anywhere" SURVIVED,
+    because the outstanding URLs in VERIFICATION.md were written without an
+    `https://` scheme — so the loose regex missed them too, and the assertion
+    held for a reason that had nothing to do with the property. Normalising
+    those URLs to carry schemes made the two regexes actually differ, and the
+    same mutant is now killed by this test. Keep the schemes: without them this
+    test passes on a checker that counts prose as proof.
+    """
+    mod = _coverage_module()
+    verified = mod.verified_pages()
+    assert verified, "the committed VERIFICATION.md should verify some pages"
+    assert "https://code.claude.com/docs/en/hooks" in verified
+    # Listed in VERIFICATION.md's prose as outstanding. Must not count as verified.
+    assert "https://code.claude.com/docs/en/memory" not in verified
 
 
 def test_no_screen_reader_defects():

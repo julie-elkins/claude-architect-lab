@@ -207,15 +207,28 @@ rewritten under the same URL.
 
 `scripts/check_citations.py` enforces that mechanically and runs in the test suite. It
 was verified by breaking it three ways — a row citing nothing, a URL with no read date,
-and a lesson with no Sources section — and it caught all three. Current state: **72 claim
-rows, 35 cited to the exam guide, 37 to documentation, 6 outstanding and declared as
-unchecked rather than omitted.** `--urls` resolves every cited link; all five currently
-return 200.
+and a lesson with no Sources section — and it caught all three. As of **2026-10-18**:
+**329 claim rows, 205 cited to the exam guide, 124 to documentation across 13 distinct
+pages, 0 outstanding.** `--urls` resolves every cited link.
 
-**What that does not establish, stated plainly: whether a cited page still says what the
-row claims.** Only reading both does, and the `verify-course-content` skill has not been
-run across these lessons yet. A passing structural check is not a verified lesson, and
-treating one as the other would be the failure this course spends its time on.
+**Run the script rather than trusting those figures.** An earlier version of this
+paragraph read "72 claim rows … 6 outstanding … all five currently return 200" long after
+the real numbers were 329 and 0 across 13 pages. A hand-maintained count in a README is a
+second copy of a measurement, and it goes stale pointing the wrong way — downward, which
+reads as modesty rather than as an error.
+
+**What a passing structural check does not establish: whether a cited page still says what
+the row claims.** Only reading both does. That stronger check has now been run on **5 of
+the 13 cited pages**, by re-fetching each and requiring the claim's *verbatim* wording
+back; it found **zero contradictions and six omissions**, all since written into the
+lessons. The other 8 pages were read when the lessons were written and have not been
+checked since.
+
+**[VERIFICATION.md](VERIFICATION.md) is the record** — which pages, on what date, what was
+found, and what the process still cannot tell you. `check_citations.py` reads that file and
+reports coverage as a fraction, so a page nobody adds to it is counted as unverified. A
+passing structural check is not a verified lesson, and treating one as the other would be
+the failure this course spends its time on.
 
 ## Going deeper, in my own public work
 

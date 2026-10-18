@@ -879,11 +879,11 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.3.
 | Spawning parallel subagents by emitting multiple spawn calls in a single coordinator response rather than across separate turns | EG §6, TS 1.3 |
 | Coordinator prompts should specify research goals and quality criteria rather than step-by-step procedural instructions | EG §6, TS 1.3 |
 | **The documentation names the `Agent` tool, not `Task`:** "the parent conversation needs the `Agent` tool in its allowed tools to spawn subagents" | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
-| A non-fork subagent starts fresh: no conversation history, no previous file reads, receiving only a delegation message | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| A non-fork subagent starts fresh: no conversation history, no previous file reads, receiving only a delegation message | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17; re-verified verbatim 2026-10-18 |
 | A fork inherits the entire conversation — same system prompt, tools, model and message history | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
 | Required fields `name` and `description`; optional `tools`, `disallowedTools`, `model`, `permissionMode`, `maxTurns`, `skills`, `memory`, `background` | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
 | `maxTurns` caps agentic turns and the output is marked partial | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
-| "Claude Code removes every other built-in tool from a background subagent, whether inherited or listed in the `tools` field" | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
+| "Claude Code removes every other built-in tool from a background subagent, whether inherited or listed in the `tools` field" | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17; re-verified verbatim 2026-10-18 |
 | The spawning tool is automatically removed at the depth limit, three layers by default | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
 | A returned subagent result consumes the parent's context, and each subagent spends its own tokens | [sub-agents docs](https://code.claude.com/docs/en/sub-agents), read 2026-10-17 |
 
@@ -1224,6 +1224,18 @@ With `onFailure: "block"`, every one of those four cases blocks the action inste
 waving it through. **If the hook enforces a rule that must hold, it needs this line.**
 Without it you have chosen fail-open, whether you meant to or not.
 
+The other accepted value is `"continue"`, which is the default behaviour written down.
+Setting it explicitly is worth doing on a hook you have decided may fail quietly, because
+it records the decision instead of leaving it to be inferred from an absent key.
+
+**And there is a version floor: `onFailure` requires Claude Code v2.1.295 or later.** On
+anything older the key is simply not recognised — which means it is ignored, the hook
+stays fail-open, and *the config file still reads as though the rule is enforced.* That is
+this lesson's own failure mode applied to the fix for this lesson's failure mode. Check
+`claude --version` before you rely on the line, and on a shared repo say which version the
+hook config assumes, because a colleague on an older build gets different enforcement from
+the same committed file and nothing tells either of you.
+
 ### Step 4 — know which events a block even applies to
 
 Exit code 2 blocks `PreToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `PreCompact`
@@ -1233,6 +1245,13 @@ and a few others. It **does not** block `PostToolUse`, `PostToolUseFailure`,
 Which means: you cannot undo a tool call from `PostToolUse`. By then it has run. You can
 rewrite what the model is told about it, and that is all. If something must not happen,
 the hook belongs on `PreToolUse`.
+
+**`onFailure: "block"` inherits that table with one exception worth knowing.** A failure
+with `"block"` set does whatever exit code 2 does *on that event* — so on `PostToolUse` it
+still cannot undo anything, because the limit is the event and not the setting. The
+exception is `PermissionRequest`, where a blocked failure **denies the request** rather
+than doing nothing. So `onFailure` is not a way to make a late event behave like an early
+one; it is a way to stop a broken hook being read as a passing one.
 
 ## Tips
 
@@ -1245,6 +1264,11 @@ happens and nothing complains.
 **A hook that crashes is worse than no hook, because you believe you have one.** This is
 the practical reason `onFailure: "block"` exists, and the reason to prefer a tiny hook
 script over a clever one.
+
+**A config key your Claude Code version does not know is ignored, not rejected.** This is
+why `onFailure` needs a version check rather than trust. Generalise it: on any
+settings file, a key that is too new for the running build fails open and looks correct in
+review. The only honest check is firing the behaviour, which is the tip above.
 
 **`PostToolUse` cannot prevent anything.** People reach for it because it is where the
 result is. The call already happened.
@@ -1301,7 +1325,10 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.5.
 | A `PreToolUse` hook blocks by exiting 2, or by returning `permissionDecision` of `allow`, `deny`, `ask` or `defer` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | `PostToolUse` can replace output via `updatedToolOutput`; `PreToolUse` can rewrite arguments via `updatedInput` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | **A missing script, a timeout, a failure to start, or a non-zero exit other than 2 is a NON-BLOCKING error and the action proceeds** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
-| **`onFailure: "block"` makes each of those cases block the action instead** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| **`onFailure: "block"` makes each of those cases block the action instead** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| `onFailure` accepts `"block"` or `"continue"`, and is settable on a `command` or `http` hook | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-18 |
+| **"Requires Claude Code v2.1.295 or later"** for `onFailure` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-18 |
+| With `"block"` set, a failure does what exit code 2 does on that event, except on `PermissionRequest`, where it denies the request | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-18 |
 | Exit code 2 does not block `PostToolUse`, `PostToolUseFailure`, `PermissionRequest` or `Notification` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | Hooks are configured in `~/.claude/settings.json`, `.claude/settings.json`, `.claude/settings.local.json`, managed policy, plugin `hooks/hooks.json`, or skill and subagent frontmatter | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | Handler types are `command`, `http`, `mcp_tool`, `prompt` and `agent` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
@@ -2394,6 +2421,17 @@ The tools appear immediately; the server is contacted when one is called.
 So a populated `/mcp` tells you *a tool list exists*. It does not tell you the server is
 reachable, authenticated, or currently working. **Call something.**
 
+**And when a cached list is the stale thing, know which action clears it.** In a server's
+`/mcp` menu, **Disable** and **Clear authentication** both discard that server's cache
+entry. **Reconnect** discards it on a connected or failed server — but on a server already
+showing `cached`, Reconnect *connects now and keeps the entry.* That asymmetry is the trap:
+the menu item whose name promises a fresh start is the one that preserves the old tool list
+on exactly the server whose tool list you were doubting. Only once the entry is discarded
+does the next connection fetch the list from the server instead of the cache.
+
+This is why a tool you just added to a server can stay invisible, and why re-running
+Reconnect feels like it should have worked.
+
 ### Step 4 — expose a catalogue instead of making it guess
 
 The guide names MCP **resources** as a way to expose content catalogues — issue
@@ -2473,9 +2511,11 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 2.4.
 | Three scopes: local and user both in `~/.claude.json`, project in `.mcp.json` at the root | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | `${VAR}` and `${VAR:-default}` expand in `command`, `args`, `env`, `url`, `headers` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | Credential variables read as EMPTY in a remote server's `url` and `headers`; `ANTHROPIC_API_KEY`, `AWS_BEARER_TOKEN_BEDROCK`, `NPM_TOKEN` and others covered — `API_KEY` and `MY_CUSTOM_TOKEN` are NOT | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
-| An unset variable with no default still loads the server, warns, and uses the literal `${VAR}` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
+| An unset variable with no default still loads the server, warns, and uses the literal `${VAR}` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17; re-verified verbatim 2026-10-18 |
 | Discovery happens via `tools/list`, `prompts/list`, `resources/list` after connection | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
-| A cached server can show `cached 2h ago · connects on first use · 5 tools` and connects on first call | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
+| A cached server can show `cached 2h ago · connects on first use · 5 tools` and connects on first call | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| **Disable** and **Clear authentication** discard a server's cache entry; **Reconnect** discards it on a connected or failed server, but on a `cached` server connects now and **keeps** the entry | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-18 |
+| After the entry is discarded, the next connection "fetches the tool list from the server instead of from the cache" | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-18 |
 | An organisation `ask` control prompts every call in all permission modes, never remembers, and is not skipped by an allow rule; `blocked` filters the tool out before Claude sees it | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | `timeout` is a per-server tool execution timeout overriding `MCP_TOOL_TIMEOUT` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 
@@ -2953,7 +2993,16 @@ required fields."*
 **The current API documentation says the opposite:** *"Reduce optional parameters. Make
 parameters `required` where possible."* Its reason is mechanical — *"each optional
 parameter roughly doubles a portion of the grammar's state space"* — and there are hard
-limits: **24 optional parameters total across all strict schemas, 16 with union types.**
+limits: **24 optional parameters total across all strict schemas, 16 with union types,
+and 20 tools with `strict: true` per request.**
+
+**Read "total across all strict schemas" literally — that is the trap in all three
+numbers.** The limits are not per tool. They apply to the combined total in a single
+request, so eleven tools that are each comfortably within the ceiling can fail together,
+and the schema that breaks the request is not necessarily the one you last edited. There
+is also a **180-second compilation timeout**, and the documentation says there are further
+internal limits on compiled grammar size that it does not put a number on — so a schema
+can be rejected for complexity without you having crossed any published figure.
 
 Both are right about different things. The guide is preventing a hallucinated value; the
 documentation is managing constrained-decoding complexity. **The reconciliation is the
@@ -2996,6 +3045,12 @@ rather than at the reason.
 **Every optional parameter you add has a cost you cannot see.** It roughly doubles part of
 the grammar's state space, and there is a hard ceiling of 24. A schema that compiles
 slowly or errors is usually a schema with too many optionals.
+
+**The limits are per request, not per tool, and that is how they surprise you.** Adding a
+twelfth strict tool can break a request by pushing a *combined* total over 24 optionals or
+16 union-typed parameters, and the error arrives while you are editing something unrelated.
+If you register strict tools dynamically, the ceiling is a property of the set you assemble
+at call time — which nothing in any single schema file reveals.
 
 **A required field with an `unclear` member beats an optional field.** The model must take
 a position, and "unclear" is a position you can count. An absent field is indistinguishable
@@ -3045,7 +3100,10 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 4.3.
 | Extracting `calculated_total` alongside `stated_total` to flag discrepancies, and a `conflict_detected` boolean for inconsistent source data | EG §6, TS 4.4 |
 | Structured outputs enforce schemas by constrained decoding: "Always valid… Type safe… no retries needed for schema violations" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
 | **"Reduce optional parameters. Make parameters `required` where possible."** and "each optional parameter roughly doubles a portion of the grammar's state space" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
-| Hard limits: 24 optional parameters total across strict schemas, 16 parameters with union types | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
+| Hard limits: 24 optional parameters total across strict schemas, 16 parameters with union types | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| A third limit: **20** is the "maximum number of tools with `strict: true`" per request | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-18 |
+| All three limits "apply to the combined total across all strict schemas in a single request" — not per tool | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-18 |
+| A **compilation timeout of 180 seconds**, plus unquantified "additional internal limits on the compiled grammar size" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-18 |
 | Required properties appear first, followed by optional properties, regardless of schema order | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
 | Output may not match the schema on a refusal (`stop_reason: "refusal"`), on truncation (`stop_reason: "max_tokens"`), or in enum capitalisation — which "may differ from your schema only in capitalisation, typically in the first letter of a word following a space" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
 
@@ -5103,10 +5161,29 @@ page and report whether it still supports the claim, contradicts it, or does
 not address it. Report the URL and today's date for each. Do not edit anything.
 ```
 
-Five frontmatter fields doing five distinct jobs. `name` sets what you type. `description`
+Six frontmatter fields doing six distinct jobs. `name` sets what you type. `description`
 is what Claude matches on to auto-invoke. `argument-hint` is the autocomplete text.
-`context: fork` runs it isolated. `allowed-tools` pre-approves exactly four tools and
-nothing else.
+`context: fork` runs it isolated. `agent: Explore` picks which subagent type it forks into,
+covered in step 2. `allowed-tools` pre-approves exactly four tools and nothing else.
+
+One more field is worth knowing and is not in the example: **`model`**, which *"accepts the
+same values as `/model`, or `inherit` to keep the active model."* `inherit` is the useful
+one — it stops a skill silently pinning an older model than the session it was invoked
+from, which is a cost and quality change nothing in the transcript announces.
+
+**None of these is actually mandatory, and the two defaults are worth knowing.** The
+documentation marks `name` optional — it *"defaults to the directory name"* — and
+`description` only **recommended**, falling back to *"the first non-empty line of the
+markdown content"* when omitted. Write both anyway. A skill relying on the directory name
+is renamed by a `mv`, and one relying on the first line means your opening sentence has
+quietly become routing logic: edit the prose and you change when the skill fires.
+
+**And `description` has a length ceiling that bites silently:** the combined `description`
+and `when_to_use` text is *"truncated at 1,536 characters in the skill listing to reduce
+context usage."* Truncation happens in the listing Claude matches against, so a long
+description's final clause — often where people put the disqualifying case, the *"not for
+X"* — is the part most likely to be cut. **Put the key use case first**, as the
+documentation says, and put any "do not use this when…" high rather than last.
 
 Project skills live at `.claude/skills/<name>/SKILL.md` and are committed, so the team
 gets them. Yours alone go in `~/.claude/skills/<name>/SKILL.md`.
@@ -5218,7 +5295,10 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.2.
 | Forked skills run in the background by default; `background: false` waits | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
 | `agent` selects `Explore` (read-only, small context), `Plan`, or `general-purpose` | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
 | `allowed-tools` pre-approves tools without prompting; `disallowed-tools` removes tools from the pool | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
-| `description` is what Claude uses to auto-invoke; `disable-model-invocation: true` prevents it | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
+| `description` is what Claude uses to auto-invoke; `disable-model-invocation: true` prevents it | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| `name` is **optional** and *"defaults to the directory name"*; `description` is **recommended**, and if omitted *"uses the first non-empty line of the markdown content"* | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-18 |
+| **"the combined `description` and `when_to_use` text is truncated at 1,536 characters in the skill listing to reduce context usage"** | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-18 |
+| `model` accepts the same values as `/model`, or `inherit` to keep the active model | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-18 |
 | `.claude/commands/<name>.md` is the legacy form and creates the same `/name`; one file, no live reload, no plugin support | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
 
 ---

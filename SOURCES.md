@@ -178,8 +178,12 @@ on one set of tasks.
 
 Before any episode is published:
 
-1. Every `docs.claude.com` URL in that episode's rows returns 200 **and still says what the row
+1. Every documentation URL in that episode's rows returns 200 **and still says what the row
    claims.** A live link is not a verified claim — pages get rewritten under the same URL.
+   **State of this step: done on 5 of the 13 cited pages, 2026-10-18.** The record, including
+   the six omissions it found and the eight pages still outstanding, is
+   [VERIFICATION.md](VERIFICATION.md). Step 1 is therefore partly satisfied and must not be
+   reported as met.
 2. Every mechanic demonstrated on camera is run from a **clean clone** in a fresh shell. A lab
    that works only on the author's machine is the standard way this kind of material is wrong.
 3. The exam guide version string is re-read and still matches the version recorded above.

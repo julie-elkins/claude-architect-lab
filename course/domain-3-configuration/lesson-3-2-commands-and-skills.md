@@ -84,10 +84,29 @@ page and report whether it still supports the claim, contradicts it, or does
 not address it. Report the URL and today's date for each. Do not edit anything.
 ```
 
-Five frontmatter fields doing five distinct jobs. `name` sets what you type. `description`
+Six frontmatter fields doing six distinct jobs. `name` sets what you type. `description`
 is what Claude matches on to auto-invoke. `argument-hint` is the autocomplete text.
-`context: fork` runs it isolated. `allowed-tools` pre-approves exactly four tools and
-nothing else.
+`context: fork` runs it isolated. `agent: Explore` picks which subagent type it forks into,
+covered in step 2. `allowed-tools` pre-approves exactly four tools and nothing else.
+
+One more field is worth knowing and is not in the example: **`model`**, which *"accepts the
+same values as `/model`, or `inherit` to keep the active model."* `inherit` is the useful
+one — it stops a skill silently pinning an older model than the session it was invoked
+from, which is a cost and quality change nothing in the transcript announces.
+
+**None of these is actually mandatory, and the two defaults are worth knowing.** The
+documentation marks `name` optional — it *"defaults to the directory name"* — and
+`description` only **recommended**, falling back to *"the first non-empty line of the
+markdown content"* when omitted. Write both anyway. A skill relying on the directory name
+is renamed by a `mv`, and one relying on the first line means your opening sentence has
+quietly become routing logic: edit the prose and you change when the skill fires.
+
+**And `description` has a length ceiling that bites silently:** the combined `description`
+and `when_to_use` text is *"truncated at 1,536 characters in the skill listing to reduce
+context usage."* Truncation happens in the listing Claude matches against, so a long
+description's final clause — often where people put the disqualifying case, the *"not for
+X"* — is the part most likely to be cut. **Put the key use case first**, as the
+documentation says, and put any "do not use this when…" high rather than last.
 
 Project skills live at `.claude/skills/<name>/SKILL.md` and are committed, so the team
 gets them. Yours alone go in `~/.claude/skills/<name>/SKILL.md`.
@@ -199,5 +218,8 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.2.
 | Forked skills run in the background by default; `background: false` waits | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
 | `agent` selects `Explore` (read-only, small context), `Plan`, or `general-purpose` | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
 | `allowed-tools` pre-approves tools without prompting; `disallowed-tools` removes tools from the pool | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
-| `description` is what Claude uses to auto-invoke; `disable-model-invocation: true` prevents it | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |
+| `description` is what Claude uses to auto-invoke; `disable-model-invocation: true` prevents it | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| `name` is **optional** and *"defaults to the directory name"*; `description` is **recommended**, and if omitted *"uses the first non-empty line of the markdown content"* | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-18 |
+| **"the combined `description` and `when_to_use` text is truncated at 1,536 characters in the skill listing to reduce context usage"** | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-18 |
+| `model` accepts the same values as `/model`, or `inherit` to keep the active model | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-18 |
 | `.claude/commands/<name>.md` is the legacy form and creates the same `/name`; one file, no live reload, no plugin support | [skills docs](https://code.claude.com/docs/en/skills), read 2026-10-17 |

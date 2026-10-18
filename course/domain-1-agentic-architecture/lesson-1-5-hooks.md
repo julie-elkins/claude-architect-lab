@@ -137,6 +137,18 @@ With `onFailure: "block"`, every one of those four cases blocks the action inste
 waving it through. **If the hook enforces a rule that must hold, it needs this line.**
 Without it you have chosen fail-open, whether you meant to or not.
 
+The other accepted value is `"continue"`, which is the default behaviour written down.
+Setting it explicitly is worth doing on a hook you have decided may fail quietly, because
+it records the decision instead of leaving it to be inferred from an absent key.
+
+**And there is a version floor: `onFailure` requires Claude Code v2.1.295 or later.** On
+anything older the key is simply not recognised — which means it is ignored, the hook
+stays fail-open, and *the config file still reads as though the rule is enforced.* That is
+this lesson's own failure mode applied to the fix for this lesson's failure mode. Check
+`claude --version` before you rely on the line, and on a shared repo say which version the
+hook config assumes, because a colleague on an older build gets different enforcement from
+the same committed file and nothing tells either of you.
+
 ### Step 4 — know which events a block even applies to
 
 Exit code 2 blocks `PreToolUse`, `UserPromptSubmit`, `Stop`, `SubagentStop`, `PreCompact`
@@ -146,6 +158,13 @@ and a few others. It **does not** block `PostToolUse`, `PostToolUseFailure`,
 Which means: you cannot undo a tool call from `PostToolUse`. By then it has run. You can
 rewrite what the model is told about it, and that is all. If something must not happen,
 the hook belongs on `PreToolUse`.
+
+**`onFailure: "block"` inherits that table with one exception worth knowing.** A failure
+with `"block"` set does whatever exit code 2 does *on that event* — so on `PostToolUse` it
+still cannot undo anything, because the limit is the event and not the setting. The
+exception is `PermissionRequest`, where a blocked failure **denies the request** rather
+than doing nothing. So `onFailure` is not a way to make a late event behave like an early
+one; it is a way to stop a broken hook being read as a passing one.
 
 ## Tips
 
@@ -158,6 +177,11 @@ happens and nothing complains.
 **A hook that crashes is worse than no hook, because you believe you have one.** This is
 the practical reason `onFailure: "block"` exists, and the reason to prefer a tiny hook
 script over a clever one.
+
+**A config key your Claude Code version does not know is ignored, not rejected.** This is
+why `onFailure` needs a version check rather than trust. Generalise it: on any
+settings file, a key that is too new for the running build fails open and looks correct in
+review. The only honest check is firing the behaviour, which is the tip above.
 
 **`PostToolUse` cannot prevent anything.** People reach for it because it is where the
 result is. The call already happened.
@@ -214,7 +238,10 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.5.
 | A `PreToolUse` hook blocks by exiting 2, or by returning `permissionDecision` of `allow`, `deny`, `ask` or `defer` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | `PostToolUse` can replace output via `updatedToolOutput`; `PreToolUse` can rewrite arguments via `updatedInput` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | **A missing script, a timeout, a failure to start, or a non-zero exit other than 2 is a NON-BLOCKING error and the action proceeds** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
-| **`onFailure: "block"` makes each of those cases block the action instead** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
+| **`onFailure: "block"` makes each of those cases block the action instead** | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| `onFailure` accepts `"block"` or `"continue"`, and is settable on a `command` or `http` hook | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-18 |
+| **"Requires Claude Code v2.1.295 or later"** for `onFailure` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-18 |
+| With `"block"` set, a failure does what exit code 2 does on that event, except on `PermissionRequest`, where it denies the request | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-18 |
 | Exit code 2 does not block `PostToolUse`, `PostToolUseFailure`, `PermissionRequest` or `Notification` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | Hooks are configured in `~/.claude/settings.json`, `.claude/settings.json`, `.claude/settings.local.json`, managed policy, plugin `hooks/hooks.json`, or skill and subagent frontmatter | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |
 | Handler types are `command`, `http`, `mcp_tool`, `prompt` and `agent` | [hooks docs](https://code.claude.com/docs/en/hooks), read 2026-10-17 |

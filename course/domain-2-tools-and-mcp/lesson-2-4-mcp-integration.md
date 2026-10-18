@@ -123,6 +123,17 @@ The tools appear immediately; the server is contacted when one is called.
 So a populated `/mcp` tells you *a tool list exists*. It does not tell you the server is
 reachable, authenticated, or currently working. **Call something.**
 
+**And when a cached list is the stale thing, know which action clears it.** In a server's
+`/mcp` menu, **Disable** and **Clear authentication** both discard that server's cache
+entry. **Reconnect** discards it on a connected or failed server — but on a server already
+showing `cached`, Reconnect *connects now and keeps the entry.* That asymmetry is the trap:
+the menu item whose name promises a fresh start is the one that preserves the old tool list
+on exactly the server whose tool list you were doubting. Only once the entry is discarded
+does the next connection fetch the list from the server instead of the cache.
+
+This is why a tool you just added to a server can stay invisible, and why re-running
+Reconnect feels like it should have worked.
+
 ### Step 4 — expose a catalogue instead of making it guess
 
 The guide names MCP **resources** as a way to expose content catalogues — issue
@@ -202,8 +213,10 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 2.4.
 | Three scopes: local and user both in `~/.claude.json`, project in `.mcp.json` at the root | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | `${VAR}` and `${VAR:-default}` expand in `command`, `args`, `env`, `url`, `headers` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | Credential variables read as EMPTY in a remote server's `url` and `headers`; `ANTHROPIC_API_KEY`, `AWS_BEARER_TOKEN_BEDROCK`, `NPM_TOKEN` and others covered — `API_KEY` and `MY_CUSTOM_TOKEN` are NOT | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
-| An unset variable with no default still loads the server, warns, and uses the literal `${VAR}` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
+| An unset variable with no default still loads the server, warns, and uses the literal `${VAR}` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17; re-verified verbatim 2026-10-18 |
 | Discovery happens via `tools/list`, `prompts/list`, `resources/list` after connection | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
-| A cached server can show `cached 2h ago · connects on first use · 5 tools` and connects on first call | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
+| A cached server can show `cached 2h ago · connects on first use · 5 tools` and connects on first call | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| **Disable** and **Clear authentication** discard a server's cache entry; **Reconnect** discards it on a connected or failed server, but on a `cached` server connects now and **keeps** the entry | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-18 |
+| After the entry is discarded, the next connection "fetches the tool list from the server instead of from the cache" | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-18 |
 | An organisation `ask` control prompts every call in all permission modes, never remembers, and is not skipped by an allow rule; `blocked` filters the tool out before Claude sees it | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |
 | `timeout` is a per-server tool execution timeout overriding `MCP_TOOL_TIMEOUT` | [MCP docs](https://code.claude.com/docs/en/mcp), read 2026-10-17 |

@@ -42,6 +42,38 @@ URL = re.compile(r"https?://[^\s)\]]+")
 READ_DATE = re.compile(r"read\s+\d{4}-\d{2}-\d{2}")
 UNCHECKED = re.compile(r"^\s*- \[ \]", re.MULTILINE)
 
+VERIFICATION = REPO / "VERIFICATION.md"
+# The verified-pages table in VERIFICATION.md. Matched on a backticked URL in the
+# first cell of a row whose later cells carry a read date, so prose mentioning a URL
+# elsewhere in that file cannot promote a page to verified by accident.
+VERIFIED_ROW = re.compile(
+    r"^\|\s*`(?P<url>https?://[^`]+)`\s*\|[^|]*(?P<date>\d{4}-\d{2}-\d{2})[^|]*\|",
+    re.MULTILINE,
+)
+
+
+def normalise(url: str) -> str:
+    """Trim trailing punctuation and markdown that rides along in a citation."""
+    return url.rstrip("`.,;:)\"'").rstrip("/")
+
+
+def verified_pages() -> dict[str, str]:
+    """URL -> re-verification date, from VERIFICATION.md.
+
+    A MISSING file means zero verified pages, not an error. That direction is
+    deliberate: deleting the record must make the course look LESS verified, never
+    more. The same reasoning applies to a page nobody remembered to add — an
+    unlisted page is reported as outstanding, so the count understates coverage
+    rather than flattering it.
+    """
+    if not VERIFICATION.is_file():
+        return {}
+    text = VERIFICATION.read_text(encoding="utf-8")
+    return {
+        normalise(m.group("url")): m.group("date")
+        for m in VERIFIED_ROW.finditer(text)
+    }
+
 
 def lessons() -> list[tuple[str, pathlib.Path]]:
     """Lesson files from the guide manifest, so the two cannot disagree."""
@@ -97,6 +129,48 @@ def check_lesson(path: pathlib.Path) -> tuple[list[str], dict[str, int]]:
     if counts["rows"] == 0:
         problems.append("%s: Sources section has no claim table rows" % name)
     return problems, counts
+
+
+def report_coverage(paths: list[pathlib.Path]) -> None:
+    """Print how many distinct cited pages carry a re-verification record.
+
+    This replaced a fixed sentence that said content verification "has not been run
+    on these lessons." Once it HAD been run on some pages, that sentence was false
+    in one direction while staying true in the other, and a reader cannot tell which
+    half applies to the claim in front of them. A fraction can carry both.
+    """
+    # Count rows in the Sources section only. Counting whole-file occurrences would
+    # fold in prose mentions, and counting distinct FILES would report "2" for a page
+    # carrying twenty claims — which inverts the triage order this list exists for.
+    cited: dict[str, int] = {}
+    for p in paths:
+        text = p.read_text(encoding="utf-8")
+        head = SOURCES_HEADING.search(text)
+        if not head:
+            continue
+        for match in TABLE_ROW.finditer(text[head.start():]):
+            for raw in URL.findall(match.group("source")):
+                url = normalise(raw)
+                cited[url] = cited.get(url, 0) + 1
+
+    verified = verified_pages()
+    outstanding = sorted(set(cited) - set(verified))
+
+    print("CONTENT VERIFICATION (does the page still SAY it?)")
+    if not verified:
+        print("  no verification record found — treating every page as unverified")
+    print("  distinct cited pages:  %d" % len(cited))
+    print("  re-verified verbatim:  %d" % len(set(cited) & set(verified)))
+    print("  not re-verified:       %d" % len(outstanding))
+    # Cite-count is the triage order: the most-cited unverified page is where a stale
+    # claim does the most damage, not the alphabetically first one.
+    for url in sorted(outstanding, key=lambda u: (-cited[u], u)):
+        print("    %-62s %3d claim row(s)" % (url, cited[url]))
+    print()
+    print("  A page listed as re-verified was re-fetched and had to return the")
+    print("  claim's VERBATIM wording. 'Not re-verified' is not a defect and is")
+    print("  not a pass — see VERIFICATION.md. Structural citation != verified")
+    print("  content, and neither one proves the lesson TEACHES the claim right.")
 
 
 def check_urls(paths: list[pathlib.Path]) -> int:
@@ -165,9 +239,7 @@ def main(argv: list[str] | None = None) -> int:
         print("Every claim row names a source, and every URL carries a read date.")
 
     print()
-    print("NOT CHECKED HERE: whether a cited page still SAYS what the row claims.")
-    print("That needs the verify-course-content skill, and it has not been run on")
-    print("these lessons. Structural citation != verified content.")
+    report_coverage([p for _, p in found if p.is_file()])
 
     rc = 1 if all_problems else 0
     if args.urls:

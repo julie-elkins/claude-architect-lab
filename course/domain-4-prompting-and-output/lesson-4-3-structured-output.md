@@ -103,7 +103,16 @@ required fields."*
 **The current API documentation says the opposite:** *"Reduce optional parameters. Make
 parameters `required` where possible."* Its reason is mechanical — *"each optional
 parameter roughly doubles a portion of the grammar's state space"* — and there are hard
-limits: **24 optional parameters total across all strict schemas, 16 with union types.**
+limits: **24 optional parameters total across all strict schemas, 16 with union types,
+and 20 tools with `strict: true` per request.**
+
+**Read "total across all strict schemas" literally — that is the trap in all three
+numbers.** The limits are not per tool. They apply to the combined total in a single
+request, so eleven tools that are each comfortably within the ceiling can fail together,
+and the schema that breaks the request is not necessarily the one you last edited. There
+is also a **180-second compilation timeout**, and the documentation says there are further
+internal limits on compiled grammar size that it does not put a number on — so a schema
+can be rejected for complexity without you having crossed any published figure.
 
 Both are right about different things. The guide is preventing a hallucinated value; the
 documentation is managing constrained-decoding complexity. **The reconciliation is the
@@ -146,6 +155,12 @@ rather than at the reason.
 **Every optional parameter you add has a cost you cannot see.** It roughly doubles part of
 the grammar's state space, and there is a hard ceiling of 24. A schema that compiles
 slowly or errors is usually a schema with too many optionals.
+
+**The limits are per request, not per tool, and that is how they surprise you.** Adding a
+twelfth strict tool can break a request by pushing a *combined* total over 24 optionals or
+16 union-typed parameters, and the error arrives while you are editing something unrelated.
+If you register strict tools dynamically, the ceiling is a property of the set you assemble
+at call time — which nothing in any single schema file reveals.
 
 **A required field with an `unclear` member beats an optional field.** The model must take
 a position, and "unclear" is a position you can count. An absent field is indistinguishable
@@ -195,7 +210,10 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 4.3.
 | Extracting `calculated_total` alongside `stated_total` to flag discrepancies, and a `conflict_detected` boolean for inconsistent source data | EG §6, TS 4.4 |
 | Structured outputs enforce schemas by constrained decoding: "Always valid… Type safe… no retries needed for schema violations" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
 | **"Reduce optional parameters. Make parameters `required` where possible."** and "each optional parameter roughly doubles a portion of the grammar's state space" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
-| Hard limits: 24 optional parameters total across strict schemas, 16 parameters with union types | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
+| Hard limits: 24 optional parameters total across strict schemas, 16 parameters with union types | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17; re-verified verbatim 2026-10-18 |
+| A third limit: **20** is the "maximum number of tools with `strict: true`" per request | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-18 |
+| All three limits "apply to the combined total across all strict schemas in a single request" — not per tool | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-18 |
+| A **compilation timeout of 180 seconds**, plus unquantified "additional internal limits on the compiled grammar size" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-18 |
 | Required properties appear first, followed by optional properties, regardless of schema order | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
 | Output may not match the schema on a refusal (`stop_reason: "refusal"`), on truncation (`stop_reason: "max_tokens"`), or in enum capitalisation — which "may differ from your schema only in capitalisation, typically in the first letter of a word following a space" | [structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs), read 2026-10-17 |
 
