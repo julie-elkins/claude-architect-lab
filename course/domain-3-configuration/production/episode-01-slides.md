@@ -1,5 +1,5 @@
 > **Production asset, not the lesson.** Slide bodies for the video version.
-> The written lessons are listed on [the course front page](../../README.md).
+> The written lessons are listed on [the course front page](../../../README.md).
 
 # Episode 1 slides — Configuration is the exam's quietest 20%
 

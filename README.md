@@ -173,10 +173,34 @@ plan and stops one being quietly dropped.
 | 5.4 | Manage context effectively in large codebase exploration | [lesson 5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) |
 | 5.5 | Design human review workflows and confidence calibration | [lesson 5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md) |
 
-**Domain 3 is written in full.** Its video script lives at
-[course/domain-3-configuration/production/](course/domain-3-configuration/production/) —
-a **production asset** covering TS 3.1 through 3.4 as narration, kept because the video
-is planned. It is not the course. Domain 2 is next.
+**All twenty-nine lessons are written.** The written lessons *are* the course — read them,
+or read [GUIDE.md](GUIDE.md) for the whole thing in one scroll.
+
+**All five video episodes are also scripted**, one per domain, as **production assets** under
+`course/domain-*/production/`. Each is a narration script plus a slide deck. **They are not
+the course and they are allowed to lag it**, so every one opens with a header saying the
+lessons are authoritative. Nothing has been filmed.
+
+| Episode | Domain | Weight | Task statements | Target runtime |
+|---|---|---|---|---|
+| [1](course/domain-3-configuration/production/) | 3 — Configuration & Workflows | 20% | 3.1–3.4 | 9–11 min |
+| [2](course/domain-2-tools-and-mcp/production/) | 2 — Tool Design & MCP | 18% | 2.1–2.5 | 9–10 min |
+| [3](course/domain-1-agentic-architecture/production/) | 1 — Agentic Architecture | **27%** | 1.1–1.7 | 13–14 min |
+| [4](course/domain-4-prompting-and-output/production/) | 4 — Prompting & Output | 20% | 4.1–4.6 | 10–11 min |
+| [5](course/domain-5-context-and-reliability/production/) | 5 — Context & Reliability | 15% | 5.1–5.5 | 7–8 min |
+
+**Runtime is proportional to blueprint weight**, which is why episode 3 is nearly twice
+episode 5. That choice is what lets every episode after the first cover *all* of its domain's
+task statements rather than leaving some on the floor. **Episode 1 is the exception** — it
+covers four of Domain 3's six and says so on camera; TS 3.5 and 3.6 are written up in
+[their lesson](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md).
+
+`scripts/check_production.py` checks the decks for the defects that actually happened — a
+stated slide count that disagrees with the slides (which occurred three times while writing
+these), non-sequential numbering, broken links, and a missing authoritative header. **It
+cannot check whether a script still agrees with its lesson**, because a script restates a
+lesson in spoken prose and no diff can tell a rewording from a stale claim. Episode 1 taught
+a corrected-away claim for five days before anyone noticed.
 
 ## The lab: Course Doctor
 
@@ -301,7 +325,8 @@ anti-patterns alongside the pattern, and names which domain they sit in.
 The scaffold and the first tool exist and run. **41 tests, 0 skips.** Lesson status is in the course outline above.
 
 ```
-course/               per-episode script and slides, as plain markdown
+course/domain-*/      the 29 written lessons — these are the course
+course/*/production/  narration scripts and slide decks for the video, which lags
 src/course_doctor/    the tool: library, output models, MCP server
 tests/                bounds, adapter, and a real stdio protocol test
 .claude/rules/        path-specific rules, loaded only on matching files
@@ -310,8 +335,9 @@ tests/                bounds, adapter, and a real stdio protocol test
 SOURCES.md            every lesson claim traced to a published source
 ```
 
-Each episode's directory holds the script and the deck, so you can read the course without
-watching it.
+**The lessons are the course and the scripts are downstream of them.** You never need the
+production assets to study; they exist so the video can be recorded without rewriting the
+material, and each says so in its own header.
 
 ## Running it
 

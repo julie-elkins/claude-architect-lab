@@ -9,11 +9,16 @@
 > video version of this material — spoken wording, screen directions, and a recording
 > checklist. It is kept in the repository because the video is still planned.
 >
-> **If you are here to learn, read the written lessons instead:**
-> [the course front page](../../README.md) lists all of them. This script covers task
-> statements 3.1 through 3.4; the written lesson for **TS 3.1** is
-> [here](../lesson-3-1-claude-md-hierarchy.md), and 3.2 through
-> 3.4 are being written.
+> **If you are here to learn, read the written lessons instead.**
+> [The course front page](../../../README.md) lists all twenty-nine. This script covers
+> task statements 3.1 through 3.4 — all four are written:
+> [3.1](../lesson-3-1-claude-md-hierarchy.md) ·
+> [3.2](../lesson-3-2-commands-and-skills.md) ·
+> [3.3](../lesson-3-3-path-specific-rules.md) ·
+> [3.4](../lesson-3-4-plan-mode.md)
+>
+> **TS 3.5 and 3.6 are deliberately outside this episode** and are covered by
+> [their written lesson](../lesson-3-5-3-6-iteration-and-pipelines.md).
 
 # Episode 1 — Configuration is the exam's quietest 20%
 

@@ -215,3 +215,35 @@ def test_a_renamed_notice_heading_fails_loudly():
         assert "not found" in str(exc)
     else:
         raise AssertionError("extract_section silently returned on a missing heading")
+
+
+def test_production_assets_are_self_consistent():
+    """Stated slide counts, numbering, links, and the authoritative header.
+
+    Every rule this enforces was broken by hand in this repository, and three of
+    the four shipped. The slide-count rule specifically: writing episodes 2 and 3
+    produced a stated count that disagreed with the slides TWICE IN TWO FILES
+    (14 against 15, then 19 against 20). Somebody building a deck from the header
+    comes up a slide short with nothing to flag it.
+
+    Verified by breaking it five ways on 2026-10-18 — a wrong stated count, a
+    duplicated slide number, a broken relative link, a removed production-asset
+    header, and a chapter marker pointing at a slide that does not exist. All
+    five were caught, exit 1; restored, exit 0.
+    """
+    result = subprocess.run(
+        [sys.executable, "scripts/check_production.py"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_production_check_declares_the_drift_it_cannot_see():
+    # The one real failure here is a script disagreeing with its lesson, and no
+    # diff can detect it. If this disclaimer goes, a passing check starts implying
+    # the scripts were verified against the lessons. They were not.
+    text = (REPO / "scripts" / "check_production.py").read_text(encoding="utf-8")
+    assert "NOT CHECKED HERE" in text
+    assert "Re-read the lessons before recording" in text
