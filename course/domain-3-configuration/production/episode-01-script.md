@@ -1,3 +1,10 @@
+> **⚠ This script LAGS the lessons, and the lessons are authoritative.** It was written
+> 2026-10-13, before the documentation verification pass of 2026-10-17. Two claims in it
+> were corrected on 2026-10-18 after the written lessons had already fixed them. Before
+> recording, re-read the lesson for each task statement this covers and reconcile — there
+> is no automated check for script-versus-lesson drift, which is why this warning is here
+> rather than in a test.
+>
 > **This is a production asset, not the lesson.** It is the narration script for the
 > video version of this material — spoken wording, screen directions, and a recording
 > checklist. It is kept in the repository because the video is still planned.
@@ -45,9 +52,11 @@ resolution idea.
 
 **Glob patterns.** The `*`, `**` and `?` wildcards that match file paths. `src/**/*.py`
 means every Python file at any depth under `src`. *Why it matters here:* a
-path-specific rule's frontmatter is a glob, and a glob that matches nothing produces
-a rule that never loads and never complains. *Depth:* `man 7 glob`, or your shell's
-own pattern documentation.
+path-specific rule's frontmatter is a glob, and there are **two** failure modes in
+opposite directions — a glob that matches nothing gives a rule that never loads and
+never complains, while **invalid YAML in the frontmatter makes the rule load on every
+file**, because Claude Code ignores unparseable frontmatter and loads the rule as if it
+had no `paths`. *Depth:* `man 7 glob`, and lesson 3.3.
 
 **The context window as a budget.** Everything loaded — instructions, files, history
 — occupies a finite space, and what you spend is not available for the work.
@@ -276,8 +285,13 @@ Each one is something the documentation does not tell you.
 **Test the non-matching case, or you have not tested the rule.** This is in the
 script for a reason and it generalises past globs: confirming a rule fires tells you
 something loaded. Only confirming it *does not* fire on a non-match tells you the
-pattern is doing the selecting. A glob with a typo matches nothing, loads nothing,
-and reports nothing.
+pattern is doing the selecting.
+
+**And there are two failure modes, in opposite directions.** A glob with a typo matches
+nothing, loads nothing and reports nothing. But **invalid YAML** in the frontmatter is
+worse and is the documented behaviour: Claude Code ignores the frontmatter and loads the
+rule unconditionally, so a typo there makes the rule universal rather than absent. Only
+`claude --debug` shows the parse error.
 
 **An unset environment variable gives you a server that registers and then fails at
 call time.** The reference in `.mcp.json` resolves to nothing, configuration looks
