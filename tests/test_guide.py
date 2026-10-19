@@ -355,6 +355,30 @@ def test_the_readme_count_of_surprising_defaults_matches_the_table():
     assert "nine places where" in (REPO / "README.md").read_text(encoding="utf-8")
 
 
+def test_the_stated_test_count_matches_the_pinned_floor():
+    """Third instance of the same class of error, so pin it this time.
+
+    The README said "41 tests, 0 skips" while the floor was 56, and the repo's
+    CLAUDE.md said "episode 1 of 5" with 29 lessons written. Both understated the
+    work, which is why neither got caught: a count stale in the FLATTERING
+    direction gets argued with, one stale downward reads as modesty. The floor in
+    run-tests.sh is the single source; these two sentences are checked against it.
+    """
+    floor = re.search(
+        r"^EXPECTED_TESTS=(\d+)",
+        (REPO / "scripts" / "run-tests.sh").read_text(encoding="utf-8"),
+        re.MULTILINE,
+    )
+    assert floor, "EXPECTED_TESTS is gone from run-tests.sh"
+    stated = "%s tests, 0 skips" % floor.group(1)
+    for page in ("README.md", "CLAUDE.md"):
+        text = (REPO / page).read_text(encoding="utf-8")
+        assert stated in text, (
+            "%s does not state %r -- the floor moved and the prose did not"
+            % (page, stated)
+        )
+
+
 def test_production_check_declares_the_drift_it_cannot_see():
     # The one real failure here is a script disagreeing with its lesson, and no
     # diff can detect it. If this disclaimer goes, a passing check starts implying

@@ -19,7 +19,9 @@ cd "$(dirname "$0")/.."
 # Episode 1: 41 tests, 0 skips. Update this when an episode adds tests.
 # 2026-10-19: +4 for RECALL.md — link resolution, term-still-in-lesson, the
 # page's own ceiling disclaimer, and the README's count of surprising defaults.
-EXPECTED_TESTS=60
+# +1 more: this floor against the test count stated in README.md and CLAUDE.md,
+# both of which had gone stale downward.
+EXPECTED_TESTS=61
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then

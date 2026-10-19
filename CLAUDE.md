@@ -9,19 +9,30 @@ Architect – Foundations exam. **Code here is read by people learning this stac
 clarity outranks cleverness, and a comment earns its place by teaching something
 rather than by defending a decision.
 
-## Status: episode 1 of 5, plus 1b
+## Status: the written course is COMPLETE; the lab is one tool on purpose
 
-One tool, `read_material_file`: read a lesson file, hash it, list the URLs it cites.
-Nothing fetches anything yet. 41 tests, 0 skips.
+**All 29 lessons are written, one per task statement across all five domains**, plus the
+root-level pages. The episode framing below was superseded on 2026-10-17 — the course is
+lessons, and the five video episodes are a production asset that lags the writing.
 
-| Episode | Exam domain | Weight | Ships |
+**The lab is one tool**, `read_material_file`: read a lesson file, hash it, list the URLs
+it cites. **Nothing fetches anything yet.** 61 tests, 0 skips.
+
+**So the course teaches five domains and the lab demonstrates one of them, and that gap is
+the honest state rather than a secret.** The lessons carry their own code inline; each
+lesson's `Lab artifact:` line names what the pattern looks like in this system, not a file
+that exists. Only one lesson references a path under `src/`, and both files it names are
+there.
+
+| Planned next | Exam domain | Weight | Would ship |
 |---|---|---|---|
-| 1 | 3 — Claude Code Configuration & Workflows | 20% | this scaffold, one tool |
-| 1b | 3 — same domain, TS 3.5 and TS 3.6 | — | written lesson only; no new code |
-| 2 | 2 — Tool Design & MCP Integration | 18% | the real tool surface, error taxonomy |
-| 3 | 1 — Agentic Architecture & Orchestration | **27%** | the loop, coordinator, subagents |
-| 4 | 4 — Prompt Engineering & Structured Output | 20% | JSON schema, validation-retry |
-| 5 | 5 — Context Management & Reliability | 15% | provenance, confidence routing |
+| fetch + staleness | 2 — Tool Design & MCP Integration | 18% | the real tool surface, error taxonomy |
+| the loop | 1 — Agentic Architecture & Orchestration | **27%** | coordinator, subagents |
+| output | 4 — Prompt Engineering & Structured Output | 20% | JSON schema, validation-retry |
+| reliability | 5 — Context Management & Reliability | 15% | provenance, confidence routing |
+
+**None of those four is committed to.** The next one worth building is the first: a course
+about content freshness whose lab cannot yet check freshness is the gap a reader notices.
 
 ## The design rule everything here follows
 

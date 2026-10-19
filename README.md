@@ -326,7 +326,10 @@ anti-patterns alongside the pattern, and names which domain they sit in.
 
 ## The lab: status
 
-The scaffold and the first tool exist and run. **41 tests, 0 skips.** Lesson status is in the course outline above.
+The scaffold and the first tool exist and run. **61 tests, 0 skips** — the floor is pinned in
+`scripts/run-tests.sh` and this sentence is checked against it, because a hand-maintained
+count in a README goes stale *downward* and then reads as modesty instead of as an error.
+Lesson status is in the course outline above.
 
 ```
 course/domain-*/      the 29 written lessons — these are the course
