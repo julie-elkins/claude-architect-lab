@@ -382,7 +382,7 @@ anti-patterns alongside the pattern, and names which domain they sit in.
 
 ## The lab: status
 
-The scaffold and the first tool exist and run. **88 tests, 0 skips** — the floor is pinned in
+The scaffold and the first tool exist and run. **102 tests, 0 skips** — the floor is pinned in
 `scripts/run-tests.sh` and this sentence is checked against it, because a hand-maintained
 count in a README goes stale *downward* and then reads as modesty instead of as an error.
 Lesson status is in the course outline above.

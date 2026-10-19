@@ -178,11 +178,25 @@ the search path double-counts silently**; nothing about the output says so.
 
 ## What this process still cannot tell you
 
-**The exam guide is not verifiable from here, and it is the source of 205 of the 329 claim
-rows.** It is a PDF read once, at the version stated in each lesson's Sources block
-(**Version 1.0, effective July 2026**). If it is revised, nothing in this repository
-notices. The December 7, 2026 content update makes that a dated risk rather than a
-theoretical one — see the README notice.
+**The exam guide's CONTENTS are not verifiable from here, and it is the source of 205 of the
+329 claim rows.** It is a PDF read once, at the version stated in each lesson's Sources block
+(**Version 1.0, effective July 2026**). Nothing here re-reads it, and no claim traced to
+`EG §n` has been re-checked against the guide since it was written.
+
+**What changed on 2026-10-19: a revision no longer goes unnoticed.**
+`scripts/check_exam_guide.py` records the published guide's address and the SHA-256 of its
+bytes, and reports when either moves. That is strictly a change detector — **it does not read
+the PDF, so it cannot say what moved or whether any claim here is affected.** When it fires,
+every `EG §n` row is unverified until a person has read the new guide. Run it with no
+arguments; `--record` is deliberately manual, because an automatic refresh would overwrite
+the evidence that something changed.
+
+Two things it found on its first run, both worth knowing: the certification page carries
+**nine** exam-guide PDFs — all four certifications plus a Japanese edition of each — so the
+check pins this course's guide by exact filename rather than by matching "exam guide"; and
+every link appears twice, once JSON-escaped, with the **unfetchable escaped copy sorting
+first**. A check that took the first match would have recorded a baseline it could never
+reproduce.
 
 **A verbatim match proves the page says it; it does not prove the lesson teaches it
 correctly.** Lesson 3.3 once taught a real documented failure mode *backwards* while citing
@@ -196,9 +210,21 @@ cannot notice a framing both passes share. The partial defence used here was to 
 verbatim quotes rather than a judgement, so the page's own words had to come back —
 a weaker claim than independent review, and a stronger one than self-assessment.
 
-**Nothing here is automated and nothing watches for drift.** There is no scheduled re-check
-and no tripwire on the documentation changelog. Re-verification happens when a person runs
-it, and this file is how you tell whether that has happened lately.
+**One thing is now watched, and it is not the documentation.** `check_exam_guide.py` notices
+a change to the published exam guide. That is the whole of the automation, and it is a change
+detector rather than a verifier.
+
+**Everything else still waits for a person.** There is **no scheduled re-check** of anything,
+**no tripwire on the documentation changelog**, and no automated re-verification of the 13
+cited documentation pages — the verbatim check in `course_doctor.citations` exists and runs
+when somebody runs it. `check_citations.py` now prints the **age** of each re-verification,
+oldest first, so this file can tell you how long ago rather than only whether. There is
+deliberately no staleness threshold: no measured number of days makes a page stale, since it
+depends entirely on how fast that page's subject moves, and **age is not staleness** in
+either direction.
+
+Re-verification happens when a person runs it, and this file plus that age list is how you
+tell whether it has happened lately.
 
 ## Sources
 

@@ -28,6 +28,7 @@ suite: a test that fails when the wifi drops teaches people to ignore the suite.
 from __future__ import annotations
 
 import argparse
+import datetime
 import pathlib
 import re
 import sys
@@ -166,6 +167,34 @@ def report_coverage(paths: list[pathlib.Path]) -> None:
     # claim does the most damage, not the alphabetically first one.
     for url in sorted(outstanding, key=lambda u: (-cited[u], u)):
         print("    %-62s %3d claim row(s)" % (url, cited[url]))
+    # How old each re-verification is. A verbatim match is a claim about the day it was
+    # made and it decays from then on, so a record with no age beside it reads as
+    # permanently current. Oldest first, because that is the re-check order.
+    #
+    # DELIBERATELY NO THRESHOLD. There is no measured number of days at which a page
+    # becomes stale -- it depends entirely on how fast that page's subject moves -- so
+    # inventing one would dress a guess as a finding. This prints the age and leaves the
+    # judgement where it belongs. AGE IS NOT STALENESS: a two-hundred-day-old
+    # verification of a page nobody has touched is still good, and a one-day-old
+    # verification of a page rewritten this morning is not.
+    aged = sorted(
+        ((url, verified[url]) for url in set(cited) & set(verified)),
+        key=lambda pair: pair[1],
+    )
+    if aged:
+        today = datetime.date.today()
+        print()
+        print("  AGE OF EACH RE-VERIFICATION (oldest first; age is not staleness)")
+        for url, date_text in aged:
+            try:
+                days = (today - datetime.date.fromisoformat(date_text)).days
+            except ValueError:
+                # An unparseable date must not silently become day zero, which would
+                # report the oldest record in the file as the freshest.
+                print("    %-56s  UNPARSEABLE DATE %r" % (url, date_text))
+                continue
+            print("    %-56s  %s  %4d day(s) ago" % (url, date_text, days))
+
     print()
     print("  A page listed as re-verified was re-fetched and had to return the")
     print("  claim's VERBATIM wording. 'Not re-verified' is not a defect and is")

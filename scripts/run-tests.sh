@@ -32,7 +32,11 @@ cd "$(dirname "$0")/.."
 # 2026-10-19 (last): 87 -> 88. Every lesson's Fundamentals block now carries a
 # skip signpost, pinned so a NEW lesson cannot ship without one -- a missing
 # signpost looks exactly like a section meant to be read in full.
-EXPECTED_TESTS=88
+# 2026-10-19 (final): 88 -> 102. The exam-guide tripwire. 14 tests, almost all of
+# them failure directions -- the mutants worth running are the ones that make an
+# unreachable page or a missing link report as UNCHANGED, because a tripwire that
+# passes silently is indistinguishable from one that found nothing wrong.
+EXPECTED_TESTS=102
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then
