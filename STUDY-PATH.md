@@ -95,10 +95,16 @@ Read, in this order:
 1. [THEMES.md](THEMES.md) — the four recurring ideas
 2. [SCENARIOS.md](SCENARIOS.md) — the six scenarios and their closing questions
 3. The **anti-pattern** section of every lesson, nothing else
+4. [RECALL.md](RECALL.md) — last, and out loud if you can
 
 The anti-patterns are the published wrong answers, and well-built distractors are the
 plausible mistakes a competent person actually makes. Three hours of anti-patterns is the
 highest-yield three hours available.
+
+**Why the recall sheet goes last and not first.** It is the only page here you can usefully
+read with no time left, because nothing on it needs to be understood — a convention is
+either in your memory or it is not. Everything above it is the opposite: worth hours, worth
+none of your last twenty minutes.
 
 This is triage, not preparation. It will not make up for not knowing the material.
 
@@ -109,6 +115,11 @@ This is triage, not preparation. It will not make up for not knowing the materia
 [GLOSSARY.md](GLOSSARY.md) first. It exists because several words mean different things in
 different lessons — "fork" means three things — and those are the distinctions that decay
 first.
+
+Then [RECALL.md](RECALL.md), as a self-test rather than as reading: cover the middle column
+and say what each term does. The rows you cannot produce are your revision list, and they
+are the cheapest thing on it to fix — judgment takes a week to rebuild, a field name takes
+a minute.
 
 ---
 

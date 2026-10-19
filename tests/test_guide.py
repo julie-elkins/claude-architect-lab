@@ -13,6 +13,7 @@ version of the bug.
 from __future__ import annotations
 
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -238,6 +239,120 @@ def test_production_assets_are_self_consistent():
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def _recall_rows() -> list[tuple[str, list[str]]]:
+    """Table rows of RECALL.md as (first cell, lesson paths it links to).
+
+    Header and separator rows are dropped. A row is kept even when it links
+    nowhere, so a row that quietly lost its lesson link still shows up in the
+    link test's denominator rather than passing by disappearing.
+    """
+    text = (REPO / "RECALL.md").read_text(encoding="utf-8")
+    rows: list[tuple[str, list[str]]] = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        if not cells or set(line) <= set("|-: "):
+            continue
+        first = cells[0]
+        if first.lower() in {"path", "field", "flag", "name", "the thing"}:
+            continue
+        rows.append((first, re.findall(r"\((course/[^)]+\.md)\)", line)))
+    return rows
+
+
+def test_every_recall_sheet_link_resolves():
+    """RECALL.md restates the lessons, so a dead link there is a dead end.
+
+    Covers every link in the file, not only the ones inside table rows: the
+    loading-order note under the first table links out in prose, and a test
+    that only read tables would call the file clean with that link broken.
+    """
+    text = (REPO / "RECALL.md").read_text(encoding="utf-8")
+    targets = re.findall(r"\]\((course/[^)]+\.md|[A-Z]+\.md)\)", text)
+    assert targets, "RECALL.md links to no lessons -- it is an index of nothing"
+    for rel in targets:
+        assert (REPO / rel).is_file(), "RECALL.md links to a missing file: %s" % rel
+
+
+def test_every_recall_sheet_term_appears_in_the_lesson_it_points_at():
+    """The cheap half of the staleness problem, and the half that is checkable.
+
+    RECALL.md is a third copy of claims the lessons own -- the same shape as an
+    episode script, and `check_production.py` exists because a script lagged its
+    lesson and nothing noticed. So: if a row names `--json-schema` and no linked
+    lesson mentions it any more, the flag was renamed or the row was invented,
+    and both are caught here.
+
+    WHAT THIS CANNOT CATCH, and it is the failure that actually ships: a row
+    whose wording survived while its MEANING drifted. `allowed-tools` appearing
+    in a lesson proves nothing about whether the lesson still says it
+    pre-approves rather than restricts. Only a person re-reading both does that,
+    which is why RECALL.md opens by naming the lessons as authoritative.
+    """
+    rows = _recall_rows()
+    assert len(rows) >= 20, "expected the recall sheet's rows; found %d" % len(rows)
+    cache: dict[str, str] = {}
+    for first_cell, links in rows:
+        terms = re.findall(r"`([^`]+)`", first_cell)
+        if not terms or not links:
+            continue
+        # Placeholder segments are the author's, not the product's: a row may
+        # write `.claude/skills/<name>/SKILL.md` where the lesson writes a real
+        # name. Match on the fixed prefix so the test checks the convention
+        # rather than the illustration.
+        term = terms[0].split("<")[0].rstrip("/")
+        for rel in links:
+            if rel not in cache:
+                # A missing lesson belongs to the link test above. Reading it
+                # here would raise FileNotFoundError from pathlib instead, which
+                # names a temp path and not the row that is wrong.
+                if not (REPO / rel).is_file():
+                    continue
+                cache[rel] = (REPO / rel).read_text(encoding="utf-8")
+            assert term in cache[rel], (
+                "RECALL.md names %r and links to %s, which no longer mentions it"
+                % (term, rel)
+            )
+
+
+def test_recall_sheet_declares_the_drift_it_cannot_see():
+    # Same reasoning as the production-asset disclaimer below: this page is a
+    # restatement, so without the warning a reader takes it for a source and
+    # stops checking the lesson it came from.
+    text = (REPO / "RECALL.md").read_text(encoding="utf-8")
+    assert "The lessons are authoritative" in text
+    assert "cannot catch a row whose meaning drifted" in text
+    # No row may be a new claim; the page says so, and the suite pins it.
+    assert "No row here is a new claim" in text
+
+
+def test_the_readme_count_of_surprising_defaults_matches_the_table():
+    """A hand-maintained count in a README goes stale DOWNWARD, which reads as
+    modesty rather than as an error -- measured in this repository once already,
+    where the README claimed 72 claim rows against a real 329 and nobody
+    noticed. So the README says "nine places where the default is the opposite"
+    and this counts them. Adding a row means editing the number on purpose.
+    """
+    recall = (REPO / "RECALL.md").read_text(encoding="utf-8")
+    heading = "## Where the default is the opposite of the guess"
+    start = recall.find(heading)
+    assert start != -1, "the surprising-defaults section was renamed or removed"
+    section = recall[start:]
+    end = section.find("\n## ", 1)
+    section = section if end == -1 else section[:end]
+    rows = [
+        l for l in section.splitlines()
+        if l.strip().startswith("|")
+        # A separator row is nothing but pipes, dashes, colons and spaces.
+        and not set(l.strip()) <= set("|-: ")
+        and not l.strip().startswith("| The thing")
+    ]
+    assert len(rows) == 9, "the table has %d rows; the README says nine" % len(rows)
+    assert "nine places where" in (REPO / "README.md").read_text(encoding="utf-8")
 
 
 def test_production_check_declares_the_drift_it_cannot_see():

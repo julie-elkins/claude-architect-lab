@@ -85,7 +85,7 @@ afterwards · why the exam cares · **fundamentals** (skippable — glosses for 
 a refresh for a senior) · the build, with real commands · **tips** the documentation does
 not tell you · the published anti-pattern · what the lesson does not cover · sources.
 
-**Four ways in, depending on what you want.**
+**Five ways in, depending on what you want.**
 
 - **[STUDY-PATH.md](STUDY-PATH.md)** — start here if you have a date booked. Plans for a
   week, a weekend and an evening, and the one thing to decide before you book.
@@ -98,8 +98,12 @@ not tell you · the published anti-pattern · what the lesson does not cover · 
 - **[THEMES.md](THEMES.md)** — four ideas that recur across domains. Read it last; it is
   the most useful thing to hold on exam day and it means little before you have seen the
   instances.
+- **[RECALL.md](RECALL.md)** — the conventions you cannot reason your way to: which file
+  lives where, which flag does what, which enum value means what, and **nine places where
+  the default is the opposite of the guess.** Every row restates a lesson and links to it;
+  no row is a new claim. Use it to find your gaps early, and again the night before.
 
-Three more pages, all straight from the parts of the guide nobody reads:
+Four more pages, all straight from the parts of the guide nobody reads:
 
 - **[SCOPE.md](SCOPE.md)** — the appendix. What may appear, what is explicitly tested, and
   **sixteen topics the guide says will not appear at all.** The out-of-scope list is the

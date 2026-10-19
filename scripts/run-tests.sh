@@ -17,7 +17,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 # Episode 1: 41 tests, 0 skips. Update this when an episode adds tests.
-EXPECTED_TESTS=56
+# 2026-10-19: +4 for RECALL.md — link resolution, term-still-in-lesson, the
+# page's own ceiling disclaimer, and the README's count of surprising defaults.
+EXPECTED_TESTS=60
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then
