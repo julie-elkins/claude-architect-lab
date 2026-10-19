@@ -214,13 +214,30 @@ a weaker claim than independent review, and a stronger one than self-assessment.
 a change to the published exam guide. That is the whole of the automation, and it is a change
 detector rather than a verifier.
 
-**Everything else still waits for a person.** There is **no scheduled re-check** of anything,
-**no tripwire on the documentation changelog**, and no automated re-verification of the 13
-cited documentation pages — the verbatim check in `course_doctor.citations` exists and runs
-when somebody runs it. `check_citations.py` now prints the **age** of each re-verification,
-oldest first, so this file can tell you how long ago rather than only whether. There is
-deliberately no staleness threshold: no measured number of days makes a page stale, since it
-depends entirely on how fast that page's subject moves, and **age is not staleness** in
+**The verbatim re-check is now a loop, and its coverage is the headline.**
+`scripts/verify_claims.py` drives `course_doctor.citations.check_quote` across every quotable
+claim row in one command. **MEASURED 2026-10-19: 32 of 335 claim rows are machine-checkable —
+9.6%.** Of the first live run's 32: **27 verbatim match, 5 not found, 0 fetch failures.**
+
+**The other 303 rows are not a backlog, they are out of reach of this method:** 205 cite the
+exam guide, which is a PDF; 94 state the claim as a paraphrase, so there is no exact string to
+look for; and 4 record a quote stitched across an ellipsis, which cannot match verbatim however
+the page reads. **A report claiming "all claims verified" over a tenth of them would be this
+course's own failure mode turned on itself**, so the coverage fraction prints before any result,
+every run.
+
+**That first run's real finding was corpus hygiene, not drift.** Of 9 initial misses, 4 were
+stitched quotes that would have fired on every future run — an alarm nobody can clear teaches
+the reader to ignore the ones they can — and one had been anglicised to "capitalisation" after
+being copied, so it was never verbatim either. Both classes are authoring artefacts. At most 4
+of 32 are candidate documentation drift, and possibly none.
+
+**Everything else still waits for a person.** There is **no scheduled re-check** — the loop runs
+when somebody runs it — **no tripwire on the documentation changelog**, and nothing that can
+re-verify a paraphrased or guide-cited claim at all. `check_citations.py` prints the **age** of
+each re-verification, oldest first, so this file tells you how long ago rather than only whether.
+There is deliberately no staleness threshold: no measured number of days makes a page stale,
+since it depends entirely on how fast that page's subject moves, and **age is not staleness** in
 either direction.
 
 Re-verification happens when a person runs it, and this file plus that age list is how you

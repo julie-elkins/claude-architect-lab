@@ -36,7 +36,10 @@ cd "$(dirname "$0")/.."
 # them failure directions -- the mutants worth running are the ones that make an
 # unreachable page or a missing link report as UNCHANGED, because a tripwire that
 # passes silently is indistinguishable from one that found nothing wrong.
-EXPECTED_TESTS=102
+# 2026-10-19 (truly last): 102 -> 118. The claim-verification loop. Mutate inverted
+# here too: the valuable mutants let `--offline` return 0, drop the exit-2 on a failed
+# fetch, or classify a stitched quote as checkable so it fails forever.
+EXPECTED_TESTS=118
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then

@@ -16,10 +16,16 @@ What it CAN check, mechanically:
 - outstanding items are declared as unchecked boxes rather than omitted
 
 What it CANNOT check, and this is the important limit: **whether the cited page
-still says what the row claims.** That needs something to read both. It is the
-`verify-course-content` skill's job, and `--urls` here only reports whether a URL
-still resolves — which is strictly weaker and must not be mistaken for the real
-check.
+still says what the row claims.** That is `scripts/verify_claims.py`'s job — it
+drives the verbatim check across every quotable row and leads its report with the
+coverage, because only about one row in ten is machine-checkable at all. `--urls`
+here only reports whether a URL still resolves, which is strictly weaker and must
+not be mistaken for the real check.
+
+An earlier version of this paragraph named a `verify-course-content` skill as
+owning that job. **No such skill ever existed** — the strong check was being run by
+hand, one quote at a time. A documented procedure pointing at something that is not
+there reads exactly like one that is handled, which is this course's own subject.
 
 Run `--urls` manually. It needs the network, so it is deliberately not in the unit
 suite: a test that fails when the wifi drops teaches people to ignore the suite.
