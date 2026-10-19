@@ -189,11 +189,9 @@ a minute.
 
 ---
 
-> [!TIP]
-> ### Now, go crush your exam. 🚀
->
-> Then tell me how it went, on [LinkedIn](https://www.linkedin.com/in/julielkins/) — and if
-> you found something here that is wrong, [open an issue](https://github.com/julie-elkins/claude-architect-lab/issues).
+**Once you have a plan, read [EXAM-DAY.md](EXAM-DAY.md).** Registering, the ID rules, how
+the 720 was set, what happens if you do not pass, and the renewal that is free only if you
+are on time. It is also where this course signs off.
 
 ---
 
