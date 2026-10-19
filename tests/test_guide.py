@@ -138,13 +138,46 @@ def test_the_real_record_verifies_some_pages_and_not_the_ones_it_disclaims():
     those URLs to carry schemes made the two regexes actually differ, and the
     same mutant is now killed by this test. Keep the schemes: without them this
     test passes on a checker that counts prose as proof.
+
+    CORRECTED 2026-10-19. This test named `memory` as its outstanding example,
+    and broke the day `memory` was re-verified — with nothing wrong. That is a
+    test pinning an INSTANCE of the property rather than the property, so the
+    outstanding list is now read out of the record instead of hard-coded, and
+    re-verifying any page can no longer break it.
+
+    MUTANTS, re-run 2026-10-19, and the result is mixed rather than clean:
+
+    - KILLED: treating every URL mentioned anywhere in VERIFICATION.md as
+      verified. This is the real "counts prose as proof" failure and the reason
+      the test exists.
+    - SURVIVED: requiring a date within 80 characters of the URL instead of in a
+      later table cell. It survives for a reason that has nothing to do with the
+      property — the outstanding table carries claim COUNTS and no dates at all,
+      so no date-requiring pattern can promote those rows however loose its
+      anchoring. Stated because the previous version of this docstring implied
+      the anchoring itself was under test here. It is not, and a reader deciding
+      whether to loosen that regex should not be reassured by this test.
     """
     mod = _coverage_module()
     verified = mod.verified_pages()
     assert verified, "the committed VERIFICATION.md should verify some pages"
-    assert "https://code.claude.com/docs/en/hooks" in verified
-    # Listed in VERIFICATION.md's prose as outstanding. Must not count as verified.
-    assert "https://code.claude.com/docs/en/memory" not in verified
+
+    text = (REPO / "VERIFICATION.md").read_text(encoding="utf-8")
+    tail = text[text.index("## Not re-verified"):]
+    # Rows of the outstanding table: a backticked URL, then a claim COUNT and no
+    # date -- which is exactly why the checker's anchored row pattern must not
+    # match them. Parsed with a different pattern here on purpose: asserting
+    # disjointness between the two is what kills the "any URL anywhere" mutant.
+    outstanding = re.findall(r"^\|\s*`(https?://[^`]+)`\s*\|\s*\d+\s*\|", tail,
+                             re.MULTILINE)
+    assert len(outstanding) >= 5, (
+        "expected the outstanding table; found %d row(s)" % len(outstanding)
+    )
+    promoted = sorted(set(outstanding) & set(verified))
+    assert not promoted, (
+        "pages listed as NOT re-verified are being counted as verified: %s"
+        % ", ".join(promoted)
+    )
 
 
 def test_no_screen_reader_defects():
@@ -372,7 +405,11 @@ def test_the_stated_test_count_matches_the_pinned_floor():
     assert floor, "EXPECTED_TESTS is gone from run-tests.sh"
     stated = "%s tests, 0 skips" % floor.group(1)
     for page in ("README.md", "CLAUDE.md"):
-        text = (REPO / page).read_text(encoding="utf-8")
+        # Whitespace-flattened, because the phrase spans a line wrap in CLAUDE.md
+        # and a test that fails when a paragraph is rewrapped teaches people to
+        # stop trusting the suite. Caught by hitting it: the sentence read
+        # "83\ntests, 0 skips" and the pin reported the prose as stale.
+        text = " ".join((REPO / page).read_text(encoding="utf-8").split())
         assert stated in text, (
             "%s does not state %r -- the floor moved and the prose did not"
             % (page, stated)

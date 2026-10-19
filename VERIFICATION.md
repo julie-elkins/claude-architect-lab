@@ -25,9 +25,10 @@ documentation moves and nothing here notices.
 
 ---
 
-## Re-verified, 2026-10-18
+## Re-verified, 2026-10-18 and 2026-10-19
 
-Five pages. The reason these five and not others is recorded below under *why this subset*.
+Six pages. The reason the first five and not others is recorded below under *why this
+subset*; `memory` was next because it carries the most claim rows in the course.
 
 | Page | Date | Result |
 |---|---|---|
@@ -36,6 +37,65 @@ Five pages. The reason these five and not others is recorded below under *why th
 | `https://code.claude.com/docs/en/mcp` | 2026-10-18 | verbatim match |
 | `https://code.claude.com/docs/en/skills` | 2026-10-18 | verbatim match |
 | `https://platform.claude.com/docs/en/build-with-claude/structured-outputs` | 2026-10-18 | verbatim match |
+| `https://code.claude.com/docs/en/memory` | 2026-10-19 | verbatim match, 22 of 22 rows |
+
+### `memory`, 2026-10-19 — the method changed, and that is the headline
+
+**Every one of the 22 claim rows citing this page came back verbatim. Contradictions:
+zero.**
+
+**The method is different from the 10-18 pass and is strictly better.** Appending `.md` to
+a docs URL serves the **raw page source** — `https://code.claude.com/docs/en/memory.md`
+returned 51,526 bytes of `text/markdown`. The 10-18 pass had to ask a fetch tool for
+verbatim wording and trust that it complied; the five pages re-verified that day were
+re-verified precisely *because* that tool had previously returned model-generated
+summaries. **Fetching the source removes the question rather than managing it**, and every
+remaining page should be re-verified this way.
+
+**One methodological trap, found by hitting it.** Two claims first reported as MISSES were
+both false alarms:
+
+- The lesson quotes *"To block an action regardless of what Claude decides, use a PreToolUse
+  hook instead."* The page says exactly that — with the link markup inside the sentence:
+  `use a [PreToolUse hook](/docs/en/hooks-guide) instead`. **A verbatim probe against raw
+  markdown must normalise inline links**, or a correct quote reads as a missing one.
+- The other was an escaping error in the probe itself.
+
+**Both failed in the safe direction** — a false MISS costs a minute of checking, where a
+false MATCH would have left a stale claim marked verified. A checker for this should be
+built to fail that way on purpose.
+
+**Omissions found: six**, all now written into the lessons. Two change what a reader would
+do, and both are the course's own thesis:
+
+1. **Claude Code reads a `CLAUDE.md` of up to 4 MiB in full and SKIPS a larger file.** Not
+   truncate — skip. A dropped file produces no instruction and no error. Added to 3.1.
+2. **Auto memory loads the first 200 lines of `MEMORY.md` or the first 25KB, whichever comes
+   first.** Two cutoffs, so a file under 200 lines can still be cut by the byte limit.
+   Added to 3.1.
+3. **Managed policy `CLAUDE.md` files cannot be excluded**, so organization-wide
+   instructions always apply. Added to 3.1.
+4. **Patterns without braces do not count against** the 1,000-pattern / 4 MiB brace budget.
+   The lesson taught the budget without the qualifier. Added to 3.3.
+5. **Before v2.1.217, a `paths` value with many brace groups stalled or crashed the CLI at
+   startup** rather than being refused — so on an old build a budget-busting pattern does
+   not report a budget. Added to 3.3.
+6. **Before v2.1.211, rules that load on demand — path-scoped rules and rules in nested
+   `.claude/rules/` directories — loaded even when `project` was excluded.** The exclusion
+   was configured, read as applied, and did not hold. Added to 3.3.
+
+**Checked and already correct, so recorded rather than changed:** lesson 3.1's `AGENTS.md`
+treatment, including the per-combination table and the **v2.1.277** floor for reading
+`AGENTS.md` directly. The page confirms the default the lesson states — with an
+`AGENTS.md` *and* a `CLAUDE.md` or `CLAUDE.local.md` at or above the working directory,
+Claude reads **the `CLAUDE.md` files only** — and adds that this default is changeable
+through the **Project instructions** setting, which the lesson also carries.
+
+**Version floors on this page that the course deliberately does not teach**, because they
+are outside the exam guide's scope rather than missing: `/doctor prompt-audit` (v2.1.283),
+the `cc-plugin-agents-md@builtin` plugin ID change (v2.1.285), `/memory` opening behaviour
+(v2.1.216), `AGENTS.md` availability on Bedrock and telemetry-disabled sessions (v2.1.281),
+and link-target exclusion matching (v2.1.239).
 
 **Contradictions found: zero.** Every claim the lessons quoted from these five pages came
 back word for word, including the two that carry the most weight in the course:
@@ -84,7 +144,7 @@ of it. They are listed as authored-and-not-re-verified, same as any unchecked pa
 
 ## Not re-verified
 
-Eight pages. Every claim cited to these came from a read at authoring time
+Seven pages. Every claim cited to these came from a read at authoring time
 (2026-10-13 to 2026-10-17) and has not been checked since.
 
 Ranked by how many claim rows depend on them, which is the order to work in — a stale
@@ -94,7 +154,6 @@ than being maintained here by hand.
 
 | Page | Claim rows |
 |---|---|
-| `https://code.claude.com/docs/en/memory` | 22 |
 | `https://code.claude.com/docs/en/agent-sdk/agent-loop` | 10 |
 | `https://code.claude.com/docs/en/sessions` | 10 |
 | `https://platform.claude.com/docs/en/build-with-claude/batch-processing` | 7 |
@@ -103,8 +162,9 @@ than being maintained here by hand.
 | `https://code.claude.com/docs/en/tools-reference` | 6 |
 | `https://code.claude.com/docs/en/headless` | 4 |
 
-`memory` is the one to re-verify first if only one gets done: it is the most-cited page in
-the course, and lesson 3.1 is built almost entirely on it.
+**`memory` was the one to do first and it is done** — 2026-10-19, above. Next by claim
+count is `agent-sdk/agent-loop` at 10, tied with `sessions`. Use the raw-markdown method
+(`<url>.md`); it is faster and it removes the paraphrase question rather than managing it.
 
 **A correction worth recording, because it is the mistake this course keeps teaching
 about.** An earlier draft of this page put `memory` at **44** claim rows. That number came

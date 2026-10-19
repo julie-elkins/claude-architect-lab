@@ -21,7 +21,11 @@ cd "$(dirname "$0")/.."
 # page's own ceiling disclaimer, and the README's count of surprising defaults.
 # +1 more: this floor against the test count stated in README.md and CLAUDE.md,
 # both of which had gone stale downward.
-EXPECTED_TESTS=61
+# 2026-10-19 (later): 61 -> 83. The network arrived with check_quote_on_page --
+# 17 for the citations library and 5 for its adapter. Two previously pinned tests
+# were EDITED rather than deleted: the open-world hint is now asserted per tool in
+# both directions, and the protocol test lists both tools by name.
+EXPECTED_TESTS=83
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then

@@ -1,13 +1,42 @@
 # Build to Pass: Claude Certified Architect – Foundations (CCAR-F)
 
 A hands-on course and lab for the **Claude Certified Architect – Foundations** certification.
-Five episodes, one per exam domain. You finish with a working system, not a set of notes.
+**Twenty-nine written lessons, one per published task statement**, built around one system
+you can clone and run. Not a set of notes, and not a feature tour.
 
 I hold this credential. I also build certification exams for a living, which is why this course
-is organised around the published blueprint and its anti-patterns rather than around a feature
-tour.
+is organised around the published blueprint and the anti-patterns the guide names — a
+well-built wrong answer is a plausible mistake, so a published list of them is a map.
 
 Anthropic's Partner Academy courses cover the concepts. **This course builds the system.**
+
+## What makes it different: it is built to catch itself being wrong
+
+Study material goes stale silently. A page gets reworded, a flag gets renamed, a version
+floor appears — and the course keeps teaching the old thing while looking exactly as
+correct as it did on the day it was written. **That failure is this course's subject, so it
+is also the standard the course is held to.** Four things are in the repository for it:
+
+- **Every factual claim is traced to a source with the date it was read** — exam-guide
+  section or documentation URL — in [SOURCES.md](SOURCES.md) and each lesson's own table.
+  `scripts/check_citations.py` fails the build on a claim that cites nothing, or a URL with
+  no read date.
+- **"Cited" and "verified" are kept apart.** A link that still returns 200 proves nothing;
+  pages get rewritten under the same URL. [VERIFICATION.md](VERIFICATION.md) records which
+  pages have been **re-fetched and made to return the claim's verbatim wording**, which
+  have not, and what that found. It reports a fraction rather than a verdict, and a page
+  nobody adds to it counts as unverified — **deleting the record makes this course look
+  less verified, never more.**
+- **The lab is the same idea as working code.** `check_quote_on_page` fetches a cited page
+  and reports whether a quoted claim is still on it — and refuses to call a missing quote
+  "stale", because a paraphrase and a retraction look identical to a machine.
+- **The limits are written down next to the claims**, including the ones that are
+  embarrassing: a lesson once taught a documented failure mode backwards while citing the
+  right page, a README count sat stale for days in the flattering direction, and the same
+  agent wrote the claims and ran the check. All three are in the files above, in place.
+
+**None of that makes the course correct.** It makes the course *checkable*, by you, in
+about ten minutes — which is the most any prep material can honestly offer.
 
 ---
 
@@ -20,8 +49,9 @@ The exam guide says what it is measuring, and it is not recall:
 
 Scenario-based, judgment-weighted exams are hard to study for by reading, because the question
 is rarely "what does this feature do" and usually "which of these four defensible choices is
-right here." The way to get fluent in tradeoffs is to make them. So each episode teaches one
-domain by building one working piece of the same system.
+right here." The way to get fluent in tradeoffs is to make them. So every lesson is anchored
+to one task statement and to one decision in the same system — what it does, what it refuses,
+and what it reports when it cannot tell.
 
 ## Certification program update: December 7, 2026
 
@@ -208,13 +238,32 @@ a corrected-away claim for five days before anyone noticed.
 
 ## The lab: Course Doctor
 
-One system, built across the five episodes: an agent that checks a set of training materials
+One system the whole course is anchored to: an agent that checks a set of training materials
 against live documentation and reports **what went stale, what it could not check, and what
 needs a human.**
 
 It needs all five domains honestly — MCP tools to fetch and compare, a coordinator with
 subagents to fan out across sections, a JSON schema to make the findings machine-checkable,
 and context discipline to keep provenance attached to every claim.
+
+**Where it actually stands, because this is a course about things that quietly go stale.**
+Two tools exist and run. `read_material_file` reads a lesson, hashes it, and lists the URLs
+it cites. `check_quote_on_page` **fetches a cited page and reports whether a quoted claim is
+still on it** — so the lab now does the thing it is for, which until 2026-10-19 it did not.
+Three of the five domains are still represented by the lessons rather than by code, and a
+reader is better served knowing that than discovering it: the lessons carry their own code
+inline and do not depend on code that is absent, and each one's `Lab artifact:` line names
+what the pattern looks like in this system rather than a file to go and open.
+
+**The citation checker is built around its own failure direction, which is the part worth
+reading.** It prefers the raw markdown source a docs URL serves under a `.md` suffix — on
+one measured page, 51,526 bytes of source against 801,645 of rendered HTML — and it
+flattens inline links before matching, because the page writes
+`use a [PreToolUse hook](/docs/en/hooks-guide) instead` where a lesson quotes *"use a
+PreToolUse hook instead"*. Both were measured by getting them wrong by hand first. And
+`found: false` is deliberately **not** a verdict that a claim is stale: a paraphrase, a
+harmless rewording and a retraction are indistinguishable from there, so the tool reports
+evidence and the judgment stays with a person.
 
 The design rule it is built around: **silence reads as healthy.** When a fetch fails or a
 permission check refuses, most tools return a report that looks clean, and that is how you end
@@ -235,22 +284,29 @@ rewritten under the same URL.
 
 `scripts/check_citations.py` enforces that mechanically and runs in the test suite. It
 was verified by breaking it three ways — a row citing nothing, a URL with no read date,
-and a lesson with no Sources section — and it caught all three. As of **2026-10-18**:
-**329 claim rows, 205 cited to the exam guide, 124 to documentation across 13 distinct
-pages, 0 outstanding.** `--urls` resolves every cited link.
+and a lesson with no Sources section — and it caught all three. `--urls` resolves every
+cited link.
 
-**Run the script rather than trusting those figures.** An earlier version of this
-paragraph read "72 claim rows … 6 outstanding … all five currently return 200" long after
-the real numbers were 329 and 0 across 13 pages. A hand-maintained count in a README is a
-second copy of a measurement, and it goes stale pointing the wrong way — downward, which
-reads as modesty rather than as an error.
+**For the figures, run it — this paragraph deliberately no longer restates them:**
+
+```sh
+python3 scripts/check_citations.py
+```
+
+It prints the claim-row total, the split between exam-guide and documentation citations,
+how many citations are outstanding, and the content-verification fraction. **An earlier
+version of this paragraph read "72 claim rows … 6 outstanding … all five currently return
+200" long after the real figures were 329 and 0 across 13 pages** — and then the sentence
+that replaced it went stale too, the same way, within a day. A count in a README is a
+second copy of a measurement and it drifts *downward*, which reads as modesty rather than
+as an error. Twice was enough: the numbers live in the tool that computes them.
 
 **What a passing structural check does not establish: whether a cited page still says what
-the row claims.** Only reading both does. That stronger check has now been run on **5 of
-the 13 cited pages**, by re-fetching each and requiring the claim's *verbatim* wording
-back; it found **zero contradictions and six omissions**, all since written into the
-lessons. The other 8 pages were read when the lessons were written and have not been
-checked since.
+the row claims.** Only reading both does. That stronger check is run by re-fetching a page
+and requiring the claim's *verbatim* wording back — never a summary, never a judgement —
+and it has found **zero contradictions and twelve omissions so far**, all since written
+into the lessons. It has not been run on every cited page, the fraction is in the script's
+output, and the pages still outstanding are listed in the record below.
 
 **[VERIFICATION.md](VERIFICATION.md) is the record** — which pages, on what date, what was
 found, and what the process still cannot tell you. `check_citations.py` reads that file and
@@ -321,12 +377,12 @@ iteration caps as the primary stopping mechanism."
 
 Read that as the gift it is. Well-built multiple-choice distractors are not random — they are
 the plausible mistakes a competent person actually makes. So a published list of anti-patterns
-is a published list of the shapes the wrong answers take. Every episode here teaches the
+is a published list of the shapes the wrong answers take. Every lesson here teaches the
 anti-patterns alongside the pattern, and names which domain they sit in.
 
 ## The lab: status
 
-The scaffold and the first tool exist and run. **61 tests, 0 skips** — the floor is pinned in
+The scaffold and the first tool exist and run. **83 tests, 0 skips** — the floor is pinned in
 `scripts/run-tests.sh` and this sentence is checked against it, because a hand-maintained
 count in a README goes stale *downward* and then reads as modesty instead of as an error.
 Lesson status is in the course outline above.
@@ -334,7 +390,7 @@ Lesson status is in the course outline above.
 ```
 course/domain-*/      the 29 written lessons — these are the course
 course/*/production/  narration scripts and slide decks for the video, which lags
-src/course_doctor/    the tool: library, output models, MCP server
+src/course_doctor/    the tools: material library, citation checker, output models, MCP server
 tests/                bounds, adapter, and a real stdio protocol test
 .claude/rules/        path-specific rules, loaded only on matching files
 .claude/skills/       check-sources, which runs forked

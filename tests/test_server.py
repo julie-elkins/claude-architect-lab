@@ -94,11 +94,24 @@ class TestTheToolSurface:
             assert tool.annotations.destructive_hint is None
             assert tool.annotations.idempotent_hint is None
 
-    def test_open_world_hint_is_false_while_nothing_fetches(self, tools):
-        # It becomes true in episode 2, when the network arrives. Pinned now so that
-        # change is a deliberate edit to a failing test rather than an oversight.
-        for tool in tools:
-            assert tool.annotations.open_world_hint is False
+    def test_open_world_hint_is_set_per_tool_rather_than_server_wide(self, tools):
+        """The network arrived 2026-10-19, and this test was EDITED, not deleted.
+
+        Its previous form asserted `open_world_hint is False` for every tool and
+        was written to fail the day a fetching tool appeared -- which it did. The
+        tempting fix was to flip the shared `READ_ONLY` constant, making both
+        tools open-world in one line. That would have relabelled the local file
+        read as reaching the open internet, and `openWorldHint` is what a client
+        uses to decide whether a result can be cached or replayed: wrong in the
+        permissive direction is worse than absent.
+
+        So the property is now per-tool and asserted in BOTH directions, because a
+        test that only checks the fetching tool is true would pass on a server
+        where every tool is true.
+        """
+        by_name = {tool.name: tool.annotations.open_world_hint for tool in tools}
+        assert by_name["read_material_file"] is False, "a local file read is not open-world"
+        assert by_name["check_quote_on_page"] is True, "a network fetch is open-world"
 
     def test_output_schema_is_published(self, tools):
         # Returning a raw dict publishes an empty schema, so a caller has to invoke
@@ -171,3 +184,92 @@ class TestRefusalsArriveAsResults:
         # cited no documentation, which is a clean-looking zero.
         not_shown = call("missing.md")["diagnostics"]["what_it_does_not_show"]
         assert "nothing was read" in not_shown.lower()
+
+
+class TestTheQuoteCheckAdapter:
+    """The network tool's adapter, with the network replaced at the library seam.
+
+    `check_quote_on_page` calls `citations.check_quote` without passing a fetcher,
+    so the seam patched here is the name the server imported -- not the one in the
+    library module. Patching the wrong one leaves the real function in place and
+    the test reaches the internet, which is exactly the failure that makes a suite
+    flaky for reasons unrelated to the code.
+    """
+
+    @pytest.fixture
+    def ask(self, monkeypatch):
+        import asyncio
+
+        def _ask(*, found=True, raises=None, fetched_url="https://x.test/p.md"):
+            def stub(url, quote, fetch=None):
+                if raises is not None:
+                    raise raises
+                from course_doctor.citations import QuoteCheck
+
+                return QuoteCheck(
+                    url=url,
+                    fetched_url=fetched_url,
+                    quote=quote,
+                    found=found,
+                    source_format=(
+                        "markdown source (.md)"
+                        if fetched_url.endswith(".md")
+                        else "as served by the URL as given"
+                    ),
+                    page_bytes=10,
+                    checked_at="2026-10-19T00:00:00+00:00",
+                )
+
+            monkeypatch.setattr(srv, "check_quote", stub)
+            return payload(
+                asyncio.run(
+                    srv.server.call_tool(
+                        "check_quote_on_page",
+                        {"url": "https://x.test/p", "quote": "a quote"},
+                    )
+                )
+            )
+
+        return _ask
+
+    def test_a_found_quote_reports_its_source_format(self, ask):
+        result = ask(found=True)
+        assert result["found"] is True
+        assert result["source_format"].startswith("markdown source")
+        assert result["diagnostics"]["warnings"] == []
+
+    def test_a_missing_quote_warns_that_it_is_not_a_staleness_verdict(self, ask):
+        # The main way this tool gets misused: `found: false` relayed as "the claim
+        # is stale". A paraphrase and a retraction are indistinguishable from here.
+        result = ask(found=False)
+        assert result["found"] is False
+        warnings = " ".join(result["diagnostics"]["warnings"]).lower()
+        assert "not a finding that the claim is stale" in warnings
+
+    def test_matching_against_a_rendered_page_is_warned_about(self, ask):
+        # Falling back to the plain URL still answers, and must say so: a quote can
+        # miss for markup reasons on a rendered page.
+        result = ask(found=True, fetched_url="https://x.test/p")
+        warnings = " ".join(result["diagnostics"]["warnings"])
+        assert "Raw markdown source was not available" in warnings
+
+    def test_an_unreachable_page_refuses_as_a_payload_saying_nothing_was_checked(self, ask):
+        from course_doctor.materials import MaterialRefused
+
+        result = ask(
+            raises=MaterialRefused("unreachable", "HTTP 404", "do not record as absent")
+        )
+        assert result["error"] == "unreachable"
+        not_shown = result["diagnostics"]["what_it_does_not_show"]
+        # "unchecked" and "absent" are different findings and the payload has to
+        # keep them apart, or a 404 gets recorded as a retracted claim.
+        assert "nothing was checked" in not_shown.lower()
+        assert "not as absent" in not_shown.lower()
+
+    def test_what_it_does_not_show_names_the_error_class_this_check_cannot_see(self, ask):
+        # A page can match every quote a lesson makes and still contradict its
+        # framing, or have gained a version floor the lesson omits. Both survive
+        # this tool, so the success payload has to say so.
+        not_shown = ask(found=True)["diagnostics"]["what_it_does_not_show"].lower()
+        assert "version floor" in not_shown
+        assert "framing" in not_shown

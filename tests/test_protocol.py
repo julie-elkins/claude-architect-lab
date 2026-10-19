@@ -104,9 +104,19 @@ class TestTheToolIsReachableOverTheWire:
             return await session.list_tools()
 
         tools = run(work).tools
-        assert [tool.name for tool in tools] == ["read_material_file"]
-        assert tools[0].title
-        assert tools[0].input_schema["properties"]["path"]["description"]
+        # Both tools, by name, so adding one is a deliberate edit here rather than
+        # something a loose assertion absorbs silently.
+        assert sorted(tool.name for tool in tools) == [
+            "check_quote_on_page",
+            "read_material_file",
+        ]
+        by_name = {tool.name: tool for tool in tools}
+        for tool in tools:
+            assert tool.title, f"{tool.name} has no title"
+        assert by_name["read_material_file"].input_schema["properties"]["path"]["description"]
+        quote_properties = by_name["check_quote_on_page"].input_schema["properties"]
+        assert quote_properties["url"]["description"]
+        assert quote_properties["quote"]["description"]
 
     @pytest.mark.parametrize("path, expected", [("", "invalid_input"), ("  ", "invalid_input")])
     def test_an_out_of_bounds_call_refuses_over_the_wire_without_touching_disk(

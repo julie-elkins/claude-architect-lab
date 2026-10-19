@@ -88,6 +88,38 @@ class MaterialReadingResult(BaseModel):
     diagnostics: Diagnostics
 
 
+class QuoteCheckResult(BaseModel):
+    """One quoted claim, checked against the page it cites. Evidence, not a verdict."""
+
+    url: str = Field(description="The URL as it was passed in.")
+    fetched_url: str = Field(
+        description=(
+            "What was actually fetched. Appending '.md' to a docs URL serves the raw "
+            "page source, which is tried first -- so this usually differs from `url` "
+            "and the difference is the point. If they are equal, the raw source was "
+            "not available and the match ran against whatever the URL served."
+        ),
+    )
+    quote: str = Field(description="The quote as it was passed in.")
+    found: bool = Field(
+        description=(
+            "Whether the quote appears on the page after whitespace and inline-link "
+            "normalisation. FALSE IS NOT A VERDICT THAT THE CLAIM IS WRONG: the quote "
+            "may be the author's paraphrase, or the page may have been reworded "
+            "harmlessly. Treat false as 'a person must read this', never as 'stale'."
+        ),
+    )
+    source_format: str = Field(
+        description=(
+            "Whether the match ran against markdown source or against whatever the "
+            "plain URL served. A match against rendered HTML can miss for markup "
+            "reasons, so this field qualifies `found` and must be relayed with it."
+        ),
+    )
+    page_bytes: int = Field(description="Size of the fetched page in bytes.")
+    diagnostics: Diagnostics
+
+
 class Refusal(BaseModel):
     """A refusal arrives as a normal result with an `error` field, not as an error.
 
@@ -103,6 +135,13 @@ class Refusal(BaseModel):
         "not_a_file",
         "too_large",
         "undecodable",
+        # Added with the citation-checking tool. Published here rather than
+        # discovered by a caller hitting one: `unreachable` in particular must be
+        # branched on, because it means NOTHING WAS CHECKED and is not the same
+        # finding as a quote that is genuinely absent.
+        "unreachable",
+        "page_too_large",
+        "not_text",
     ] = Field(description="Which refusal this is. Branch on it rather than on prose.")
     message: str = Field(description="What went wrong, in one sentence.")
     guidance: str = Field(

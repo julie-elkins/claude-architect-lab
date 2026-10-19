@@ -4992,6 +4992,22 @@ file and each `@path` import counts separately toward that.
 
 That is a real failure mode: no single file looks wrong, and together they are too much.
 
+**Three hard limits sit behind that warning, and two of them are silent.** A warning tells
+you a file is long; these tell you what actually gets read.
+
+- **Claude Code reads a `CLAUDE.md` of up to 4 MiB in full and *skips* a larger one.** Not
+  truncates — skips. A file big enough to be dropped produces no instruction and no error at
+  the place you would look.
+- **Auto memory loads the first 200 lines of `MEMORY.md`, or the first 25 KB, whichever
+  comes first.** So the cutoff is not one number, and a file under 200 lines can still be
+  cut mid-way by the byte limit.
+- **Managed policy `CLAUDE.md` files cannot be excluded at all**, which is the point of
+  them: organization-wide instructions apply regardless of an individual's settings.
+
+The first two are this course's thesis in one paragraph — **a file that was skipped and a
+file that was read look identical from the outside.** The under-200-lines guidance in the
+authoring advice above is a recommendation; 4 MiB and 25 KB are the mechanism.
+
 ## Tips
 
 Things the documentation does not tell you.
@@ -5070,6 +5086,9 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.1.
 | Imports "help you organize a long file but don't reduce its context cost, because imported files also load at launch" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | An import resolving outside the working directory is external and prompts for approval once; declining disables them and the dialog does not reappear | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Target under 200 lines per CLAUDE.md file | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Claude Code reads a CLAUDE.md of up to 4 MiB in full and skips a larger file | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| Auto memory loads the first 200 lines of `MEMORY.md` or the first 25KB, whichever comes first | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| "Managed policy CLAUDE.md files cannot be excluded" so organization-wide instructions always apply | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
 
 **Outstanding, and stated rather than papered over:**
 
@@ -5420,10 +5439,20 @@ also when it views one with a Bash command that counts as a read, like `cat` or 
 **A rule with no `paths` field loads unconditionally.**
 
 Brace expansion works and has a budget: `src/**/*.{ts,tsx}` expands to two patterns, and
-a rule's whole `paths` list shares a ceiling of 1,000 expanded patterns and 4 MiB. A
-pattern that would exceed it **is used unexpanded, so its literal braces match nothing.**
+a rule's whole `paths` list shares a ceiling of 1,000 expanded patterns and 4 MiB —
+**patterns without braces do not count against it.** A pattern that would exceed the
+budget **is used unexpanded, so its literal braces match nothing.**
 And `[` starts a bracket expression, so `photos [2024/**` is invalid and matches nothing
 while the rule's other patterns keep working; escape it as `photos \[2024/**`.
+
+**Two version floors on exactly this mechanism, and they matter because the older
+behaviour looks like your pattern being wrong.** Before Claude Code **v2.1.217**, a
+`paths` value with many brace groups *stalled or crashed the CLI at startup* rather than
+being refused — so a budget-busting pattern on an old build does not report a budget. And
+before **v2.1.211**, rules that load on demand, including path-scoped rules and rules in
+nested `.claude/rules/` directories, **loaded even when `project` was excluded** — the
+exclusion was configured, read as applied, and did not hold. Both are the course's
+recurring shape: the configuration says one thing and the version decides.
 
 ### Step 1 — a rule scoped by pattern
 
@@ -5570,6 +5599,9 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.3.
 | `.claude/rules/` organises topic-specific rule files as an alternative to a monolithic CLAUDE.md | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | `[` starts a bracket expression; an invalid one matches nothing while the rule's other patterns keep working, and a literal `[` is escaped as `\[` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Brace expansion shares a budget of 1,000 expanded patterns and 4 MiB; a pattern exceeding it is used unexpanded and its literal braces match nothing | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Patterns without braces do not count against the brace-expansion budget | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| "Before v2.1.217, a `paths` value with many brace groups stalled or crashed the CLI at startup" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| "Before v2.1.211, rules that load on demand, including path-scoped rules and rules in nested `.claude/rules/` directories, loaded even when `project` was excluded" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
 | "If the YAML between the markers doesn't parse, Claude Code ignores the frontmatter and loads the rule as if it had no `paths`." `claude --debug` shows the parse error | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | A path-scoped rule loads on Read, Write or Edit of a matching file, and on a Bash command that counts as a read such as `cat` or `head` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | A rule without a `paths` field loads unconditionally | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |

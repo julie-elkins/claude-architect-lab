@@ -90,10 +90,20 @@ also when it views one with a Bash command that counts as a read, like `cat` or 
 **A rule with no `paths` field loads unconditionally.**
 
 Brace expansion works and has a budget: `src/**/*.{ts,tsx}` expands to two patterns, and
-a rule's whole `paths` list shares a ceiling of 1,000 expanded patterns and 4 MiB. A
-pattern that would exceed it **is used unexpanded, so its literal braces match nothing.**
+a rule's whole `paths` list shares a ceiling of 1,000 expanded patterns and 4 MiB —
+**patterns without braces do not count against it.** A pattern that would exceed the
+budget **is used unexpanded, so its literal braces match nothing.**
 And `[` starts a bracket expression, so `photos [2024/**` is invalid and matches nothing
 while the rule's other patterns keep working; escape it as `photos \[2024/**`.
+
+**Two version floors on exactly this mechanism, and they matter because the older
+behaviour looks like your pattern being wrong.** Before Claude Code **v2.1.217**, a
+`paths` value with many brace groups *stalled or crashed the CLI at startup* rather than
+being refused — so a budget-busting pattern on an old build does not report a budget. And
+before **v2.1.211**, rules that load on demand, including path-scoped rules and rules in
+nested `.claude/rules/` directories, **loaded even when `project` was excluded** — the
+exclusion was configured, read as applied, and did not hold. Both are the course's
+recurring shape: the configuration says one thing and the version decides.
 
 ### Step 1 — a rule scoped by pattern
 
@@ -240,6 +250,9 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.3.
 | `.claude/rules/` organises topic-specific rule files as an alternative to a monolithic CLAUDE.md | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | `[` starts a bracket expression; an invalid one matches nothing while the rule's other patterns keep working, and a literal `[` is escaped as `\[` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Brace expansion shares a budget of 1,000 expanded patterns and 4 MiB; a pattern exceeding it is used unexpanded and its literal braces match nothing | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Patterns without braces do not count against the brace-expansion budget | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| "Before v2.1.217, a `paths` value with many brace groups stalled or crashed the CLI at startup" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| "Before v2.1.211, rules that load on demand, including path-scoped rules and rules in nested `.claude/rules/` directories, loaded even when `project` was excluded" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
 | "If the YAML between the markers doesn't parse, Claude Code ignores the frontmatter and loads the rule as if it had no `paths`." `claude --debug` shows the parse error | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | A path-scoped rule loads on Read, Write or Edit of a matching file, and on a Bash command that counts as a read such as `cat` or `head` | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | A rule without a `paths` field loads unconditionally | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |

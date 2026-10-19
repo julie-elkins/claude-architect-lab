@@ -4,7 +4,7 @@ Checks training material against live documentation and reports **what went stal
 what it could not check, and what needs a human.**
 
 This repo is two things at once, and the second one constrains the first: it is a
-working tool, and it is the lab for a five-episode course on the Claude Certified
+working tool, and it is the lab for a 29-lesson course on the Claude Certified
 Architect – Foundations exam. **Code here is read by people learning this stack**, so
 clarity outranks cleverness, and a comment earns its place by teaching something
 rather than by defending a decision.
@@ -15,24 +15,28 @@ rather than by defending a decision.
 root-level pages. The episode framing below was superseded on 2026-10-17 — the course is
 lessons, and the five video episodes are a production asset that lags the writing.
 
-**The lab is one tool**, `read_material_file`: read a lesson file, hash it, list the URLs
-it cites. **Nothing fetches anything yet.** 61 tests, 0 skips.
+**The lab is two tools.** `read_material_file` reads a lesson file, hashes it, and lists
+the URLs it cites. `check_quote_on_page` **fetches a cited page and reports whether a
+quoted claim is still on it** — added 2026-10-19, which is when the network arrived. 83
+tests, 0 skips.
 
-**So the course teaches five domains and the lab demonstrates one of them, and that gap is
-the honest state rather than a secret.** The lessons carry their own code inline; each
+**So the lab can now do the thing the course is about**, which it could not until that
+tool existed: a course on checking material against live documentation whose lab fetched
+nothing was the gap a reader noticed first.
+
+**The course still teaches five domains and the lab demonstrates two of them, and that gap
+is the honest state rather than a secret.** The lessons carry their own code inline; each
 lesson's `Lab artifact:` line names what the pattern looks like in this system, not a file
 that exists. Only one lesson references a path under `src/`, and both files it names are
 there.
 
 | Planned next | Exam domain | Weight | Would ship |
 |---|---|---|---|
-| fetch + staleness | 2 — Tool Design & MCP Integration | 18% | the real tool surface, error taxonomy |
 | the loop | 1 — Agentic Architecture & Orchestration | **27%** | coordinator, subagents |
 | output | 4 — Prompt Engineering & Structured Output | 20% | JSON schema, validation-retry |
 | reliability | 5 — Context Management & Reliability | 15% | provenance, confidence routing |
 
-**None of those four is committed to.** The next one worth building is the first: a course
-about content freshness whose lab cannot yet check freshness is the gap a reader notices.
+**None of those three is committed to.**
 
 ## The design rule everything here follows
 
@@ -51,6 +55,10 @@ from a healthy one. So:
 
 - `src/course_doctor/materials.py` — the library. Bounds, refusals, the real read. **No
   MCP dependency**, so bounds are testable without speaking JSON-RPC.
+- `src/course_doctor/citations.py` — the network half: fetch a cited page, normalise it,
+  report whether a quote is still on it. Same no-MCP rule, and **the fetcher is an
+  argument** — `check_quote(..., fetch=...)` — so no test needs a socket. A suite that
+  fails when the wifi drops is a suite people learn to ignore.
 - `src/course_doctor/contracts.py` — Pydantic output models. Returning raw dicts would
   publish an empty output schema, so a caller would have to call the tool to learn the
   shape.
@@ -82,6 +90,22 @@ it; defaults to the working directory) and `COURSE_DOCTOR_LOG_LEVEL` (default
 
 ## Things measured here rather than assumed
 
+- **Appending `.md` to a docs URL serves the raw page source.**
+  `code.claude.com/docs/en/memory.md` returned 51,526 bytes of `text/markdown`; the same
+  URL without the suffix returned **801,645 bytes of HTML**. Sixteen times larger, and
+  reading the rendered form means parsing markup or handing it to a summariser — and a
+  claim checked against a summary is a paraphrase compared with a paraphrase, which is the
+  failure `VERIFICATION.md` already records. So `citations.py` tries the suffix FIRST, not
+  as a fallback: the rendered page also returns 200, so a fallback ordering would always
+  take the HTML and never discover source was available.
+- **Inline link markup breaks a verbatim match.** The page carries
+  `use a [PreToolUse hook](/docs/en/hooks-guide) instead` where a lesson quotes *"use a
+  PreToolUse hook instead"*. Matching raw markdown without flattening inline links reports
+  a correct quote as missing. Measured by hitting it during a hand re-verification, and it
+  cost a false alarm on a claim that was fine.
+- **Both false results during that hand check were false ABSENCES**, and the module is
+  written to keep that direction: a false absence costs a minute of reading, where a false
+  presence marks a stale claim as verified and removes it from everyone's list.
 - **mcp 2.3.0 wraps a `Union` return one level deep under `"result"`** in
   `structured_content`. A test written against the un-nested shape fails with a bare
   `KeyError` that says nothing about why. There is one unwrap helper in

@@ -161,6 +161,22 @@ file and each `@path` import counts separately toward that.
 
 That is a real failure mode: no single file looks wrong, and together they are too much.
 
+**Three hard limits sit behind that warning, and two of them are silent.** A warning tells
+you a file is long; these tell you what actually gets read.
+
+- **Claude Code reads a `CLAUDE.md` of up to 4 MiB in full and *skips* a larger one.** Not
+  truncates — skips. A file big enough to be dropped produces no instruction and no error at
+  the place you would look.
+- **Auto memory loads the first 200 lines of `MEMORY.md`, or the first 25 KB, whichever
+  comes first.** So the cutoff is not one number, and a file under 200 lines can still be
+  cut mid-way by the byte limit.
+- **Managed policy `CLAUDE.md` files cannot be excluded at all**, which is the point of
+  them: organization-wide instructions apply regardless of an individual's settings.
+
+The first two are this course's thesis in one paragraph — **a file that was skipped and a
+file that was read look identical from the outside.** The under-200-lines guidance in the
+authoring advice above is a recommendation; 4 MiB and 25 KB are the mechanism.
+
 ## Tips
 
 Things the documentation does not tell you.
@@ -239,6 +255,9 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 3.1.
 | Imports "help you organize a long file but don't reduce its context cost, because imported files also load at launch" | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | An import resolving outside the working directory is external and prompts for approval once; declining disables them and the dialog does not reappear | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
 | Target under 200 lines per CLAUDE.md file | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-17 |
+| Claude Code reads a CLAUDE.md of up to 4 MiB in full and skips a larger file | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| Auto memory loads the first 200 lines of `MEMORY.md` or the first 25KB, whichever comes first | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
+| "Managed policy CLAUDE.md files cannot be excluded" so organization-wide instructions always apply | [memory docs](https://code.claude.com/docs/en/memory), read 2026-10-19 |
 
 **Outstanding, and stated rather than papered over:**
 
