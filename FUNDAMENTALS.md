@@ -4,8 +4,10 @@ Every lesson has a Fundamentals block covering the terms *that lesson* needs. Th
 the layer underneath all of them: the prerequisite stack, what the guide assumes you
 already have, and a way to find out whether you have it before you spend a week.
 
-**Read this first if you are not sure the course is pitched at you.** Read it last, or not
-at all, if you build production systems for a living.
+> [!NOTE]
+> **Read this first if you are not sure the course is pitched at you.** Read it last, or
+> not at all, if you build production systems for a living. Either way it is the one page
+> here written to be skipped by half its readers — that is the design, not a filler page.
 
 ---
 
