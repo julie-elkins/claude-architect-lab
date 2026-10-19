@@ -270,11 +270,18 @@ permission check refuses, most tools return a report that looks clean, and that 
 up trusting a green result over a broken run. So every finding carries what it does not cover,
 and `unchecked` is a state this tool is not allowed to collapse into `fine`.
 
-I built the machine-learning version of this detector first, in
+I built the model-based version of this detector first, in
 [driftwood](https://github.com/julie-elkins/driftwood), and **published the result that it lost
-to a baseline that flags nothing at all** — F1 0.364 against 0.448. This is the version that
-works, and it works because detection is deterministic and only the judgment is delegated to a
-model. The negative result is why the design looks like this.
+to a constant** — the judge scored 49.5–51.6% accuracy against a stuck "not stale" switch at
+69.5% on the same 95 hand-labelled cases, a 17.9-point gap against a 2.1-point run-to-run
+width. That is why detection here is deterministic and only the judgement is delegated.
+
+**An earlier version of this paragraph quoted an F1 comparison, and that was wrong** — not
+the direction, the readability. Driftwood measured its own run-to-run F1 width at 0.131 by
+judging the same cases three times, and the judge-to-best-free-floor gap is 0.080. A gap
+smaller than the noise is not a result, whichever way it points, so the F1 sentence was
+claiming more than the measurement could carry. The accuracy comparison above is the one that
+survives its own error bar. Corrected 2026-10-19.
 
 ## How claims here are checked
 
