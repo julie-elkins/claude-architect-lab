@@ -214,23 +214,45 @@ a weaker claim than independent review, and a stronger one than self-assessment.
 a change to the published exam guide. That is the whole of the automation, and it is a change
 detector rather than a verifier.
 
-**The verbatim re-check is now a loop, and its coverage is the headline.**
-`scripts/verify_claims.py` drives `course_doctor.citations.check_quote` across every quotable
-claim row in one command. **MEASURED 2026-10-19: 32 of 335 claim rows are machine-checkable —
-9.6%.** Of the first live run's 32: **27 verbatim match, 5 not found, 0 fetch failures.**
+**Every claim row now has a freshness mechanism, and they are not equally strong.**
+`scripts/verify_claims.py` runs them in one command and **prints the tier table before any
+result**, because a single blended number would destroy the only thing that makes this useful.
+MEASURED 2026-10-19:
 
-**The other 303 rows are not a backlog, they are out of reach of this method:** 205 cite the
-exam guide, which is a PDF; 94 state the claim as a paraphrase, so there is no exact string to
-look for; and 4 record a quote stitched across an ellipsis, which cannot match verbatim however
-the page reads. **A report claiming "all claims verified" over a tenth of them would be this
-course's own failure mode turned on itself**, so the coverage fraction prints before any result,
-every run.
+| Rows | Tier | What it establishes |
+|---|---|---|
+| **205** | GUIDE | The exam guide is a **static** PDF at a fixed version. `check_exam_guide.py` watches its address and byte hash, so while the hash holds, no cited claim can have silently drifted. **Stronger** than a per-claim check — it covers the whole document rather than one sentence per claim. |
+| **35** | VERBATIM | The cited page still contains the claim's exact quoted wording. Strongest per-claim evidence here. Live run: **30 exact, 5 not found.** |
+| **51** | IDENTIFIER | The page still contains a distinctive symbol the claim names. **Catches rename and removal only** — a page still mentioning `--fork-session` has confirmed nothing about what the flag does. Live run: **50 present, 1 gone.** |
+| **44** | UNCOVERED | Nothing automated reaches these: a paraphrase of prose with no distinctive symbol. A recorded supporting quote would move each to VERBATIM. |
 
-**That first run's real finding was corpus hygiene, not drift.** Of 9 initial misses, 4 were
-stitched quotes that would have fired on every future run — an alarm nobody can clear teaches
-the reader to ignore the ones they can — and one had been anglicised to "capitalisation" after
-being copied, so it was never verbatim either. Both classes are authoring artefacts. At most 4
-of 32 are candidate documentation drift, and possibly none.
+**So 285 of 335 rows have a passing mechanism, 6 are findings for a person, and 44 are
+genuinely uncovered.** Zero fetch failures; 13 pages fetched.
+
+**An earlier version of this section said "32 of 335 are machine-checkable — 9.6%" and treated
+the other 303 as needing a human.** That conflated *not verbatim-checkable* with *not covered*,
+and the difference was most of the number: the guide is static, so a hash over it is a complete
+drift check for 205 rows rather than no check at all.
+
+**The first runs' findings were mostly authoring artefacts, not drift**, and each one became a
+classification rather than an alarm:
+
+- **4 quotes stitched across an ellipsis.** They cannot match verbatim however the page reads,
+  so they would have fired on every future run — and an alarm nobody can clear teaches the
+  reader to ignore the ones they can. Tested fragment by fragment, **3 of the 4 matched the page
+  on BOTH sides of the ellipsis**, so nothing had drifted; they are now split into contiguous
+  spans and pass.
+- **2 templated paths.** `.claude/skills/<name>/SKILL.md` is absent from the skills page while
+  `.claude/skills/` is present — the docs write the same path with different notation.
+  Identifiers are now truncated at a placeholder.
+- **56 of 140 backticked tokens were bare words** — `Bash`, `Read`, `agent`, `allow`. "The page
+  still contains the word Read" is not a check, so the IDENTIFIER tier requires a structural
+  marker or an internal capital.
+
+**One hypothesis was tested and FALSIFIED, and it is recorded because it was wrong.** A miss on
+*"may differ from your schema only in capitalisation…"* looked like British spelling introduced
+after copying. The US spelling does not match either. So that row is a paraphrase or real
+drift, and it is one of the 5 open VERBATIM findings rather than an explained artefact.
 
 **Everything else still waits for a person.** There is **no scheduled re-check** — the loop runs
 when somebody runs it — **no tripwire on the documentation changelog**, and nothing that can

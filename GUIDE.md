@@ -829,7 +829,7 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 1.1.
 | "Spend can therefore pass the cap by up to the cost of that one response, plus anything that subagents still running at that moment spend before they stop" | [agent loop docs](https://code.claude.com/docs/en/agent-sdk/agent-loop), read 2026-10-17 |
 | The result `subtype` is the primary way to check termination state, and the `result` field is only present on `success` | [agent loop docs](https://code.claude.com/docs/en/agent-sdk/agent-loop), read 2026-10-17 |
 | Context does not reset between turns: system prompt, tool definitions, history, tool inputs and outputs all accumulate | [agent loop docs](https://code.claude.com/docs/en/agent-sdk/agent-loop), read 2026-10-17 |
-| "Compaction replaces older messages with a summary, so specific instructions from early in the conversation may not be preserved. Persistent rules belong in CLAUDE.md... because CLAUDE.md content is re-injected on every request" | [agent loop docs](https://code.claude.com/docs/en/agent-sdk/agent-loop), read 2026-10-17 |
+| "Compaction replaces older messages with a summary, so specific instructions from early in the conversation may not be preserved." Persistent rules therefore belong in CLAUDE.md, whose content is re-injected on every request | [agent loop docs](https://code.claude.com/docs/en/agent-sdk/agent-loop), read 2026-10-17 |
 | A `PreToolUse` hook that rejects a tool call prevents it executing, and Claude receives the rejection message instead | [agent loop docs](https://code.claude.com/docs/en/agent-sdk/agent-loop), read 2026-10-17 |
 
 **Outstanding:**
@@ -5224,7 +5224,7 @@ Exam guide **Version 1.0, effective July 2026**, §6, TS 2.5.
 | Building codebase understanding incrementally — Grep for entry points, then Read to follow imports — rather than reading all files upfront | EG §6, TS 2.5 |
 | Tracing function usage across wrapper modules by identifying exported names, then searching each across the codebase | EG §6, TS 2.5 |
 | Selecting Glob for files matching naming patterns, e.g. `**/*.test.tsx` | EG §6, TS 2.5 |
-| "On macOS, Linux, and WSL, Claude Code leaves Glob and Grep out of the default tool set, and Claude searches with `find` and `grep` through the Bash tool instead... the searches reach your hooks and permission rules as `Bash` calls." | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
+| "On macOS, Linux, and WSL, Claude Code leaves Glob and Grep out of the default tool set, and Claude searches with `find` and `grep` through the Bash tool instead" — so those searches reach hooks and permission rules as Bash calls | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
 | On Windows, Glob is part of the default tool set | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
 | Tool names are the exact strings used in permission rules, subagent tool lists and hook matchers | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
 | Edit: "`old_string` must appear exactly once"; otherwise more surrounding context or `replace_all: true` | [tools reference](https://code.claude.com/docs/en/tools-reference), read 2026-10-17 |
@@ -6539,7 +6539,7 @@ CCAR-F exam guide **Version 1.0, effective July 2026**, §6:
 | `--permission-prompts none` denies anything that would prompt unless a `PermissionRequest` hook allows it, tells Claude not to retry, and removes tools needing a person such as `AskUserQuestion`; denials appear as `permission_denied` and in `permission_denials` | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
 | `--bare` is "the recommended mode for scripted and SDK calls" and "will become the default for `-p` in a future release" | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
 | Without `--bare`, a `-p` run loads hooks, skills, commands, subagents, plugins, MCP servers, auto memory and CLAUDE.md as an interactive session would | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
-| "Without `--bare`, a `-p` session runs the hooks in a project's `.claude/settings.json` and connects the servers in its `.mcp.json`, even in a folder you've never trusted… no workspace trust dialog and no per-server approval prompt" | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
+| "Without `--bare`, a `-p` session runs the hooks in a project's `.claude/settings.json` and connects the servers in its `.mcp.json`, even in a folder you've never trusted" — with no trust dialog and no per-server approval prompt | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
 
 **Official documentation links — REQUIRED BEFORE PUBLICATION, not yet fetched.** Each
 needs a URL and a read date, and per this repo's rule a live link is not a verified

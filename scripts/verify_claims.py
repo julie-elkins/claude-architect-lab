@@ -1,45 +1,63 @@
 #!/usr/bin/env python3
-"""Re-check every machine-checkable claim in the course, and lead with the coverage.
+"""Re-check every claim in the course at the strongest tier available, and never pool them.
 
 WHAT WAS MISSING, AND WHY THIS IS THE GAP RATHER THAN THE SCHEDULE.
-`course_doctor.citations.check_quote` has been able to re-fetch a page and demand a
-claim's verbatim wording back since 2026-10-19. Nothing drove it. The six re-verified
-pages in VERIFICATION.md were done by calling the MCP tool by hand, one quote at a time,
-inside a session. So the check existed and the loop did not, and a loop nobody can run
-unattended is a procedure rather than automation.
+`course_doctor.citations.check_quote` has been able to re-fetch a page and demand a claim's
+verbatim wording back since 2026-10-19. Nothing drove it: the six re-verified pages in
+VERIFICATION.md were done by calling the MCP tool by hand, one quote at a time, inside a
+session. The check existed and the loop did not, and a loop nobody can run unattended is a
+procedure rather than automation.
 
-THE COVERAGE FIGURE IS THE HEADLINE, NOT A FOOTNOTE, and that is the whole design.
-MEASURED 2026-10-19: of 335 claim rows in this course, **36 are machine-checkable** --
-about 11%. The other 299 split two ways and neither is a defect:
+EVERY CLAIM HAS A MECHANISM. THEY ARE NOT EQUALLY STRONG. That is the whole design, and
+reporting one blended number would destroy it:
 
-  - **205 cite the exam guide**, which is a PDF. `check_quote` reads pages. A change to
-    the guide is caught by `check_exam_guide.py`; whether a specific claim survived that
-    change is not, and cannot be from here.
-  - **94 cite a documentation URL but state the claim as a PARAPHRASE.** "The hierarchy
-    is user-level, project-level, and directory-level" is the lesson author's sentence,
-    not the documentation's, so there is no exact string to look for. A human re-reads
-    those or nothing does.
+  - **GUIDE** — the claim cites the exam guide, a *static* PDF at a fixed version. Covered
+    by `check_exam_guide.py`, which records the published guide's address and byte hash. If
+    the hash holds, the guide says exactly what it said when the claim was written, so the
+    claim cannot have silently drifted. This is STRONGER than a per-claim check, because it
+    covers the whole document rather than one sentence per claim. What it does NOT give is
+    independent verification: it preserves whatever state existed, and for most of these
+    rows that state is "authored from one read, never re-checked".
+  - **VERBATIM** — the claim carries a contiguous quoted span of documentation prose. The
+    page is re-fetched and must still contain it. The strongest per-claim evidence here.
+  - **IDENTIFIER** — the claim carries no quotable prose but does name a distinctive symbol
+    (`--strict-mcp-config`, `${VAR:-default}`). The page must still contain the symbol.
+    **This is deliberately weak**: it catches a rename or a removal and nothing else. A page
+    that still mentions `--fork-session` has not thereby confirmed anything about what the
+    flag does. Rename-and-removal is a real and probably the commonest drift mode on a
+    product shipping monthly, which is why it is worth having -- and why it is reported on
+    its own row and never added to the verbatim count.
+  - **UNCOVERED** — a paraphrase of documentation prose with no distinctive symbol in it.
+    Nothing automated can check these. They need a recorded supporting quote, or a person.
 
-**A report that said "all claims verified" over 11% of them would be this repository's
-own failure mode committed against itself** -- a clean result read as a complete one. So
-the coverage fraction is printed first, every run, before any result.
+**A report claiming "all claims verified" over a tenth of them would be this repository's own
+failure mode committed against itself**, so the per-tier table prints before any result.
 
-THE QUOTE THRESHOLD, and it is robust rather than tuned. A claim counts as checkable when
-it contains a double-quoted run of at least `--min-quote` characters; shorter quoted runs
-are usually identifiers (`"tool_use"`) and an identifier found on a page is weak evidence
-that a claim survived. MEASURED 2026-10-19: the count is **flat at 36 for every threshold
-from 10 to 30**, and only falls at 40 (33) and 60 (27). So 36 is not an artefact of the
-default -- it is what the corpus contains across a 3x range of the parameter. Re-measure
-if the authoring convention changes.
+TWO MEASURED CALIBRATIONS, both of which cut against the obvious implementation:
 
-"COULD NOT CHECK" IS NEVER "PASSED". A failed fetch exits 2, which outranks a missing
-quote's exit 1, because an incomplete run is a worse thing to report than a known finding.
-A run that cannot reach the network must not look like a run that found nothing wrong.
+1. **The quote threshold is robust rather than tuned.** MEASURED 2026-10-19: the
+   verbatim-checkable count is FLAT at 36 for every minimum quote length from 10 to 30, and
+   only falls at 40 (33) and 60 (27). So the figure is what the corpus contains across a 3x
+   range of the parameter, not an artefact of the default.
+2. **Most backticked tokens are too common to be evidence.** MEASURED 2026-10-19: of 140
+   distinct identifiers in paraphrased rows, 56 were bare words — `Bash`, `Edit`, `Read`,
+   `Glob`, `agent`, `allow`, `"block"`, `-p`. "The page still contains the word Read" is not
+   a check. Requiring a structural marker or internal capital drops those and keeps 84,
+   taking the tier from 66 rows of noise-and-signal to 52 of signal.
 
-AND `found=False` IS NOT A VERDICT. It means the string is not on the page after
-normalisation. The documentation may have been harmlessly reworded, the lesson may have
-drifted into paraphrase, or the claim may be gone. Those are three findings and only a
-person separates them -- so this script reports and never edits a lesson.
+A STITCHED QUOTE IS NOT A FINDING, IT IS AN AUTHORING BUG. A quote joined across an ellipsis
+cannot match verbatim however the page reads, so reporting it NOT FOUND fires on every future
+run, and an alarm nobody can clear teaches the reader to ignore the ones they can. Measured:
+4 of the first 9 not-found results were exactly this, and when the fragments were tested
+separately, 3 of the 4 matched the page on BOTH sides of the ellipsis -- so nothing had
+drifted at all.
+
+"COULD NOT CHECK" IS NEVER "PASSED". A failed fetch exits 2, outranking a finding's exit 1,
+because an incomplete run is worse to report than a known result.
+
+AND `found=False` IS NOT A VERDICT. The documentation may have been harmlessly reworded, the
+lesson may have drifted into paraphrase, or the claim may be gone. Three findings; only a
+person separates them. This script reports and never edits a lesson.
 """
 
 from __future__ import annotations
@@ -62,30 +80,34 @@ SOURCES_HEADING = re.compile(r"^## Sources\s*$", re.MULTILINE)
 TABLE_ROW = re.compile(r"^\|(?P<claim>[^|]+)\|(?P<source>[^|]+)\|\s*$", re.MULTILINE)
 EG_REF = re.compile(r"EG\s*§\s*\d")
 URL = re.compile(r"https?://[^\s)\]]+")
+BACKTICKED = re.compile(r"`([^`]+)`")
 
-# DESIGN DECISION. See the module docstring: the count is insensitive to this between
-# 10 and 30, so the default sits in the middle of the flat region rather than at an end.
+# See calibration 1 in the module docstring. The default sits in the middle of the flat
+# region rather than at either end of it.
 DEFAULT_MIN_QUOTE = 25
 
-
-# A quote carrying an ellipsis was STITCHED from two places on the page, so it cannot
-# match verbatim no matter what the page says. MEASURED 2026-10-19: 4 of the first 9
-# not-found results were this, and every one of them would have fired on every future run.
-# An alarm that cannot be cleared trains whoever reads it to ignore the ones that can be,
-# so these are classified NOT CHECKABLE rather than NOT FOUND. Both the ASCII and the
-# typographic form, because the corpus contains both.
+# See the module docstring: a quote spanning an ellipsis cannot match verbatim.
 STITCHED = re.compile(r"\.\.\.|…")
+
+# A distinctive identifier carries a structural marker or an internal capital. See
+# calibration 2: without this, the tier fills with bare words whose presence on a page
+# proves nothing.
+STRUCTURAL = re.compile(r"[-_./${}:=]|\(\)")
+INTERNAL_CAPITAL = re.compile(r"[a-z][A-Z]")
+MIN_IDENTIFIER = 3
+
+TIERS = ("GUIDE", "VERBATIM", "IDENTIFIER", "UNCOVERED")
 
 
 def quoted_run(claim: str, min_length: int) -> tuple[str | None, str | None]:
-    """The longest usable double-quoted run in a claim, or why there isn't one.
+    """The longest usable contiguous quoted run, or why there isn't one.
 
     Returns `(quote, reason_it_is_unusable)` — exactly one of the two is set.
     """
     runs = [m.group(1) for m in re.finditer(r'"([^"]+)"', claim)]
     long_enough = [r for r in runs if len(r) >= min_length]
     if not long_enough:
-        return None, "stated as a paraphrase, no exact string to match"
+        return None, "no quoted span"
 
     whole = [r for r in long_enough if not STITCHED.search(r)]
     if not whole:
@@ -94,6 +116,38 @@ def quoted_run(claim: str, min_length: int) -> tuple[str | None, str | None]:
             "record one contiguous span instead"
         )
     return max(whole, key=len), None
+
+
+def identifiers(claim: str) -> list[str]:
+    """Distinctive backticked symbols in a claim, deduplicated and order-preserving.
+
+    Reduced to the leading whitespace-delimited token, so `--resume <name>` and
+    `--resume <transcript-path>` both become `--resume`. Checking the whole backticked
+    string would fail on a page that documents the same flag with a different
+    placeholder, which is a difference in the DOCS' notation rather than a change to the
+    thing being claimed.
+    """
+    found: dict[str, None] = {}
+    for match in BACKTICKED.finditer(claim):
+        raw = match.group(1).strip().strip("\"'")
+        if not raw:
+            continue
+        token = raw.split()[0]
+
+        # Truncate at a placeholder. MEASURED 2026-10-19:
+        # `.claude/skills/<name>/SKILL.md` is absent from the skills page while
+        # `.claude/skills/` is present -- the docs write the same path with different
+        # notation, so matching the templated form reports a rename that did not happen.
+        # Two of the first three IDENTIFIER misses were this. The stem is weaker evidence
+        # and still catches the thing this tier is for: the directory being renamed away.
+        if "<" in token:
+            token = token.split("<", 1)[0]
+
+        if len(token) < MIN_IDENTIFIER:
+            continue
+        if STRUCTURAL.search(token) or INTERNAL_CAPITAL.search(token):
+            found.setdefault(token, None)
+    return list(found)
 
 
 def lessons() -> list[pathlib.Path]:
@@ -108,14 +162,14 @@ def lessons() -> list[pathlib.Path]:
 
 
 class Row:
-    __slots__ = ("lesson", "claim", "source", "url", "quote", "reason")
+    __slots__ = ("lesson", "claim", "source", "url", "tier", "quote", "symbols", "note")
 
-    def __init__(self, lesson, claim, source, url, quote, reason):
-        self.lesson, self.claim, self.source = lesson, claim, source
-        self.url, self.quote, self.reason = url, quote, reason
+    def __init__(self, lesson, claim, source, url, tier, quote=None, symbols=(), note=None):
+        self.lesson, self.claim, self.source, self.url = lesson, claim, source, url
+        self.tier, self.quote, self.symbols, self.note = tier, quote, list(symbols), note
 
 
-def collect(min_quote: int) -> list[Row]:
+def collect(min_quote: int = DEFAULT_MIN_QUOTE) -> list[Row]:
     rows: list[Row] = []
     for path in lessons():
         text = path.read_text(encoding="utf-8")
@@ -131,28 +185,32 @@ def collect(min_quote: int) -> list[Row]:
 
             found_url = URL.search(source)
             if not found_url:
-                # Exam-guide-only rows. Not a defect: see the module docstring.
-                reason = (
-                    "cites the exam guide (a PDF)"
-                    if EG_REF.search(source)
-                    else "cites no URL"
-                )
-                rows.append(Row(name, claim, source, None, None, reason))
+                note = None if EG_REF.search(source) else "cites no URL and no guide section"
+                rows.append(Row(name, claim, source, None, "GUIDE", note=note))
                 continue
 
             url = found_url.group(0).rstrip(".,;:)]`")
-            quote, reason = quoted_run(claim, min_quote)
-            rows.append(Row(name, claim, source, url, quote, reason))
+            quote, why = quoted_run(claim, min_quote)
+            if quote:
+                rows.append(Row(name, claim, source, url, "VERBATIM", quote=quote))
+                continue
+
+            symbols = identifiers(claim)
+            if symbols:
+                rows.append(Row(name, claim, source, url, "IDENTIFIER", symbols=symbols,
+                                note=why))
+                continue
+
+            rows.append(Row(name, claim, source, url, "UNCOVERED", note=why))
     return rows
 
 
 def caching_fetcher(fetch_one=None):
     """Fetch each URL at most once per run, and reuse it across every claim on it.
 
-    Not only a speed-up. Several claims cite the same page -- the `memory` page carries
-    22 of them -- so fetching per claim would hit one host 22 times in a few seconds and
-    invite a rate limit, which this script would then have to report as "could not
-    check" for reasons it caused itself.
+    Not only a speed-up. The `memory` page alone carries 22 claim rows, so fetching per
+    claim would hit one host 22 times in a few seconds and invite a rate limit that this
+    script would then have to report as "could not check" for a reason it caused itself.
     """
     if fetch_one is None:
         from course_doctor.citations import _fetch
@@ -190,81 +248,118 @@ def main(argv=None, fetch_one=None) -> int:
     )
     parser.add_argument(
         "--offline", action="store_true",
-        help="report coverage and check nothing. Exits 2, because a run that checked "
-             "nothing has not passed",
+        help="report the tier table and check nothing. Exits 2, because a run that "
+             "checked nothing has not passed",
     )
     args = parser.parse_args(argv)
 
     rows = collect(args.min_quote)
-    checkable = [r for r in rows if r.quote]
     total = len(rows)
+    by_tier = {tier: [r for r in rows if r.tier == tier] for tier in TIERS}
 
     lines = [
         f"# Claim verification — {date.today().isoformat()}",
         "",
-        f"**Coverage: {len(checkable)} of {total} claim rows are machine-checkable "
-        f"({100 * len(checkable) / total:.1f}%).**",
+        "**Every claim row has a freshness mechanism. They are not equally strong, and "
+        "these counts are deliberately never added together.**",
         "",
-        "This report covers only those. It says nothing about the rest, and the rest is "
-        "the majority. Read the breakdown below before treating any of this as a "
-        "statement about the course.",
+        "| Rows | Tier | What it establishes |",
+        "|---|---|---|",
+        f"| {len(by_tier['GUIDE'])} | GUIDE | the exam guide is a static PDF; "
+        "`check_exam_guide.py` watches its bytes, so no cited claim can have silently "
+        "drifted. Not independent verification. |",
+        f"| {len(by_tier['VERBATIM'])} | VERBATIM | the cited page still contains the "
+        "claim's exact quoted wording. Strongest per-claim evidence here. |",
+        f"| {len(by_tier['IDENTIFIER'])} | IDENTIFIER | the cited page still contains a "
+        "distinctive symbol the claim names. **Catches rename and removal only.** |",
+        f"| {len(by_tier['UNCOVERED'])} | UNCOVERED | nothing automated can check these. "
+        "A recorded supporting quote would move them to VERBATIM. |",
+        f"| **{total}** | total | |",
         "",
     ]
 
-    reasons: dict[str, int] = {}
+    notes: dict[str, int] = {}
     for row in rows:
-        if row.reason:
-            reasons[row.reason] = reasons.get(row.reason, 0) + 1
-    lines.append("## Why the rest is not checkable here")
-    lines.append("")
-    for reason, count in sorted(reasons.items(), key=lambda kv: -kv[1]):
-        lines.append(f"- **{count} rows** — {reason}")
-    lines.append("")
+        if row.note:
+            notes[row.note] = notes.get(row.note, 0) + 1
+    if notes:
+        lines += ["## Why a row is not at a stronger tier", ""]
+        for note, count in sorted(notes.items(), key=lambda kv: -kv[1]):
+            lines.append(f"- **{count} rows** — {note}")
+        lines.append("")
 
-    found: list[Row] = []
-    missing: list[Row] = []
+    verbatim_ok: list[Row] = []
+    verbatim_miss: list[Row] = []
+    symbol_ok: list[Row] = []
+    symbol_miss: list[tuple[Row, list[str]]] = []
     failed: list[tuple[Row, str]] = []
 
     if args.offline:
         lines += ["## Checked", "", "Nothing. `--offline` was passed.", ""]
     else:
         fetch = caching_fetcher(fetch_one)
-        for row in checkable:
+
+        for row in by_tier["VERBATIM"]:
             try:
                 result = check_quote(row.url, row.quote, fetch=fetch)
-            except MaterialRefused as refused:
-                failed.append((row, refused.message))
-                continue
             except Exception as exc:  # noqa: BLE001 - a fetch problem is a finding
                 failed.append((row, str(exc)))
                 continue
-            (found if result.found else missing).append(row)
+            (verbatim_ok if result.found else verbatim_miss).append(row)
+
+        for row in by_tier["IDENTIFIER"]:
+            gone: list[str] = []
+            broke = None
+            for symbol in row.symbols:
+                try:
+                    if not check_quote(row.url, symbol, fetch=fetch).found:
+                        gone.append(symbol)
+                except Exception as exc:  # noqa: BLE001
+                    broke = str(exc)
+                    break
+            if broke:
+                failed.append((row, broke))
+            elif gone:
+                symbol_miss.append((row, gone))
+            else:
+                symbol_ok.append(row)
 
         lines += [
-            "## Checked",
+            "## VERBATIM tier",
             "",
-            f"- **{len(found)} verbatim match** — the page still carries the claim's "
-            "exact wording",
-            f"- **{len(missing)} NOT FOUND** — the string is not on the page after "
-            "normalisation",
-            f"- **{len(failed)} could not be checked** — a fetch failed, so these are "
-            "neither pass nor fail",
-            f"- pages fetched: {len(getattr(fetch, 'cache', {}))}",
+            f"- **{len(verbatim_ok)} still exact**",
+            f"- **{len(verbatim_miss)} NOT FOUND**",
+            "",
+            "## IDENTIFIER tier — rename and removal only",
+            "",
+            f"- **{len(symbol_ok)} symbols all still present**",
+            f"- **{len(symbol_miss)} rows name a symbol the page no longer contains**",
+            "",
+            "A row passing here has NOT had its claim verified. The symbol exists; what "
+            "the claim says about it is unchecked.",
+            "",
+            f"Could not be checked at all: **{len(failed)}** — neither pass nor fail. "
+            f"Pages fetched: {len(getattr(fetch, 'cache', {}))}.",
             "",
         ]
 
-        if missing:
+        if verbatim_miss:
             lines += [
-                "### Not found — each needs a person, not an edit",
+                "### VERBATIM not found — each needs a person, not an edit",
                 "",
-                "`found=False` is not a verdict that the claim is wrong. The page may "
-                "have been harmlessly reworded, the lesson may have drifted into "
-                "paraphrase, or the claim may be gone. Three findings; only a human "
-                "separates them.",
+                "`found=False` is not a verdict that the claim is wrong. The page may have "
+                "been reworded harmlessly, the lesson may have drifted into paraphrase, or "
+                "the claim may be gone. Only a human separates those.",
                 "",
             ]
-            for row in missing:
+            for row in verbatim_miss:
                 lines.append(f"- `{row.lesson}`  \n  {row.url}  \n  quote: \"{row.quote}\"")
+            lines.append("")
+
+        if symbol_miss:
+            lines += ["### IDENTIFIER missing — a rename or a removal", ""]
+            for row, gone in symbol_miss:
+                lines.append(f"- `{row.lesson}`  \n  {row.url}  \n  gone: {', '.join(gone)}")
             lines.append("")
 
         if failed:
@@ -276,10 +371,12 @@ def main(argv=None, fetch_one=None) -> int:
     lines += [
         "## What this report does not show",
         "",
-        "- Whether the **exam guide** still supports the 205 rows that cite it. "
-        "`check_exam_guide.py` notices the guide changing; it does not read it.",
-        "- Whether a **paraphrased** claim is still true. Nothing automated can.",
-        "- Whether a lesson **teaches** a claim correctly. A verbatim match proves the "
+        "- Whether a **GUIDE**-tier claim is a correct reading of the guide. The hash "
+        "proves the guide has not changed, not that the claim was right when written.",
+        "- Whether an **IDENTIFIER**-tier claim is true. A symbol still existing says "
+        "nothing about what it does.",
+        "- Whether an **UNCOVERED** paraphrase is still true. Nothing automated can.",
+        "- Whether a lesson **teaches** any claim correctly. A verbatim match proves the "
         "page says it, not that the lesson explains it right — one lesson here once "
         "taught a documented failure mode backwards while citing the correct page.",
         "",
@@ -296,12 +393,15 @@ def main(argv=None, fetch_one=None) -> int:
         print("\nOFFLINE: nothing was checked. This is not a pass.", file=sys.stderr)
         return 2
     if failed:
-        # Outranks a missing quote on purpose: an incomplete run is worse to report than
-        # a known finding, because you do not know what it would have found.
-        print(f"\n{len(failed)} claim(s) could not be checked.", file=sys.stderr)
+        # Outranks a finding on purpose: an incomplete run is worse to report than a known
+        # result, because you do not know what it would have found.
+        print(f"\n{len(failed)} row(s) could not be checked.", file=sys.stderr)
         return 2
-    if missing:
-        print(f"\n{len(missing)} claim(s) not found on their cited page.", file=sys.stderr)
+    if verbatim_miss or symbol_miss:
+        print(
+            f"\n{len(verbatim_miss)} verbatim miss(es), {len(symbol_miss)} missing "
+            "symbol(s).", file=sys.stderr,
+        )
         return 1
     return 0
 

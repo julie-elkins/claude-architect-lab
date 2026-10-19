@@ -294,7 +294,7 @@ CCAR-F exam guide **Version 1.0, effective July 2026**, §6:
 | `--permission-prompts none` denies anything that would prompt unless a `PermissionRequest` hook allows it, tells Claude not to retry, and removes tools needing a person such as `AskUserQuestion`; denials appear as `permission_denied` and in `permission_denials` | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
 | `--bare` is "the recommended mode for scripted and SDK calls" and "will become the default for `-p` in a future release" | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
 | Without `--bare`, a `-p` run loads hooks, skills, commands, subagents, plugins, MCP servers, auto memory and CLAUDE.md as an interactive session would | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
-| "Without `--bare`, a `-p` session runs the hooks in a project's `.claude/settings.json` and connects the servers in its `.mcp.json`, even in a folder you've never trusted… no workspace trust dialog and no per-server approval prompt" | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
+| "Without `--bare`, a `-p` session runs the hooks in a project's `.claude/settings.json` and connects the servers in its `.mcp.json`, even in a folder you've never trusted" — with no trust dialog and no per-server approval prompt | [headless docs](https://code.claude.com/docs/en/headless), read 2026-10-17 |
 
 **Official documentation links — REQUIRED BEFORE PUBLICATION, not yet fetched.** Each
 needs a URL and a read date, and per this repo's rule a live link is not a verified

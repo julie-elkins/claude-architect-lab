@@ -39,7 +39,11 @@ cd "$(dirname "$0")/.."
 # 2026-10-19 (truly last): 102 -> 118. The claim-verification loop. Mutate inverted
 # here too: the valuable mutants let `--offline` return 0, drop the exit-2 on a failed
 # fetch, or classify a stitched quote as checkable so it fails forever.
-EXPECTED_TESTS=118
+# 2026-10-19 (the tiers): 118 -> 134. verify_claims grew three more tiers and the rule
+# that their counts are never added together. Two more inverted mutants to watch: pooling
+# the IDENTIFIER count into VERBATIM, and dropping the placeholder truncation so a
+# templated path reports a rename that never happened.
+EXPECTED_TESTS=134
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then
