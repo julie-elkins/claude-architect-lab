@@ -229,6 +229,12 @@ this course records what the guide said at the version noted in [SOURCES.md](SOU
 was read — but a page can return 200 and no longer say what it said. See the README's
 section on how claims are checked, including the part that is **not** yet verified.
 
+> [!TIP]
+> ### Now, go crush your exam. 🚀
+>
+> Then tell me how it went, on [LinkedIn](https://www.linkedin.com/in/julielkins/) — and if
+> you found something here that is wrong, [open an issue](https://github.com/julie-elkins/claude-architect-lab/issues).
+
 ---
 
 > What the exam sits on top of, and a readiness check. Skippable if you are already building with this stack daily.
@@ -7325,6 +7331,26 @@ updates), 0.2 June 2026 (draft revision), 0.1 February 2026 (initial draft).
 This course records what version 1.0 said, on the date noted in [SOURCES.md](SOURCES.md).
 The guide states it is subject to change without notice, and **the guide on the Partner
 Academy page supersedes anything written here.**
+
+## One last thing
+
+> [!TIP]
+> You know what this course covered. You also know what it did not — [SCOPE.md](SCOPE.md)
+> names the topics that will not appear, [VERIFICATION.md](VERIFICATION.md) says which
+> cited pages have been re-read and which have not, and every lesson states what it leaves
+> out.
+>
+> That is a better place to sit an exam from than feeling ready.
+>
+> ### Now, go crush your exam. 🚀
+>
+> Then come and tell me how it went — I genuinely want to know, and I am easiest to find
+> on [LinkedIn](https://www.linkedin.com/in/julielkins/).
+>
+> And if something here was wrong, or a page I cited has moved since I read it,
+> **[open an issue](https://github.com/julie-elkins/claude-architect-lab/issues)**. That is
+> the more useful of the two messages, and this course is built on the assumption that
+> somebody eventually sends it.
 
 ## Sources
 

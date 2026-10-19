@@ -171,6 +171,26 @@ This course records what version 1.0 said, on the date noted in [SOURCES.md](SOU
 The guide states it is subject to change without notice, and **the guide on the Partner
 Academy page supersedes anything written here.**
 
+## One last thing
+
+> [!TIP]
+> You know what this course covered. You also know what it did not — [SCOPE.md](SCOPE.md)
+> names the topics that will not appear, [VERIFICATION.md](VERIFICATION.md) says which
+> cited pages have been re-read and which have not, and every lesson states what it leaves
+> out.
+>
+> That is a better place to sit an exam from than feeling ready.
+>
+> ### Now, go crush your exam. 🚀
+>
+> Then come and tell me how it went — I genuinely want to know, and I am easiest to find
+> on [LinkedIn](https://www.linkedin.com/in/julielkins/).
+>
+> And if something here was wrong, or a page I cited has moved since I read it,
+> **[open an issue](https://github.com/julie-elkins/claude-architect-lab/issues)**. That is
+> the more useful of the two messages, and this course is built on the assumption that
+> somebody eventually sends it.
+
 ## Sources
 
 Exam guide **Version 1.0, effective July 2026** — §10 (scoring), §11 (registration and
