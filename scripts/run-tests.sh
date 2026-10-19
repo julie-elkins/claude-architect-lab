@@ -25,7 +25,11 @@ cd "$(dirname "$0")/.."
 # 17 for the citations library and 5 for its adapter. Two previously pinned tests
 # were EDITED rather than deleted: the open-world hint is now asserted per tool in
 # both directions, and the protocol test lists both tools by name.
-EXPECTED_TESTS=83
+# 2026-10-19 (later still): 83 -> 87. GUIDE.md now assembles the seven learner-
+# facing root pages as well as the lessons, so four tests pin that a declared page
+# exists, is actually emitted, raises when missing, and that the two deliberate
+# omissions are explained in the guide itself.
+EXPECTED_TESTS=87
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then

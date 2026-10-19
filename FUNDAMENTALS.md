@@ -181,11 +181,10 @@ Deliberately short, and deliberately not a link farm.
 - **Layer 4** — standard sampling and measurement material. Calibration curves and
   stratified sampling are old, well-documented ideas.
 
-## Other people's material, and what each one is for
+## Other people's material
 
-Named because leaving them out would be the more dishonest choice in a course about
-material going stale — and because none of them does what this one does. Neither is
-affiliated with this course, and neither has reviewed it.
+Named because leaving it out would be the more dishonest choice in a course about material
+going stale. Not affiliated with this course, and has not reviewed it.
 
 - **Matthew Purcell's consolidated prep list**, on LinkedIn at
   [linkedin.com/in/purcellmatthew](https://www.linkedin.com/in/purcellmatthew/) — free
@@ -193,17 +192,17 @@ affiliated with this course, and neither has reviewed it.
   written review of the exams. It is the most used community material for these exams by a
   wide margin, and it is the thing to read if what you want is **practice questions**, which
   [SCOPE.md](SCOPE.md) explains this course will never contain.
-- **Schuberg Philis's open AI training**, at
-  [schubergphilis.github.io/ai-training](https://schubergphilis.github.io/ai-training/) —
-  roughly 130 short vendor-neutral lessons on agents, covering MCP, hooks, subagents,
-  skills and evaluation. Not exam preparation, names no certification, and states that it
-  is co-authored by AI and human-reviewed. Useful if **layer 1 or 2 above** is where you are
-  thin, and a reasonable place to go after this course rather than instead of it.
 
-**What this course does that neither does:** one task statement per lesson against the
-published blueprint, a lab you build and run, and a claim table that says where every
-factual statement came from and when it was read. That is the whole pitch, and it is only
-worth anything if the sourcing claim is true — which is what
+**Only one entry, and that is deliberate.** There is plenty of other free Claude and agent
+material, some of it good. It is not listed here because **I have not worked through it**,
+and a recommendation from someone who has not read the thing is worth exactly nothing —
+which is the same standard this course applies to its own claims. If you have found
+something that earned its place, tell me and I will read it before naming it.
+
+**What this course does that the list above does not:** one task statement per lesson
+against the published blueprint, a lab you build and run, and a claim table that says where
+every factual statement came from and when it was read. That is the whole pitch, and it is
+only worth anything if the sourcing claim is true — which is what
 [VERIFICATION.md](VERIFICATION.md) tracks and keeps honest about the parts not yet done.
 
 ## Sources

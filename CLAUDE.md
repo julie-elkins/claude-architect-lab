@@ -9,7 +9,7 @@ Architect – Foundations exam. **Code here is read by people learning this stac
 clarity outranks cleverness, and a comment earns its place by teaching something
 rather than by defending a decision.
 
-## Status: the written course is COMPLETE; the lab is one tool on purpose
+## Status: the written course is COMPLETE; the lab covers two of the five domains
 
 **All 29 lessons are written, one per task statement across all five domains**, plus the
 root-level pages. The episode framing below was superseded on 2026-10-17 — the course is
@@ -17,7 +17,7 @@ lessons, and the five video episodes are a production asset that lags the writin
 
 **The lab is two tools.** `read_material_file` reads a lesson file, hashes it, and lists
 the URLs it cites. `check_quote_on_page` **fetches a cited page and reports whether a
-quoted claim is still on it** — added 2026-10-19, which is when the network arrived. 83
+quoted claim is still on it** — added 2026-10-19, which is when the network arrived. 87
 tests, 0 skips.
 
 **So the lab can now do the thing the course is about**, which it could not until that

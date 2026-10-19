@@ -45,7 +45,63 @@ GUIDE = REPO / "GUIDE.md"
 # either source makes `--check` fail until the guide is rebuilt.
 NOTICE_SOURCE = REPO / "README.md"
 NOTICE_HEADING = "## Certification program update: December 7, 2026"
-PREFACE = REPO / "FUNDAMENTALS.md"
+
+# The pages that surround the lessons, included so the single-document reading
+# path is the WHOLE course rather than the lessons alone. Added 2026-10-19: a
+# learner reading GUIDE.md end to end was getting 29 lessons and none of the
+# study path, scope, scenarios, themes, recall sheet, glossary or exam-day
+# mechanics -- which are seven of the nine things a reader actually asks for.
+#
+# EXTRACTED, never duplicated, for the same reason the notice above is: two
+# copies of a page drift, and `--check` makes editing either one fail the build
+# until the guide is rebuilt.
+#
+# Each entry carries the sentence that introduces it IN THE GUIDE. A page lifted
+# out of its own file loses the context its filename gave it -- "Scope" means
+# nothing dropped between a lesson and a glossary -- so the lead-in is data here
+# rather than prose inside the page, which has to stand alone too.
+FRONT_MATTER: tuple[tuple[str, str], ...] = (
+    ("STUDY-PATH.md",
+     "Read this first if you have a date booked. It is the only page here that "
+     "tells you what to skip."),
+    ("FUNDAMENTALS.md",
+     "What the exam sits on top of, and a readiness check. Skippable if you are "
+     "already building with this stack daily."),
+    ("SCOPE.md",
+     "What the guide says is in scope, and the sixteen topics it says will not "
+     "appear at all. The out-of-scope list is the cheapest page in the course: it "
+     "tells you what to stop studying."),
+)
+
+# After the lessons, because each one is either an index into them or a thing to
+# look up rather than to read through.
+APPENDICES: tuple[tuple[str, str], ...] = (
+    ("SCENARIOS.md",
+     "The six published scenarios and the lessons each one needs. This is how the "
+     "exam presents the material; the lessons above are how the blueprint "
+     "organises it."),
+    ("THEMES.md",
+     "Four ideas that recur across every domain. Deliberately last of the reading "
+     "pages: it means little before you have seen the instances."),
+    ("RECALL.md",
+     "The conventions you cannot reason your way to -- file locations, flags, enum "
+     "values, and the places where the default is the opposite of the guess. Use "
+     "it as a self-test, not as reading."),
+    ("GLOSSARY.md",
+     "The words that mean different things in different lessons. Look things up "
+     "here rather than reading it through."),
+    ("EXAM-DAY.md",
+     "Registering, sitting, scoring and renewing. Nothing here is about the "
+     "content; it is the part people discover too late."),
+)
+
+# DELIBERATELY NOT INCLUDED: SOURCES.md and VERIFICATION.md. Both are the
+# course's own audit trail rather than material for a candidate -- they answer
+# "can I trust this course", which is a real question and not one to answer with
+# 150 lines of verification record wedged between a learner and the lessons. Both
+# are linked from the pages above and from the README, and the lessons each carry
+# their own Sources section inline, which is where a claim's provenance is
+# actually useful.
 
 # Dependency order: tools before the loop that calls them, the loop before the
 # output it shapes. Domain 1 is the largest slice of the exam and still cannot
@@ -125,12 +181,21 @@ python3 scripts/build_guide.py
 The test suite checks this file against the lessons, so a stale guide fails the build
 rather than quietly disagreeing with the course.
 
-It opens with the current program notice and the prerequisite stack, then the lessons in
-**dependency order** rather than exam-weight order. See the [repository README](README.md)
-for the exam details, the full 29-task-statement outline, how the course is sourced, and
-how to run the lab. [SCENARIOS.md](SCENARIOS.md) indexes the same lessons by the six
-published exam scenarios, and [THEMES.md](THEMES.md) names the four ideas that recur
-across domains.
+**This is the whole course, in reading order.** It opens with the current program notice,
+then the study path, the prerequisite stack and the scope boundary; then the 29 lessons in
+**dependency order** rather than exam-weight order; then the scenarios, the recurring
+themes, the recall sheet, the glossary and the exam-day mechanics.
+
+Every section below is also a standalone file, and each one says which — the files are the
+source and this document is assembled from them, so nothing here is a second copy that can
+drift. Two files are deliberately *not* included, because they are the course's own audit
+trail rather than material for a candidate: [SOURCES.md](SOURCES.md), which records what
+this course treats as a source, and [VERIFICATION.md](VERIFICATION.md), which records which
+cited pages have been re-read verbatim and which have not. Read both if your question is
+whether to trust this course. Each lesson also carries its own sources inline.
+
+See the [repository README](README.md) for the exam details, the blueprint map, and how to
+run the lab.
 
 ---
 
@@ -156,17 +221,32 @@ def extract_section(path: pathlib.Path, heading: str) -> str:
     return (heading + (rest if end == -1 else rest[:end])).strip()
 
 
+def include_page(name: str, lead_in: str) -> str:
+    """One surrounding page, with its lead-in, ready to drop into the guide.
+
+    Raises on a missing file rather than emitting nothing. Rule 2 applies to
+    these exactly as it does to a lesson: a page that silently vanishes from the
+    guide leaves a reader with a course that looks complete and is not, and the
+    standalone file still being on disk is what makes that invisible.
+    """
+    path = REPO / name
+    if not path.is_file():
+        raise FileNotFoundError("listed page missing: %s" % name)
+    body = path.read_text(encoding="utf-8").strip()
+    return "> %s\n>\n> Read it standalone at [%s](%s).\n\n%s\n\n---\n\n" % (
+        lead_in, name, name, body,
+    )
+
+
 def build() -> str:
-    """Return the full guide text, or raise if a listed lesson is missing."""
+    """Return the full guide text, or raise if a listed lesson or page is missing."""
     parts = [HEADER]
 
     # The program-update notice, lifted from the README so there is one copy.
     parts.append(extract_section(NOTICE_SOURCE, NOTICE_HEADING) + "\n\n---\n\n")
 
-    # Prerequisites, in full, before any lesson.
-    if not PREFACE.is_file():
-        raise FileNotFoundError("preface missing: %s" % PREFACE)
-    parts.append(PREFACE.read_text(encoding="utf-8").strip() + "\n\n---\n\n")
+    for name, lead_in in FRONT_MATTER:
+        parts.append(include_page(name, lead_in))
 
     covered: dict[str, list[str]] = {}
     for ts, _title, rel in MANIFEST:
@@ -189,11 +269,20 @@ def build() -> str:
         )
         label = "TS " + " and ".join(statements)
         lines.append("- **%s** — %s" % (label, title))
+    # The appendices are listed here too. A reader who has scrolled past 29
+    # lessons will not discover a recall sheet at the bottom by accident.
+    lines.append("")
+    lines.append("**After the lessons:** " + " · ".join(
+        name.removesuffix(".md") for name, _ in APPENDICES
+    ))
     parts.append("\n".join(lines) + "\n\n---\n\n")
 
     for rel in covered:
         body = (COURSE / rel).read_text(encoding="utf-8").strip()
         parts.append(body + "\n\n---\n\n")
+
+    for name, lead_in in APPENDICES:
+        parts.append(include_page(name, lead_in))
 
     return "".join(parts).rstrip() + "\n"
 

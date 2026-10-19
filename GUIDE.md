@@ -12,12 +12,21 @@ python3 scripts/build_guide.py
 The test suite checks this file against the lessons, so a stale guide fails the build
 rather than quietly disagreeing with the course.
 
-It opens with the current program notice and the prerequisite stack, then the lessons in
-**dependency order** rather than exam-weight order. See the [repository README](README.md)
-for the exam details, the full 29-task-statement outline, how the course is sourced, and
-how to run the lab. [SCENARIOS.md](SCENARIOS.md) indexes the same lessons by the six
-published exam scenarios, and [THEMES.md](THEMES.md) names the four ideas that recur
-across domains.
+**This is the whole course, in reading order.** It opens with the current program notice,
+then the study path, the prerequisite stack and the scope boundary; then the 29 lessons in
+**dependency order** rather than exam-weight order; then the scenarios, the recurring
+themes, the recall sheet, the glossary and the exam-day mechanics.
+
+Every section below is also a standalone file, and each one says which — the files are the
+source and this document is assembled from them, so nothing here is a second copy that can
+drift. Two files are deliberately *not* included, because they are the course's own audit
+trail rather than material for a candidate: [SOURCES.md](SOURCES.md), which records what
+this course treats as a source, and [VERIFICATION.md](VERIFICATION.md), which records which
+cited pages have been re-read verbatim and which have not. Read both if your question is
+whether to trust this course. Each lesson also carries its own sources inline.
+
+See the [repository README](README.md) for the exam details, the blueprint map, and how to
+run the lab.
 
 ---
 
@@ -50,6 +59,181 @@ Anthropic Partner Academy certification pages; the authoritative source is those
 this README, and an announcement can be revised.
 
 ---
+
+> Read this first if you have a date booked. It is the only page here that tells you what to skip.
+>
+> Read it standalone at [STUDY-PATH.md](STUDY-PATH.md).
+
+# How to use this course
+
+Twenty-nine lessons, one per task statement. Four plans below depending on how much time
+you have, and one thing to decide before you book anything.
+
+## Decide this first: when to sit it
+
+**The credential is valid for 12 months from the date it is awarded.** That is shorter
+than most cloud certifications and it should shape *when* you sit, not just whether you
+pass. Sitting it the week before a job search starts is worth more than sitting it eight
+months earlier and renewing in the middle.
+
+Exam mechanics, from the guide: **60 items, 4 scenarios drawn from a published bank of 6,
+120 minutes, passing score 720 on a 100–1,000 scale, $125.** The score report gives
+percent-correct **by domain** — useful diagnostics, and those section percentages do
+**not** determine pass or fail. Only the total scaled score does.
+
+---
+
+## If you have a week
+
+Dependency order, which is also the order the course is written in. Tools before the loop
+that calls them; the loop before the output it shapes.
+
+**Day 1 — Domain 3, configuration (20%).** Six lessons.
+[3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) ·
+[3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) ·
+[3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) ·
+[3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md) ·
+[3.5 and 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md)
+
+Start here because it is the most concrete and because two of its lessons set up a
+distinction the rest of the exam keeps using.
+
+**Day 2 — Domain 2, tools and MCP (18%).** Five lessons.
+[2.1](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) ·
+[2.2](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) ·
+[2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) ·
+[2.4](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) ·
+[2.5](course/domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md)
+
+**Days 3 and 4 — Domain 1, agentic architecture (27%).** Seven lessons, the largest slice.
+[1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) ·
+[1.2](course/domain-1-agentic-architecture/lesson-1-2-coordinator-patterns.md) ·
+[1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) ·
+[1.4](course/domain-1-agentic-architecture/lesson-1-4-enforcement-and-handoff.md) ·
+[1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) ·
+[1.6](course/domain-1-agentic-architecture/lesson-1-6-task-decomposition.md) ·
+[1.7](course/domain-1-agentic-architecture/lesson-1-7-session-state.md)
+
+Two days, not one. It is 27% of the items and the lessons are denser.
+
+**Day 5 — Domain 4, prompting and output (20%).** Six lessons.
+[4.1](course/domain-4-prompting-and-output/lesson-4-1-explicit-criteria.md) ·
+[4.2](course/domain-4-prompting-and-output/lesson-4-2-few-shot.md) ·
+[4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) ·
+[4.4](course/domain-4-prompting-and-output/lesson-4-4-validation-and-retry.md) ·
+[4.5](course/domain-4-prompting-and-output/lesson-4-5-batch-processing.md) ·
+[4.6](course/domain-4-prompting-and-output/lesson-4-6-multi-instance-review.md)
+
+**Day 6 — Domain 5, context and reliability (15%).** Five lessons.
+[5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md) ·
+[5.2](course/domain-5-context-and-reliability/lesson-5-2-escalation.md) ·
+[5.3](course/domain-5-context-and-reliability/lesson-5-3-error-propagation.md) ·
+[5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) ·
+[5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md)
+
+**Do not skip this one because it is 15%.** It appears in five of the six scenarios — see
+[SCENARIOS.md](SCENARIOS.md). The weights say how many items come from a domain; the
+scenarios say how often you will need it.
+
+**Day 7 — the two synthesis pages, then the scenarios.** Read
+[THEMES.md](THEMES.md) — four ideas that recur across domains, and the most useful thing to
+hold on exam day. Then walk [SCENARIOS.md](SCENARIOS.md) and answer the closing question
+under each of the six before reading anything again.
+
+---
+
+## If you have a weekend
+
+**Saturday:** Domains 3 and 2 in full (11 lessons). Then [THEMES.md](THEMES.md).
+
+**Sunday:** Domain 1 in full (7 lessons), then the anti-pattern section only of each
+Domain 4 and 5 lesson. Finish on [SCENARIOS.md](SCENARIOS.md).
+
+You will be thin on Domain 5, which is a real cost given how often it recurs. Know that
+going in rather than discovering it.
+
+---
+
+## If you have an evening
+
+Read, in this order:
+
+1. [THEMES.md](THEMES.md) — the four recurring ideas
+2. [SCENARIOS.md](SCENARIOS.md) — the six scenarios and their closing questions
+3. The **anti-pattern** section of every lesson, nothing else
+4. [RECALL.md](RECALL.md) — last, and out loud if you can
+
+The anti-patterns are the published wrong answers, and well-built distractors are the
+plausible mistakes a competent person actually makes. Three hours of anti-patterns is the
+highest-yield three hours available.
+
+**Why the recall sheet goes last and not first.** It is the only page here you can usefully
+read with no time left, because nothing on it needs to be understood — a convention is
+either in your memory or it is not. Everything above it is the opposite: worth hours, worth
+none of your last twenty minutes.
+
+This is triage, not preparation. It will not make up for not knowing the material.
+
+---
+
+## If you are coming back to it after a gap
+
+[GLOSSARY.md](GLOSSARY.md) first. It exists because several words mean different things in
+different lessons — "fork" means three things — and those are the distinctions that decay
+first.
+
+Then [RECALL.md](RECALL.md), as a self-test rather than as reading: cover the middle column
+and say what each term does. The rows you cannot produce are your revision list, and they
+are the cheapest thing on it to fix — judgment takes a week to rebuild, a field name takes
+a minute.
+
+---
+
+## What to do with the lab
+
+The repository is a working system: [Course Doctor](README.md#the-lab-course-doctor), an
+agent that checks training material against live documentation and reports what went stale,
+what it could not check, and what needs a human.
+
+Reading the course does not require running it. But if you learn by building, clone it, run
+the tests, and read `src/course_doctor/` against lessons 2.1 and 2.2 — the error shapes and
+the tool descriptions in there are the ones those lessons teach, and the comments say why
+each decision was made rather than what the code does.
+
+```
+uv venv --python 3.12
+uv pip install -e '.[test]'
+./scripts/run-tests.sh
+```
+
+Several of its tests assert an **absence** — that a path escape is refused, that nothing is
+read on a refusal. Use the script rather than bare `pytest`: it pins the collected count and
+fails on any skip, because an absence test that never runs looks exactly like one that
+passed.
+
+---
+
+## What this course cannot tell you
+
+**Whether you are ready.** There is no practice exam here and there will not be. No
+pass-rate, difficulty or score-distribution claim appears anywhere in this course, because
+none is published and I have access to no such data for this exam. The guide's four
+preparation exercises are the closest thing to practice material Anthropic publishes, and
+**completing them is not a predictor of a score** and is not presented as one.
+
+**What is on the exam.** The authoritative source is the exam guide on the Anthropic
+Partner Academy certification page, which supersedes anything written here. Details change;
+this course records what the guide said at the version noted in [SOURCES.md](SOURCES.md).
+
+**That every claim here is current.** Every claim names its source and carries the date it
+was read — but a page can return 200 and no longer say what it said. See the README's
+section on how claims are checked, including the part that is **not** yet verified.
+
+---
+
+> What the exam sits on top of, and a readiness check. Skippable if you are already building with this stack daily.
+>
+> Read it standalone at [FUNDAMENTALS.md](FUNDAMENTALS.md).
 
 # What this exam sits on top of
 
@@ -234,11 +418,10 @@ Deliberately short, and deliberately not a link farm.
 - **Layer 4** — standard sampling and measurement material. Calibration curves and
   stratified sampling are old, well-documented ideas.
 
-## Other people's material, and what each one is for
+## Other people's material
 
-Named because leaving them out would be the more dishonest choice in a course about
-material going stale — and because none of them does what this one does. Neither is
-affiliated with this course, and neither has reviewed it.
+Named because leaving it out would be the more dishonest choice in a course about material
+going stale. Not affiliated with this course, and has not reviewed it.
 
 - **Matthew Purcell's consolidated prep list**, on LinkedIn at
   [linkedin.com/in/purcellmatthew](https://www.linkedin.com/in/purcellmatthew/) — free
@@ -246,17 +429,17 @@ affiliated with this course, and neither has reviewed it.
   written review of the exams. It is the most used community material for these exams by a
   wide margin, and it is the thing to read if what you want is **practice questions**, which
   [SCOPE.md](SCOPE.md) explains this course will never contain.
-- **Schuberg Philis's open AI training**, at
-  [schubergphilis.github.io/ai-training](https://schubergphilis.github.io/ai-training/) —
-  roughly 130 short vendor-neutral lessons on agents, covering MCP, hooks, subagents,
-  skills and evaluation. Not exam preparation, names no certification, and states that it
-  is co-authored by AI and human-reviewed. Useful if **layer 1 or 2 above** is where you are
-  thin, and a reasonable place to go after this course rather than instead of it.
 
-**What this course does that neither does:** one task statement per lesson against the
-published blueprint, a lab you build and run, and a claim table that says where every
-factual statement came from and when it was read. That is the whole pitch, and it is only
-worth anything if the sourcing claim is true — which is what
+**Only one entry, and that is deliberate.** There is plenty of other free Claude and agent
+material, some of it good. It is not listed here because **I have not worked through it**,
+and a recommendation from someone who has not read the thing is worth exactly nothing —
+which is the same standard this course applies to its own claims. If you have found
+something that earned its place, tell me and I will read it before naming it.
+
+**What this course does that the list above does not:** one task statement per lesson
+against the published blueprint, a lab you build and run, and a claim table that says where
+every factual statement came from and when it was read. That is the whole pitch, and it is
+only worth anything if the sourcing claim is true — which is what
 [VERIFICATION.md](VERIFICATION.md) tracks and keeps honest about the parts not yet done.
 
 ## Sources
@@ -267,6 +450,148 @@ lessons. They are not in the exam guide.
 What *is* from the guide: the audience statement and the six-months floor (§2), and every
 out-of-scope item quoted above (§17). The claim that the ML layer is not a prerequisite is
 an inference from §17's exclusions, and it is stated as one.
+
+---
+
+> What the guide says is in scope, and the sixteen topics it says will not appear at all. The out-of-scope list is the cheapest page in the course: it tells you what to stop studying.
+>
+> Read it standalone at [SCOPE.md](SCOPE.md).
+
+# What is in scope, and what is explicitly not
+
+The exam guide's appendix (§17) lists the technologies and concepts that may appear, the
+topics explicitly tested, and — more useful than either — **the topics that explicitly will
+not appear.**
+
+That last list is the reason this page exists. Most study time is lost to material that was
+never going to be tested, and the guide tells you what that is.
+
+Everything here is from the exam guide, **Version 1.0, effective July 2026**, §17.
+
+---
+
+## Explicitly OUT of scope
+
+> "The following related topics will **not** appear on the exam"
+
+Sixteen items. If you find yourself studying one of these, stop.
+
+- Fine-tuning Claude models or training custom models
+- Claude API authentication, billing, or account management
+- Detailed implementation of specific programming languages or frameworks, beyond what is
+  needed for tool and schema configuration
+- **Deploying or hosting MCP servers** — infrastructure, networking, container
+  orchestration
+- Claude's internal architecture, training process, or model weights
+- Constitutional AI, RLHF, or safety training methodologies
+- Embedding models or vector database implementation details
+- Computer use — browser automation, desktop interaction
+- Vision and image analysis capabilities
+- Streaming API implementation or server-sent events
+- Rate limiting, quotas, or API pricing calculations
+- OAuth, API key rotation, or authentication protocol details
+- Specific cloud provider configurations — AWS, GCP, Azure
+- Performance benchmarking or model comparison metrics
+- **Prompt caching implementation details, beyond knowing it exists**
+- Token counting algorithms or tokenization specifics
+
+Three of those are worth dwelling on, because they are where a competent engineer's
+instincts will pull them off course.
+
+**Deploying MCP servers is out; designing them is in.** You need tool descriptions, error
+shapes, scoping and configuration — lessons 2.1 through 2.4. You do not need Docker,
+networking, or how to host one.
+
+**Prompt caching is out "beyond knowing it exists."** That is an unusually precise
+boundary. Know the term; do not study the mechanics.
+
+**Cloud provider configuration is out** — which, if you came from a cloud certification
+background, is the hardest habit to drop.
+
+---
+
+## Technologies and concepts that may appear
+
+The guide's own list, verbatim in substance, with the lesson that covers each.
+
+| Technology or concept | Covered in |
+|---|---|
+| **Claude Agent SDK** — agent definitions, agentic loops, `stop_reason` handling, hooks (`PostToolUse`, tool call interception), subagent spawning via **Task tool**, `allowedTools` configuration | [1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) · [1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) · [1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) |
+| **Model Context Protocol** — servers, tools, resources, `isError` flag, tool descriptions, tool distribution, `.mcp.json`, environment variable expansion | [2.1](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) · [2.2](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) · [2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) · [2.4](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) |
+| **Claude Code** — CLAUDE.md hierarchy (user/project/directory), `.claude/rules/` with YAML frontmatter path-scoping, `.claude/commands/`, `.claude/skills/` with SKILL.md frontmatter (`context: fork`, `allowed-tools`, `argument-hint`), plan mode, direct execution, `/memory`, `/compact`, `--resume`, `fork_session`, **Explore subagent** | [3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) · [3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) · [3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) · [3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md) · [1.7](course/domain-1-agentic-architecture/lesson-1-7-session-state.md) · [5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) |
+| **Claude Code CLI** — `-p` / `--print`, `--output-format json`, `--json-schema` | [3.5 and 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
+| **Claude API** — `tool_use` with JSON schemas, `tool_choice` (`"auto"`, `"any"`, forced), `stop_reason` values (`"tool_use"`, `"end_turn"`), `max_tokens`, system prompts | [4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) · [2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) · [1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) |
+| **Message Batches API** — 50% cost savings, up to 24-hour window, `custom_id`, polling, **no multi-turn tool calling support** | [4.5](course/domain-4-prompting-and-output/lesson-4-5-batch-processing.md) |
+| **JSON Schema** — required vs optional fields, enums, nullable fields, `"other"` + detail string, strict mode for syntax error elimination | [4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) |
+| **Pydantic** — schema validation, semantic validation errors, validation-retry loops | [4.4](course/domain-4-prompting-and-output/lesson-4-4-validation-and-retry.md) — see the note below |
+| **Built-in tools** — Read, Write, Edit, Bash, Grep, Glob, their purposes and selection criteria | [2.5](course/domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md) |
+| **Few-shot prompting** — targeted examples for ambiguous scenarios, format demonstration, generalisation to novel patterns | [4.2](course/domain-4-prompting-and-output/lesson-4-2-few-shot.md) |
+| **Prompt chaining** — sequential decomposition into focused passes | [1.6](course/domain-1-agentic-architecture/lesson-1-6-task-decomposition.md) |
+| **Context window management** — token budgets, progressive summarisation, lost-in-the-middle, context extraction, scratchpad files | [5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md) · [5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) |
+| **Session management** — resumption, `fork_session`, named sessions, session context isolation | [1.7](course/domain-1-agentic-architecture/lesson-1-7-session-state.md) |
+| **Confidence scoring** — field-level confidence, calibration with labelled validation sets, stratified sampling | [5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md) |
+
+**Pydantic is named by the guide and the lessons treat it generically.** Lesson 4.4 teaches
+validation, semantic-versus-syntactic errors and retry loops without tying them to a
+library. The lab's `src/course_doctor/contracts.py` is Pydantic, so the concrete version is
+there if you want it — but the exam is testing the *concepts* the guide lists, and this
+course does not teach a library's API.
+
+---
+
+## In-scope topics, explicitly tested
+
+The guide lists these separately from the technologies. Every one maps to a lesson except
+the last, which is noted below.
+
+Agentic loop implementation · multi-agent orchestration · subagent context management
+including **crash recovery using manifests** · tool interface design · MCP tool and
+resource design · MCP server configuration · error handling and propagation · escalation
+decision-making · CLAUDE.md configuration including **`@import` patterns** · custom
+commands and skills · plan mode versus direct execution · iterative refinement · structured
+output via `tool_use` · few-shot prompting · batch processing · context window optimisation
+· human review workflows.
+
+### The one with no home
+
+> **"Information provenance: claim-source mappings, temporal data handling, conflict
+> annotation, coverage gap reporting"**
+
+This is listed as explicitly tested and it maps to **no single task statement.** The course
+covers its parts across [5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md)
+(metadata in structured outputs, attribution surviving handoffs),
+[5.3](course/domain-5-context-and-reliability/lesson-5-3-error-propagation.md) (coverage
+annotations for gaps from unavailable sources) and
+[4.4](course/domain-4-prompting-and-output/lesson-4-4-validation-and-retry.md)
+(`conflict_detected`), but never under that name.
+
+Worth knowing as a phrase, because an item framed around "provenance" is asking about those
+three things together: where did this claim come from, when was it true, and what did the
+report fail to cover.
+
+---
+
+## Preparation material the guide publishes
+
+Two things, and they are the only practice material with Anthropic's name on it.
+
+**Sample questions with full rationales**, in §9. Each gives the correct answer and
+explains why each distractor is wrong. Those explanations are the most valuable study
+material in the entire guide, because they show you how the distractors are built.
+
+**Four preparation exercises**, in §7 and §8. The guide's own suggested hands-on work.
+
+**This course contains no practice questions and will not.** The guide's sample items are
+published with reasoning; there is no reason to write worse ones, and good reason not to.
+See [SOURCES.md](SOURCES.md) for what this course does and does not treat as a source.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §17 (Appendix: Technologies and Concepts,
+In-Scope Topics, Out-of-Scope Topics), §9 (sample questions), §7 and §8 (preparation and
+exercises).
+
+The lesson mappings in the tables are the author's. The lists themselves are the guide's.
 
 ---
 
@@ -300,6 +625,8 @@ an inference from §17's exclusions, and it is stated as one.
 - **TS 3.3** — Lesson 3.3 — Rules that only load when they are relevant
 - **TS 3.4** — Lesson 3.4 — Planning first, and when plan mode is not actually a block
 - **TS 3.5 and 3.6** — Lesson 3b — Iterating on purpose, and reviewing without yourself
+
+**After the lessons:** SCENARIOS · THEMES · RECALL · GLOSSARY · EXAM-DAY
 
 ---
 
@@ -6145,5 +6472,868 @@ than written from memory, which is the failure this course is about.
 
 Everything in **Tips** is `OBSERVED`, not cited — behaviour measured on one version,
 a weaker claim than a documentation URL, labelled as such per the existing convention.
+
+---
+
+> The six published scenarios and the lessons each one needs. This is how the exam presents the material; the lessons above are how the blueprint organises it.
+>
+> Read it standalone at [SCENARIOS.md](SCENARIOS.md).
+
+# The six scenarios, and which lessons each one needs
+
+The exam presents **four scenarios, drawn at random from a published bank of six.** Every
+question sits inside one of them. So the exam does not ask you about task statements — it
+drops you into a production context and asks which of four defensible choices is right
+*there*.
+
+This page is the other index of the course. The [README](README.md) lists lessons by task
+statement, which is how the blueprint is organised. This lists them by scenario, which is
+how the exam is organised.
+
+**All six scenarios are published in the exam guide, §5.** Their text and their primary
+domains are Anthropic's, not reconstructed from anywhere — and nothing on this page comes
+from sitting the exam. See [SOURCES.md](SOURCES.md) for why that boundary is the reason
+this course can be trusted.
+
+## How to use this
+
+Pick a scenario. Read its lessons. Then ask yourself the question in its last column
+before you look at anything else — that question is the one the scenario exists to test.
+
+Four of these six will be in front of you. You do not get to choose which, so the honest
+preparation is all six.
+
+---
+
+## Scenario 1 — Customer Support Resolution Agent
+
+A support agent built on the Agent SDK, handling high-ambiguity requests — returns,
+billing disputes, account issues — reaching backend systems through custom MCP tools
+(`get_customer`, `lookup_order`, `process_refund`, `escalate_to_human`). The target is
+80%+ first-contact resolution **while knowing when to escalate.**
+
+**Primary domains:** Agentic Architecture & Orchestration · Tool Design & MCP Integration ·
+Context Management & Reliability
+
+| Read | Why this scenario needs it |
+|---|---|
+| [lesson 1.4](course/domain-1-agentic-architecture/lesson-1-4-enforcement-and-handoff.md) | The refund gate. `process_refund` must not run until `get_customer` has **returned** a verified id, and the handoff goes to a human with no transcript |
+| [lesson 5.2](course/domain-5-context-and-reliability/lesson-5-2-escalation.md) | "Knowing when to escalate" is the scenario's own phrase. Sentiment and confidence are both ruled out as triggers |
+| [lesson 5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md) | A long support conversation is where a summary eats the amount and the order number |
+| [lesson 2.2](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) | Four error categories, and a business refusal the agent has to say out loud |
+| [lesson 1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) | The loop underneath all of it |
+
+**The question to ask yourself:** the customer is angry and the fix is one tool call away.
+What do you do, and what changes if they ask for a person?
+
+---
+
+## Scenario 2 — Code Generation with Claude Code
+
+A team using Claude Code for generation, refactoring, debugging and documentation,
+integrating it into a development workflow with **custom slash commands, CLAUDE.md
+configurations, and knowing when to use plan mode versus direct execution.**
+
+**Primary domains:** Claude Code Configuration & Workflows · Context Management &
+Reliability
+
+| Read | Why this scenario needs it |
+|---|---|
+| [lesson 3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) | The hierarchy, and that a CLAUDE.md is context rather than a control |
+| [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) | The scenario names custom slash commands directly |
+| [lesson 3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) | Conventions that must apply to files spread by type |
+| [lesson 3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md) | "When to use plan mode vs direct execution" is the scenario's own wording |
+| [lesson 3.5 and 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) | Iterating with artifacts rather than adjectives |
+| [lesson 5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) | Long refactors are where a session starts talking about typical patterns |
+
+**The question to ask yourself:** a rule applies and you cannot find where it came from.
+Where do you look, in what order?
+
+---
+
+## Scenario 3 — Multi-Agent Research System
+
+A coordinator delegating to specialised subagents — one searches the web, one analyses
+documents, one synthesises findings, one generates reports — producing comprehensive,
+**cited** reports.
+
+**Primary domains:** Agentic Architecture & Orchestration · Tool Design & MCP Integration ·
+Context Management & Reliability
+
+| Read | Why this scenario needs it |
+|---|---|
+| [lesson 1.2](course/domain-1-agentic-architecture/lesson-1-2-coordinator-patterns.md) | Hub-and-spoke, dynamic routing, and the over-narrow decomposition trap |
+| [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) | Workers inherit nothing, so the coordinator passes findings not references |
+| [lesson 5.3](course/domain-5-context-and-reliability/lesson-5-3-error-propagation.md) | One unreachable source must not become a clean report or a dead workflow |
+| [lesson 1.6](course/domain-1-agentic-architecture/lesson-1-6-task-decomposition.md) | Fixed pipeline or adaptive plan, and per-item plus integration passes |
+| [lesson 5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md) | "Cited" is the hard word here — attribution has to survive the handoffs |
+| [lesson 2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) | A synthesis agent holding a web search tool will use it |
+
+**The question to ask yourself:** your synthesis reads complete and three subtopics were
+never searched. What in the design would have told you?
+
+---
+
+## Scenario 4 — Developer Productivity with Claude
+
+Tools built on the Agent SDK that help engineers explore unfamiliar codebases, understand
+legacy systems, generate boilerplate and automate repetitive tasks, using the **built-in
+tools (Read, Write, Bash, Grep, Glob)** and integrating with MCP servers.
+
+**Primary domains:** Tool Design & MCP Integration · Claude Code Configuration &
+Workflows · Agentic Architecture & Orchestration
+
+| Read | Why this scenario needs it |
+|---|---|
+| [lesson 2.5](course/domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md) | The scenario names all six tools — and two of them are absent by default on macOS and Linux |
+| [lesson 2.4](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) | Wiring servers in, and what a populated `/mcp` does not prove |
+| [lesson 5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) | "Explore unfamiliar codebases" is this lesson's entire subject |
+| [lesson 2.1](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) | Boilerplate generation is where overlapping tool descriptions misroute |
+| [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) | Delegating the verbose reading |
+| [lesson 3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md) | The Explore subagent, for discovery that would fill the window |
+
+**The question to ask yourself:** your permission rule for `Grep` never fires. Why?
+
+---
+
+## Scenario 5 — Claude Code for Continuous Integration
+
+Claude Code in a CI/CD pipeline running automated code reviews, generating test cases and
+providing pull request feedback, where you must **design prompts that give actionable
+feedback and minimise false positives.**
+
+**Primary domains:** Claude Code Configuration & Workflows · Prompt Engineering &
+Structured Output
+
+| Read | Why this scenario needs it |
+|---|---|
+| [lesson 3.5 and 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) | `-p`, `--output-format json`, `--json-schema`, and CLAUDE.md as the CI context |
+| [lesson 4.1](course/domain-4-prompting-and-output/lesson-4-1-explicit-criteria.md) | "Minimise false positives" is the scenario's own phrase, and "be conservative" is the named wrong answer |
+| [lesson 4.6](course/domain-4-prompting-and-output/lesson-4-6-multi-instance-review.md) | The session that generated the code is the worst reviewer of it |
+| [lesson 4.2](course/domain-4-prompting-and-output/lesson-4-2-few-shot.md) | Actionable feedback has a format, and examples teach it |
+| [lesson 4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) | Findings a pipeline can post as inline comments |
+| [lesson 4.5](course/domain-4-prompting-and-output/lesson-4-5-batch-processing.md) | And why a pre-merge check cannot be a batch |
+
+**The question to ask yourself:** developers have started ignoring the bot. Which category
+do you turn off, and why does turning one off help the others?
+
+---
+
+## Scenario 6 — Structured Data Extraction
+
+A system extracting information from unstructured documents, validating output against
+JSON schemas, maintaining high accuracy, handling edge cases gracefully and integrating
+with downstream systems.
+
+**Primary domains:** Prompt Engineering & Structured Output · Context Management &
+Reliability
+
+| Read | Why this scenario needs it |
+|---|---|
+| [lesson 4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) | Schemas, `tool_choice`, and the three documented holes in the guarantee |
+| [lesson 4.4](course/domain-4-prompting-and-output/lesson-4-4-validation-and-retry.md) | "Handling edge cases gracefully" — and the retry that cannot work |
+| [lesson 5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md) | "Maintaining high accuracy" is the phrase this lesson exists to interrogate |
+| [lesson 4.2](course/domain-4-prompting-and-output/lesson-4-2-few-shot.md) | Varied document structures, and reducing extraction hallucination |
+| [lesson 4.5](course/domain-4-prompting-and-output/lesson-4-5-batch-processing.md) | Volume extraction at half price, with partial-failure recovery |
+| [lesson 5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md) | Trimming what a document tool returns before it accumulates |
+
+**The question to ask yourself:** you are at 97% accuracy. What are you not able to say
+yet?
+
+---
+
+## Coverage, stated honestly
+
+Every one of the 29 task statements appears in at least one scenario above, and several
+appear in four. **That is not a coincidence and it is worth planning around:** the domains
+that recur across scenarios — Context Management & Reliability appears in five of six — pay
+off more than their 15% weighting suggests, because they are in play whichever four
+scenarios you draw.
+
+The weights say how many items come from each domain. The scenarios say how often you will
+need it. Those are different questions and the second one is not in the blueprint.
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026**, §5 — all six scenario descriptions and
+their primary domains. §4 for the domain weights.
+
+The lesson mappings and the closing questions are the author's reading of the published
+scenarios, not Anthropic's. They are a study aid, not a statement about what the exam
+asks.
+
+---
+
+> Four ideas that recur across every domain. Deliberately last of the reading pages: it means little before you have seen the instances.
+>
+> Read it standalone at [THEMES.md](THEMES.md).
+
+# Four ideas that carry most of this exam
+
+The blueprint has 29 task statements. It does not tell you that several of them are the
+same idea wearing different clothes.
+
+This page names four. They are not in the exam guide — they are what fell out of writing
+all 29 lessons and noticing the same shape arriving again. **If you understand these four,
+you can reason your way to answers in task statements you have not studied**, because the
+distractors are built from the same handful of plausible mistakes.
+
+Read this last, not first. It will mean more once you have seen the instances.
+
+---
+
+## 1. A thing that looks like a guarantee and is not
+
+The single most productive idea in this exam. In every case below there is a mechanism that
+*prevents* something and a mechanism that *asks* for it, they read almost identically, and
+the exam will offer you both.
+
+| Where | What looks like a guarantee | What it actually is |
+|---|---|---|
+| [3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) | A rule in `CLAUDE.md` | Context. The docs: *"not enforced configuration… To block an action regardless of what Claude decides, use a PreToolUse hook instead"* |
+| [3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md) | Plan mode blocks edits | It does in headless, SDK and VS Code chat. In an interactive terminal with bypass available, *"Claude Code also doesn't enforce plan mode's blocks"* |
+| [1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) | A hook enforces a policy | Until its script is missing, times out or crashes — all **non-blocking by default**, action proceeds. `onFailure: "block"` is the fix |
+| [1.4](course/domain-1-agentic-architecture/lesson-1-4-enforcement-and-handoff.md) | A prompt instruction orders a workflow | The guide: prompt instructions alone have a **non-zero failure rate** |
+| [2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) | "Always call the tool" under `tool_choice: "auto"` | A request the model may decline by answering in prose |
+| [4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) | A strict schema | Guarantees shape, not sense — and leaks on a refusal, a truncation, and enum capitalisation |
+
+**The exam shape:** when one option strengthens wording and another adds a mechanism, the
+mechanism is the answer. Every time.
+
+**The practical corollary:** *"it did not do the thing"* is not the claim *"it could not do
+the thing."* Only one of those is a control, and only firing it tells you which you have.
+
+---
+
+## 2. An absence that reads as a result
+
+The failure this exam cares most about, and the one that is invisible by construction: a
+report, a count or a status that is produced by *nothing having happened* and is
+indistinguishable from one produced by success.
+
+| Where | The flattering reading | What it can also mean |
+|---|---|---|
+| [5.3](course/domain-5-context-and-reliability/lesson-5-3-error-propagation.md) | An empty result | The search failed. Named anti-pattern: *"returning empty results as success"* |
+| [2.2](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md) | No data | An access failure, or a valid empty result — opposite responses |
+| [1.2](course/domain-1-agentic-architecture/lesson-1-2-coordinator-patterns.md) | Every worker succeeded | The decomposition was too narrow and nothing covered the gaps between them |
+| [5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md) | 97% accurate | 60% on a document type that is a fifth of the volume |
+| [2.5](course/domain-2-tools-and-mcp/lesson-2-5-built-in-tools.md) | A permission rule is in place | On macOS and Linux a `Grep` rule matches nothing, because the search arrives as `Bash` |
+| [2.4](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) | `/mcp` lists the tools | The list came from a discovery cache; the server has not been contacted |
+| [1.7](course/domain-1-agentic-architecture/lesson-1-7-session-state.md) | The session restored fully | It restored file contents from before you edited those files |
+| [5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md) | A fluent, confident answer | Generic. The specific knowledge degraded and the prose did not |
+| [3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) | A scoped rule never fired | Either the glob matches nothing, **or** the YAML failed to parse and it is loading on everything |
+
+**The exam shape:** an option that reports what it could *not* check beats an option that
+reports only findings.
+
+**The practical corollary:** every result needs a coverage statement. Not as politeness —
+as the only thing that distinguishes a clean run from a run that never started.
+
+---
+
+## 3. Wording strength is not a mechanism
+
+Domain 4's thesis, and it reaches into three other domains. Asking more firmly is never the
+answer, and it is always one of the options.
+
+| Where | The tempting fix | The mechanism |
+|---|---|---|
+| [4.1](course/domain-4-prompting-and-output/lesson-4-1-explicit-criteria.md) | "Be conservative", "only high-confidence findings" | A categorical report-versus-skip list. The guide names both phrases as *failing* |
+| [4.2](course/domain-4-prompting-and-output/lesson-4-2-few-shot.md) | More detailed instructions | 2–4 worked examples, including the ambiguous case |
+| [4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md) | "Reply in valid JSON" | A schema, through tool use |
+| [1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) | "Never run destructive commands" | A `PreToolUse` hook |
+| [5.2](course/domain-5-context-and-reliability/lesson-5-2-escalation.md) | "Escalate when the customer is upset" | Explicit criteria: a request for a human, a policy gap, no progress possible |
+| [3.5](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) | "Be more careful about severity" | Concrete input/output examples |
+
+**The tell:** if you cannot say what changed about the *test*, you have added an adverb.
+
+---
+
+## 4. Branch on structure, never on prose
+
+A quieter theme, and the one that distinguishes a robust design from one that works most of
+the time.
+
+| Where | The soft signal | The hard signal |
+|---|---|---|
+| [1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) | Parsing text for "I'm done"; checking whether assistant text exists | Tool calls present or absent. Both soft versions are **named anti-patterns**, and the text check fails intermittently because a model can emit text *and* tool calls together |
+| [5.2](course/domain-5-context-and-reliability/lesson-5-2-escalation.md) | Sentiment; a self-reported confidence score | A policy gap, or an explicit request |
+| [5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md) | A confidence number, as a filter | The same number, **calibrated against labelled outcomes**, as a routing signal |
+| [2.1](course/domain-2-tools-and-mcp/lesson-2-1-tool-interfaces.md) | Hoping the right tool is chosen | A description that names what the tool does *not* do and which sibling to use instead |
+
+**The subtlety worth carrying:** confidence is ruled out as a *filter* in 4.1 and 5.2, and
+named as a *routing signal* in 4.6 and 5.5. That is not a contradiction. Uncalibrated, it
+is a word; measured against labelled data, it carries information. The difference is
+whether anyone checked.
+
+---
+
+## Using this on exam day
+
+Four scenarios, sixty items, judgment-weighted. When an item has four defensible-looking
+options, the four questions above resolve most of them:
+
+1. Is one option a **mechanism** and another a **request**?
+2. Does one option **report what it could not check**?
+3. Is one option an **adverb** and another a **test**?
+4. Is one option reading a **soft signal** where a structural one exists?
+
+**What this page is not.** It is not a shortcut past the task statements, and it is not
+Anthropic's framing — the four headings are mine, drawn from writing the lessons. The
+exam guide is the authority on what is tested. This is a way of holding it.
+
+## Sources
+
+Every row links to the lesson that carries the claim and its citation. The themes
+themselves are the author's synthesis across all 29 lessons and are not stated anywhere in
+the exam guide.
+
+---
+
+> The conventions you cannot reason your way to -- file locations, flags, enum values, and the places where the default is the opposite of the guess. Use it as a self-test, not as reading.
+>
+> Read it standalone at [RECALL.md](RECALL.md).
+
+# Recall sheet — the half you cannot reason out
+
+**⚠ The lessons are authoritative. This page restates them and nothing more.** If this
+sheet and a lesson disagree, the lesson is right and this file is stale — report it.
+
+## Why this page exists
+
+Every other page here teaches judgment, because most of this exam rewards it: given a
+requirement, choose the design. Judgment is what a course can actually build.
+
+But a closed-book exam also asks which file lives where, which flag does what, and what a
+particular enum value means. **You cannot derive those.** They are conventions somebody
+chose, and either you have them or you do not — no amount of architectural instinct
+recovers the name of a frontmatter field.
+
+So this page is the recall surface, and it is deliberately the thinnest page in the
+repository: **no explanations, no reasoning, no new facts.** Every row restates something a
+lesson already teaches and already cites, and links to that lesson. Read the lesson to
+understand a row; read the row to remember it.
+
+**What this page is not.** It is not a prediction of what is on the exam. No item count,
+no weighting and no "expect this" appears here — the guide publishes domain weights and
+nothing finer, and anything more specific would be guesswork dressed as preparation. It is
+also not a substitute for the lessons: a sheet of conventions with the reasoning stripped
+out is exactly the material that gets you to 700.
+
+**Use it twice.** Once a week early, to find out which rows you cannot produce from
+memory — those are your gaps, and they are cheap to close. Then once the night before,
+when there is no time left to learn anything that needs understanding.
+
+---
+
+## Where a file lives
+
+| Path | What it is | Lesson |
+|---|---|---|
+| `CLAUDE.md` | Instructions you write. Context, not enforcement | [lesson 3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
+| `.claude/rules/` | Topic files carrying a `paths` glob, loaded conditionally | [lesson 3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) |
+| `.claude/skills/<name>/SKILL.md` | A skill: a directory, so it can carry supporting files | [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
+| `.claude/commands/<name>.md` | A custom command: one file, the legacy form of the same `/name` | [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
+| `.mcp.json` | Project MCP servers, checked in with the project | [lesson 2.4](course/domain-2-tools-and-mcp/lesson-2-4-mcp-integration.md) |
+
+**Loading order, and the part people get backwards:** `CLAUDE.md` files *above* the working
+directory load at launch; files in *subdirectories* load on demand. See
+[lesson 3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md).
+
+## Frontmatter fields, by file
+
+| Field | Where it goes | What it does | Lesson |
+|---|---|---|---|
+| `paths` | `.claude/rules/` file | Glob deciding when the rule loads. The only field read | [lesson 3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) |
+| `context: fork` | a skill | Runs it in a subagent that cannot see your conversation | [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
+| `allowed-tools` | a skill | **Pre-approves.** Removes the prompt; does not restrict | [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
+| `tools` | a subagent | Allowlist of what that subagent may have | [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) |
+
+## The three reach fields, which are not three names for one thing
+
+| Field | Direction | Lesson |
+|---|---|---|
+| `allowed-tools` (skill), `allowedTools` (SDK) | Pre-approve. Removes the prompt for tools it would have used anyway | [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
+| `disallowed-tools` | Restrict. Removes tools from the pool. **This is the only one that restricts** | [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md) |
+| `tools` (subagent frontmatter) | Allowlist for a subagent — and a background subagent has entries stripped from it anyway | [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) |
+
+## Flags for a non-interactive run
+
+| Flag | Effect | Lesson |
+|---|---|---|
+| `-p` / `--print` | Runs non-interactively, for a pipeline | [lesson 3.5 and 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
+| `--output-format` | `text`, `json` or `stream-json` | [lesson 3.5 and 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
+| `--json-schema` | Enforces a shape on the output in CI | [lesson 3.5 and 3.6](course/domain-3-configuration/lesson-3-5-3-6-iteration-and-pipelines.md) |
+| `--fork-session` | With `--continue`: copies the conversation to a new session id | [lesson 1.7](course/domain-1-agentic-architecture/lesson-1-7-session-state.md) |
+
+## Values worth knowing cold
+
+| Name | Values, and the catch | Lesson |
+|---|---|---|
+| `tool_choice` | `"auto"` may return text instead of calling; `"any"` must call one and picks; `{"type": "tool", "name": "…"}` must call that one | [lesson 2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md) |
+| `stop_reason` | Two altitudes. Messages API distinguishes `tool_use` from `end_turn`; on the SDK result, `end_turn`, `max_tokens`, `refusal` | [lesson 1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) |
+| `max_turns` | Counts **tool-use turns only** | [lesson 1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md) |
+| `PreToolUse` | Can block a call or rewrite its input | [lesson 1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) |
+| `PostToolUse` | Can rewrite the result and **cannot prevent anything** — the call already ran | [lesson 1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) |
+
+## Where the default is the opposite of the guess
+
+The highest-value rows on this page. Each one is a convention whose default surprises
+people, which is exactly what makes it answerable in one line and worth a question.
+
+| The thing | The default | Lesson |
+|---|---|---|
+| A rule file with invalid YAML | Loads **unconditionally** — it does not silently vanish | [lesson 3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md) |
+| A user rule against a project rule | **No precedence either way.** Neither overrides the other, so keep them consistent | [lesson 3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
+| A project `CLAUDE.md` under a parent one | Does **not** suppress the parent. Both load | [lesson 3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
+| An `@` import | Not a literal `@import`, and it **does not reduce context cost** — imports load at launch too | [lesson 3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md) |
+| Plan mode in an interactive terminal with bypass permissions available | **Not enforced.** It is a control in headless `-p`, Agent SDK and the VS Code chat panel, and an instruction here | [lesson 3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md) |
+| A hook that crashes, times out or is missing | **Non-blocking.** The action proceeds | [lesson 1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md) |
+| A subagent's inherited context | Inherits **nothing** unless you forked the conversation into it | [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) |
+| A background subagent's tools | Built-in tools are **stripped**, inherited or listed | [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md) |
+| Compaction | Replaces older history with a summary, so early instructions may not survive — `CLAUDE.md` is re-injected every request | [lesson 5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md) |
+
+## Three terms the course deliberately keeps apart
+
+Not conventions, but they cost marks the same way — each is one word covering more than one
+mechanism, and [GLOSSARY.md](GLOSSARY.md) is the full treatment.
+
+- **`fork`** means three things: forking a session, forking a conversation into a subagent,
+  and `context: fork` on a skill. The second inherits everything; the third inherits
+  nothing.
+- **The `Task` tool and the `Agent` tool** are the same tested objective under two names —
+  the guide uses one, current documentation the other.
+- **Structured outputs against tool-use-as-schema** are both real. **The exam tests tool
+  use with a JSON schema.**
+
+## Sources
+
+**No row here is a new claim.** Every one restates a lesson that carries its own citation —
+exam-guide section or documentation URL with a read date — and links to it, so this page
+adds nothing to verify and nothing that can be verified independently of the lessons.
+
+**The honest limit, stated because this page's shape invites the error.**
+`scripts/check_citations.py` reads the lessons in the build manifest, not the pages at the
+repository root, so nothing mechanically citation-checks this file. What *is* checked:
+`tests/test_guide.py` asserts every lesson this page links to exists, and that each row's
+term still appears in the lesson it points at. That catches a renamed flag or a deleted
+lesson. **It cannot catch a row whose meaning drifted while its wording stayed** — the same
+limit `scripts/check_production.py` carries for the episode scripts, and the reason the
+warning at the top of this page is a warning rather than a note.
+
+See [SOURCES.md](SOURCES.md) for what this course treats as a source, and
+[VERIFICATION.md](VERIFICATION.md) for which cited pages have been re-read verbatim.
+
+---
+
+> The words that mean different things in different lessons. Look things up here rather than reading it through.
+>
+> Read it standalone at [GLOSSARY.md](GLOSSARY.md).
+
+# Glossary
+
+Terms this course uses across more than one lesson, with the senses kept apart.
+
+Most of these are here because **the same word means different things in different
+lessons** — not through sloppiness, but because the product and the exam guide both reuse
+them. Each entry says which sense belongs where, and what confusing them costs.
+
+---
+
+## fork
+
+**Three distinct things, and they are the most confusable terms in the course.**
+
+- **Fork a session** — `claude --continue --fork-session`, or `/branch` inside a session.
+  Copies the conversation to a new session id, leaves the original intact.
+  [lesson 1.7](course/domain-1-agentic-architecture/lesson-1-7-session-state.md)
+- **Fork a conversation into a subagent** — `/subtask`. A subagent that inherits the
+  *entire* conversation instead of starting fresh.
+  [lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md)
+- **`context: fork` on a skill** — runs the skill in an isolated subagent that does **not**
+  see your conversation history.
+  [lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md)
+
+**What confusing them costs:** the second inherits everything and the third inherits
+nothing. Using a conversation-fork as a reviewer reproduces exactly the reasoning context
+you were trying to remove — see
+[lesson 4.6](course/domain-4-prompting-and-output/lesson-4-6-multi-instance-review.md).
+Also: `/branch` keeps your session permission grants because it stays in the same process;
+`--fork-session` starts a new process and you re-approve.
+
+## subagent
+
+A separate agent with its own context window.
+[1.2](course/domain-1-agentic-architecture/lesson-1-2-coordinator-patterns.md),
+[1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md)
+
+A **non-fork** subagent starts fresh: no conversation history, no prior file reads, only a
+delegation message. A **background** subagent keeps a restricted tool set — Claude Code
+*"removes every other built-in tool… whether inherited or listed in the `tools` field"* —
+so a tool you granted can be absent.
+
+## Task tool / Agent tool
+
+**A naming conflict the course records rather than resolves.** The exam guide names the
+**`Task`** tool and the requirement that `allowedTools` include `"Task"` to spawn
+subagents. The current documentation names the **`Agent`** tool, and the tools reference
+has no `Task` row. The tested objective — a coordinator cannot spawn without the spawning
+tool in its allowed list — holds under either name.
+[lesson 1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md)
+
+## turn
+
+One round trip: the model produces output including tool calls, the tools run, the results
+feed back. The loop ends when output contains no tool calls.
+[lesson 1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md)
+
+`max_turns` counts **tool-use turns only**, and hitting it returns a result with subtype
+`error_max_turns` — not a normal result with less in it.
+
+## stop_reason
+
+**Two layers, and the exam guide and the SDK docs describe different ones.** At the
+Messages API level it distinguishes `tool_use` (the model wants a tool run) from `end_turn`
+(finished) — which is what the guide describes. On the SDK's *result*, common values are
+`end_turn`, `max_tokens` and `refusal`, and loop termination is described through the
+no-tool-calls condition instead. Same mechanism, different altitude.
+[lesson 1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md)
+
+Also load-bearing in [4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md):
+check it before parsing, because on a refusal or a truncation the payload will not match
+your schema.
+
+## context
+
+Three senses, all in play:
+
+- **The context window** — everything loaded, which accumulates across turns and does not
+  reset. [1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md),
+  [5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md)
+- **Context versus control** — information that *informs* a decision against a mechanism
+  that *prevents* an action. The distinction behind theme 1.
+  [3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md)
+- **Context passed to a subagent** — what you put in its prompt, because it inherits
+  nothing. [1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md)
+
+## instructions, rules, memory
+
+- **`CLAUDE.md`** — instructions you write. Load at launch from the hierarchy above the
+  working directory; subdirectory files load on demand. Context, not enforcement.
+- **`.claude/rules/`** — topic files with a `paths` glob, loading only when a matching file
+  is in play. `paths` is the only field read; **invalid YAML means the rule loads
+  unconditionally.**
+- **Auto memory** — notes Claude writes itself across sessions.
+- **`@path/to/import`** — not a literal `@import`; pulls another file in at launch.
+  **Organises, does not reduce context cost**, because imported files load at launch too.
+
+[3.1](course/domain-3-configuration/lesson-3-1-claude-md-hierarchy.md),
+[3.3](course/domain-3-configuration/lesson-3-3-path-specific-rules.md)
+
+## skill / slash command
+
+A **skill** is a directory at `.claude/skills/<name>/SKILL.md` with frontmatter, able to
+carry supporting files, reloading live during a session. A **custom command** is a single
+file at `.claude/commands/<name>.md` — the legacy form, same `/name`, no live reload, no
+plugin support. Both are invocable as `/name`.
+[lesson 3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md)
+
+## allowed-tools / disallowed-tools / tools
+
+**The distinction that costs people reach they did not intend.**
+
+- **`allowed-tools`** (skill) and **`allowedTools`** (SDK) **pre-approve** — they remove the
+  prompt for tools the thing would have used anyway. They do **not** restrict.
+- **`disallowed-tools`** removes tools from the pool. This is the one that restricts.
+- **`tools`** (subagent frontmatter) is an allowlist of what the subagent may have — and a
+  background subagent has entries stripped from it anyway.
+
+[3.2](course/domain-3-configuration/lesson-3-2-commands-and-skills.md),
+[1.3](course/domain-1-agentic-architecture/lesson-1-3-subagent-invocation.md),
+[2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md)
+
+## hook
+
+Code that runs at a lifecycle point. `PreToolUse` can block a call (exit 2, or
+`permissionDecision`) or rewrite its input; `PostToolUse` can rewrite the result and
+**cannot prevent anything** — the call already ran.
+
+**Default on failure is non-blocking**: a missing script, a timeout or a crash lets the
+action proceed. `onFailure: "block"` changes that.
+[lesson 1.5](course/domain-1-agentic-architecture/lesson-1-5-hooks.md)
+
+## plan mode
+
+Claude researches and proposes without editing. **Enforced** in headless `-p` runs, Agent
+SDK sessions and the VS Code chat panel. **Not enforced** in an interactive terminal with
+bypass permissions available, where it remains an instruction.
+[lesson 3.4](course/domain-3-configuration/lesson-3-4-plan-mode.md)
+
+## tool_choice
+
+`"auto"` — the model may call a tool **or return text**. `"any"` — must call one, chooses
+which. `{"type": "tool", "name": "…"}` — must call that one. The first row is where the
+exam item lives.
+[2.3](course/domain-2-tools-and-mcp/lesson-2-3-tool-distribution.md),
+[4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md)
+
+## confidence
+
+**Ruled out as a filter; valid as a routing signal.** Not a contradiction —
+uncalibrated it is a word, and "only report high-confidence findings" is named as failing
+([4.1](course/domain-4-prompting-and-output/lesson-4-1-explicit-criteria.md)) as is
+sentiment- or confidence-based escalation
+([5.2](course/domain-5-context-and-reliability/lesson-5-2-escalation.md)). Calibrated
+against labelled outcomes it routes review attention
+([4.6](course/domain-4-prompting-and-output/lesson-4-6-multi-instance-review.md),
+[5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md)).
+
+## empty result versus access failure
+
+A query that succeeded and matched nothing, against an operation that did not happen. Both
+are "no data" and they call for opposite responses. They need **different types**, not one
+type with a flag, because a flag survives one hop and gets dropped at the next.
+[2.2](course/domain-2-tools-and-mcp/lesson-2-2-structured-errors.md),
+[5.3](course/domain-5-context-and-reliability/lesson-5-3-error-propagation.md)
+
+## calibration
+
+Whether a stated confidence matches observed accuracy — things marked 90% confident being
+right about 90% of the time. Measured against a **labelled validation set**, not asserted.
+[lesson 5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md)
+
+## stratified random sampling
+
+Sampling randomly *within* defined strata rather than across the whole population, so a
+rare-but-important segment is actually represented. The guide's instruction is to sample
+the **high-confidence** population — the one nobody will otherwise look at.
+[lesson 5.5](course/domain-5-context-and-reliability/lesson-5-5-human-review-and-calibration.md)
+
+## attention dilution
+
+One pass asked to hold too many concerns, so each gets less — the stated reason to split
+per-item local analysis from a cross-item integration pass.
+[1.6](course/domain-1-agentic-architecture/lesson-1-6-task-decomposition.md),
+[4.6](course/domain-4-prompting-and-output/lesson-4-6-multi-instance-review.md)
+
+## prompt chaining versus adaptive decomposition
+
+A **fixed sequence** where each step feeds the next, against **generating the next subtask
+from what the last one found.** The discriminator is whether you know the steps before
+starting.
+[lesson 1.6](course/domain-1-agentic-architecture/lesson-1-6-task-decomposition.md)
+
+## structured outputs versus tool-use-as-schema
+
+The exam guide teaches **tool use with a JSON schema** as the way to guarantee shape. The
+current API also has a dedicated **structured outputs** feature using constrained decoding
+(`output_config.format`, `strict: true`). Both are real; the exam tests the former.
+[lesson 4.3](course/domain-4-prompting-and-output/lesson-4-3-structured-output.md)
+
+## OBSERVED versus cited
+
+A convention in [SOURCES.md](SOURCES.md), not a product term. **Cited** means traced to the
+exam guide or a documentation URL with a read date. **OBSERVED** means measured by running
+something on one version — a weaker claim, labelled as such rather than presented as a
+documented contract.
+
+## compaction, `/clear`, summarisation
+
+**Compaction** replaces older history with a summary when the window fills, so early
+instructions may not survive — which is why persistent rules belong in `CLAUDE.md`, which
+is re-injected every request. **`/clear`** starts empty. **Progressive summarisation** is
+the risk that numbers, dates and stated expectations get condensed into vague prose.
+[1.1](course/domain-1-agentic-architecture/lesson-1-1-agentic-loops.md),
+[5.1](course/domain-5-context-and-reliability/lesson-5-1-conversation-context.md),
+[5.4](course/domain-5-context-and-reliability/lesson-5-4-codebase-exploration.md)
+
+---
+
+> Registering, sitting, scoring and renewing. Nothing here is about the content; it is the part people discover too late.
+>
+> Read it standalone at [EXAM-DAY.md](EXAM-DAY.md).
+
+# Registering, sitting, and renewing
+
+Everything on this page is from the exam guide, **Version 1.0, effective July 2026**,
+§10 through §16. It is the part of the guide nobody reads and some of it changes decisions.
+
+Nothing here is advice about how to pass. It is mechanics, and it is the mechanics the
+lessons do not cover.
+
+---
+
+## How the exam is scored, and why the number is what it is
+
+**It is criterion-referenced.** You are measured against a fixed performance standard, not
+against other candidates. The guide is explicit: you pass *"by demonstrating the knowledge
+and skills defined in the blueprint, not by outperforming a percentage of peers."*
+
+So there is no curve and no quota. Everyone who meets the standard passes.
+
+**Where 720 comes from.** The guide states that the passing score was established through a
+**formal standard-setting study** in which trained subject matter experts judged the level
+of performance expected of a **minimally qualified candidate**. That is a real method with
+a literature behind it, and it is why the cut score is a judgment made once by a panel
+rather than a round number someone chose.
+
+**Why the score is scaled 100–1,000 rather than a percentage.** Scaled scoring equates
+scores across multiple exam forms that may differ slightly in difficulty. A 720 on an
+easier form and a 720 on a harder one represent the same demonstrated ability — which is
+the entire reason not to report raw percent-correct as the result.
+
+**What the per-domain percentages are for.** Your score report shows percent-correct within
+each content domain. The guide says these are *"provided to help you understand your
+performance and are not used to determine your pass or fail result."* Only the total scaled
+score decides. So a weak domain percentage on a passing report is diagnostic information,
+not a near-miss.
+
+---
+
+## Registering
+
+Handled through the **Anthropic Partner Academy** and **Pearson VUE**, in this order per
+§11:
+
+1. Go to the certification page for the exam on the Partner Academy and review the details.
+2. Download the exam guide and **review the Certification Terms and Conditions and the
+   Certification Exam Policy before registering.**
+3. Register and check out. **The fee shown reflects any discount that applies to your
+   partner tier.**
+4. Follow the confirmation instructions to create a Pearson VUE account, then sign in to
+   schedule.
+5. Choose a date and either online proctoring or a Pearson test center.
+6. **Cancel or reschedule up to 24 hours before the appointment. Inside 24 hours you forfeit
+   the fee.**
+
+Two documents in step 2 are not reproduced anywhere in this course and are yours to read:
+the Terms and Conditions, and the Exam Policy.
+
+---
+
+## Before you schedule: accommodations
+
+> Reasonable accommodations are available for candidates with documented disabilities or
+> needs. **"Accommodations must be requested and approved by Pearson VUE before you schedule
+> your exam. Do not schedule your appointment until your request has been approved."**
+
+That ordering is the thing to notice. Requesting after scheduling is the wrong sequence,
+and the guide says so directly. Requests go to
+`pearsonvue.com/us/en/test-takers/accommodations`.
+
+---
+
+## On the day
+
+**Identification.** A valid, unexpired, government-issued photo ID, and **the name on it
+must match the name on your registration exactly.** To correct a name, contact
+`certifications-support@anthropic.com` **before scheduling**.
+
+**Environment.** Whether online or at a test center: stay in view of the proctor and webcam
+throughout if online; keep the workspace clear of notes, books, phones, secondary monitors;
+no communication with anyone; and do not capture, copy, photograph or reproduce any exam
+content in any form.
+
+**Prohibited:** mobile phones, smart watches, headphones, study materials, any recording
+device. Permitted items, such as scratch paper provided by the proctor, are specified by
+Pearson VUE.
+
+**No-show or late arrival** past the permitted window forfeits the fee and requires
+re-registration.
+
+---
+
+## The non-disclosure agreement
+
+Before the exam begins you accept a confidentiality and NDA. By accepting, you agree that
+**all exam content — including questions, answer options, and scenarios — is the
+confidential and proprietary property of Anthropic**, and that you will not disclose,
+reproduce or distribute any portion of it. Declining ends the session with no refund.
+
+**Read that against §5.** The guide itself publishes six scenario *descriptions*, and
+[SCENARIOS.md](SCENARIOS.md) teaches against those. The confidential thing is the exam
+content — the scenarios **as presented in the exam**, with their questions and options.
+Those are two different objects and this course only ever touches the first.
+
+Consequences of misconduct, per §13: invalidation of your result, revocation of the
+credential, and a ban from future exams.
+
+---
+
+## If you do not pass
+
+Waiting periods increase with each failed attempt:
+
+| Attempt | Wait before the next |
+|---|---|
+| After the first fail | **14 days** |
+| After the second | **30 days** |
+| After the third | **90 days** |
+
+**Maximum four attempts per rolling twelve-month period.** Limits are per exam, so not
+passing one does not block registering for a different one. **The fee applies to each
+attempt.**
+
+---
+
+## Renewing — the part worth planning around
+
+The credential is **valid for 12 months** from the date it is awarded. The guide gives the
+reason plainly: the underlying technology evolves rapidly, so the credential is time-limited
+so holders maintain current knowledge.
+
+**On-time renewal is free and not proctored.** You review what has changed since you
+certified and complete a **free, non-proctored assessment** on the Partner Academy. No fee.
+
+**If it lapses, you retake the full exam at the full fee.** That is the whole reason to
+care about the date.
+
+And one caveat the guide includes: **if exam content changes significantly, Anthropic may
+require holders to retake the full exam** rather than complete the renewal assessment.
+
+Holders remain subject to the rules of conduct in §13 after certifying.
+
+---
+
+## Appeals
+
+You may appeal a decision within **14 days** of being notified, or within 14 days of your
+exam date for a concern about your result. Appeals go to Pearson VUE support and are
+reviewed under the program's appeals policy.
+
+**Two things are not appealable:** the standard-setting outcome, and the content of
+individual exam items.
+
+---
+
+## Support
+
+- Name corrections on a registration: `certifications-support@anthropic.com`
+- Everything else — registration, scheduling, accommodations, results:
+  `pearsonvue.com/us/en/anthropic.html`
+
+Personal data from registration and testing is handled under Anthropic's privacy policy,
+Pearson VUE's privacy policy, and applicable data-protection law.
+
+---
+
+## Document version
+
+The guide records its own history in §18: **1.0, July 2026** (formatting and layout
+updates), 0.2 June 2026 (draft revision), 0.1 February 2026 (initial draft).
+
+This course records what version 1.0 said, on the date noted in [SOURCES.md](SOURCES.md).
+The guide states it is subject to change without notice, and **the guide on the Partner
+Academy page supersedes anything written here.**
+
+## Sources
+
+Exam guide **Version 1.0, effective July 2026** — §10 (scoring), §11 (registration and
+scheduling), §12 (policies: identification, accommodations, retake, no-show), §13 (exam-day
+rules of conduct), §14 (confidentiality and NDA), §15 (credential maintenance and
+recertification), §16 (support, appeals, privacy), §18 (document control).
+
+Quoted passages are the guide's wording. The reading of §14 against §5 is the author's, and
+it is the same boundary [SOURCES.md](SOURCES.md) set before §14 had been read.
 
 ---

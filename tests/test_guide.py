@@ -227,6 +227,66 @@ def test_guide_includes_the_program_notice_from_the_readme():
     assert "is not named in that announcement" in flat
 
 
+def _declared_pages():
+    sys.path.insert(0, str(REPO / "scripts"))
+    import build_guide
+
+    return list(build_guide.FRONT_MATTER) + list(build_guide.APPENDICES)
+
+
+def test_every_page_the_guide_declares_exists_on_disk():
+    # Rule 2, extended from lessons to the surrounding pages on 2026-10-19. The
+    # standalone file still being on disk is what makes a page missing from the
+    # guide invisible: the repository looks complete and the single-document
+    # reading path is short by a chapter.
+    for name, _lead_in in _declared_pages():
+        assert (REPO / name).is_file(), "declared in build_guide but missing: %s" % name
+
+
+def test_the_guide_actually_contains_every_declared_page():
+    """Declaring a page and emitting it are different things.
+
+    Asserted on each page's own first heading rather than on its filename,
+    because the filename appears in the lead-in line either way -- so a test
+    matching the filename would pass on a guide that announced a page and
+    included none of it.
+    """
+    guide = (REPO / "GUIDE.md").read_text(encoding="utf-8")
+    for name, lead_in in _declared_pages():
+        heading = next(
+            line[2:].strip()
+            for line in (REPO / name).read_text(encoding="utf-8").splitlines()
+            if line.startswith("# ")
+        )
+        assert heading in guide, "%s declared but its body is not in the guide" % name
+        assert lead_in.split(".")[0] in guide, "%s has no lead-in in the guide" % name
+
+
+def test_a_declared_page_that_is_missing_raises_rather_than_emitting_nothing():
+    # The same contract `extract_section` has for the notice. A page that quietly
+    # disappears is worse than one never listed, because the README still links
+    # the standalone file and nothing reports that the two disagree.
+    sys.path.insert(0, str(REPO / "scripts"))
+    import build_guide
+
+    try:
+        build_guide.include_page("NO-SUCH-PAGE.md", "lead-in")
+    except FileNotFoundError as exc:
+        assert "NO-SUCH-PAGE.md" in str(exc)
+    else:
+        raise AssertionError("include_page silently returned for a missing page")
+
+
+def test_the_guide_says_which_two_pages_it_deliberately_omits():
+    # SOURCES and VERIFICATION are left out on purpose -- they answer "can I
+    # trust this course", not "what is on the exam". Pinned because the omission
+    # otherwise reads as an oversight, and the obvious fix is to wedge 150 lines
+    # of audit trail between a learner and lesson 1.1.
+    flat = " ".join((REPO / "GUIDE.md").read_text(encoding="utf-8").split())
+    assert "deliberately *not* included" in flat
+    assert "SOURCES.md" in flat and "VERIFICATION.md" in flat
+
+
 def test_guide_includes_the_prerequisite_stack():
     flat = " ".join((REPO / "GUIDE.md").read_text(encoding="utf-8").split())
     assert "What this exam sits on top of" in flat
