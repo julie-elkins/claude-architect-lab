@@ -24,7 +24,10 @@ reasoning context, are more effective at catching subtle issues than self-review
 instructions or extended thinking.** Both of those are the tempting options, and both are
 named as weaker.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Reviewer independence.** The reviewer did not produce the work. *Why it matters here:* it
 is the whole mechanism, and it is the reason human code review exists. *Depth:* any

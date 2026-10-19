@@ -28,7 +28,10 @@ Expect judgment items. "A reviewer's prose instructions produce inconsistent sev
 classifications. What is the most effective fix?" has four plausible options, and the
 tempting one — write firmer instructions — is the wrong answer the guide names.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 Skip what you know. Here so a newcomer has somewhere to go and a senior gets a
 one-line refresh.

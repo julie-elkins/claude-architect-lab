@@ -21,7 +21,10 @@ So the items here are not "how do I make a slash command." They are *should this
 skill or a CLAUDE.md rule*, and *what should it be allowed to do*. Both are judgment,
 and both have a defensible wrong answer sitting next to the right one.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Procedure versus convention.** A procedure is a thing you *do* on request; a
 convention is a thing that is *always true*. *Why it matters here:* it is the whole

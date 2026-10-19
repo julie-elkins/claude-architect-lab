@@ -123,6 +123,14 @@ a minute.
 
 ---
 
+> [!TIP]
+> ### Now, go crush your exam. 🚀
+>
+> Then tell me how it went, on [LinkedIn](https://www.linkedin.com/in/julielkins/) — and if
+> you found something here that is wrong, [open an issue](https://github.com/julie-elkins/claude-architect-lab/issues).
+
+---
+
 ## What to do with the lab
 
 The repository is a working system: [Course Doctor](README.md#the-lab-course-doctor), an
@@ -162,9 +170,3 @@ this course records what the guide said at the version noted in [SOURCES.md](SOU
 **That every claim here is current.** Every claim names its source and carries the date it
 was read — but a page can return 200 and no longer say what it said. See the README's
 section on how claims are checked, including the part that is **not** yet verified.
-
-> [!TIP]
-> ### Now, go crush your exam. 🚀
->
-> Then tell me how it went, on [LinkedIn](https://www.linkedin.com/in/julielkins/) — and if
-> you found something here that is wrong, [open an issue](https://github.com/julie-elkins/claude-architect-lab/issues).

@@ -26,7 +26,10 @@ The second half is `tool_choice`, and the guide names three settings precisely. 
 item where the right answer is forcing a specific tool and the tempting one is a firmer
 instruction.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Decision complexity.** The cost of choosing grows with the number of options. *Why it
 matters here:* it is the stated mechanism — more tools, less reliable selection. *Depth:*

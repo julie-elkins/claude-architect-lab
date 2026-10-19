@@ -23,7 +23,10 @@ to the total, values in the wrong fields. A valid document that is wrong.
 
 That distinction is the lesson. Everything else is mechanics.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **JSON Schema.** A machine-readable description of what a document must contain. *Why it
 matters here:* it is the contract. *Depth:* `json-schema.org`.

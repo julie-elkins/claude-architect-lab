@@ -26,7 +26,10 @@ Then it names a second-order skill that is unusually concrete: **calculating sub
 frequency from an SLA.** Its own worked figure is 4-hour windows to guarantee a 30-hour
 SLA against 24-hour batch processing. That is arithmetic you can be asked to do.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Synchronous versus asynchronous.** Waiting for a reply against submitting and collecting
 later. *Why it matters here:* it is the entire distinction. *Depth:* any treatment of

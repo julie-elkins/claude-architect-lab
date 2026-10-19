@@ -28,7 +28,10 @@ the prompt and another adds a hook. The hook is the answer, and the guide says w
 Its named uses are both here: **interception** — blocking a tool call that violates
 policy — and **normalisation** — transforming a tool result before the model processes it.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Determinism.** The same input always producing the same result. *Why it matters here:*
 it is the single property that separates a hook from an instruction. *Depth:* none

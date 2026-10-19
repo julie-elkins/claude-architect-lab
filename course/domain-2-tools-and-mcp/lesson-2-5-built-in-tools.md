@@ -24,7 +24,10 @@ That is a context-management answer wearing a tooling hat, which is why it sits 
 pays off in Domain 5. Reading twenty files to answer one question spends the budget you
 needed for the answer.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Content search versus path search.** Finding text inside files against finding files by
 name. *Why it matters here:* it is the Grep/Glob distinction and the guide's first

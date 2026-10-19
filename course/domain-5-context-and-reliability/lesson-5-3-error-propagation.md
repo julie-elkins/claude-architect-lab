@@ -26,7 +26,10 @@ It also repeats the distinction from lesson 2.2 because it matters more at syste
 **access failures versus valid empty results.** A timeout and a query that legitimately
 matched nothing are both "no data" to a coordinator that cannot tell them apart.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Error propagation.** Passing a failure upward with context. *Why it matters here:* the
 subject. *Depth:* exception-chaining practice in any language.

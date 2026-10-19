@@ -25,7 +25,10 @@ And it names one structural pattern worth memorising because it recurs everywher
 **per-item local passes plus a separate cross-item integration pass, to avoid attention
 dilution.** One pass trying to do both does neither well.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Prompt chaining.** A fixed sequence where each step's output feeds the next. *Why it
 matters here:* it is one of the two named options. *Depth:* any treatment of pipelines.

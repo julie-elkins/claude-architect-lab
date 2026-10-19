@@ -27,7 +27,10 @@ And the sharpest rule, because it inverts a natural instinct: **honour an explic
 for a human immediately, without first attempting investigation.** The helpful move — let
 me just try one thing — is the wrong answer.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Escalation.** Handing a case to a human. *Why it matters here:* the subject. *Depth:*
 lesson 1.4 for the handoff format, which is the other half.

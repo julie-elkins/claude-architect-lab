@@ -22,7 +22,10 @@ That last one is the setup for a question. If every server's tools are live at o
 adding servers is not free — it is Domain 2's own `tool_choice` problem arriving by the
 back door, which lesson 2.3 covers.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Client and server.** The client — Claude Code — connects to a server, asks what tools
 it has, and calls them. The server does the work. *Why it matters here:* configuration is

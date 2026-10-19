@@ -24,7 +24,10 @@ A timeout and a query that legitimately matched nothing are both "no data", and 
 for opposite responses. Collapsing them means an agent retries something that worked, or
 gives up on something that would have succeeded.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Error taxonomy.** Grouping failures by what the caller should *do*, not by where they
 happened. *Why it matters here:* the four categories are a decision table, not a

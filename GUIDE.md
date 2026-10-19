@@ -189,6 +189,14 @@ a minute.
 
 ---
 
+> [!TIP]
+> ### Now, go crush your exam. 🚀
+>
+> Then tell me how it went, on [LinkedIn](https://www.linkedin.com/in/julielkins/) — and if
+> you found something here that is wrong, [open an issue](https://github.com/julie-elkins/claude-architect-lab/issues).
+
+---
+
 ## What to do with the lab
 
 The repository is a working system: [Course Doctor](README.md#the-lab-course-doctor), an
@@ -228,12 +236,6 @@ this course records what the guide said at the version noted in [SOURCES.md](SOU
 **That every claim here is current.** Every claim names its source and carries the date it
 was read — but a page can return 200 and no longer say what it said. See the README's
 section on how claims are checked, including the part that is **not** yet verified.
-
-> [!TIP]
-> ### Now, go crush your exam. 🚀
->
-> Then tell me how it went, on [LinkedIn](https://www.linkedin.com/in/julielkins/) — and if
-> you found something here that is wrong, [open an issue](https://github.com/julie-elkins/claude-architect-lab/issues).
 
 ---
 
@@ -664,7 +666,10 @@ A published list of wrong answers is a published list of distractors. All three 
 plausible, all three are things a competent engineer actually does, and that is exactly
 what makes them good exam options.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **The agentic loop.** Send a request, get back either tool calls or a final answer, run
 the tools, feed the results back, repeat. *Why it matters here:* it is the subject.
@@ -871,7 +876,10 @@ It also names a failure most people would never think to guard against: **overly
 task decomposition, leading to incomplete coverage of broad topics.** The coordinator can
 be too good at splitting.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Hub-and-spoke.** One central node; all traffic passes through it. *Why it matters here:*
 it is the named architecture. *Depth:* network topology treatments; the trade is the same
@@ -1066,7 +1074,10 @@ lesson we just discussed" has told the worker nothing. The worker has no "just".
 There is also a naming discrepancy you need to hold both halves of. See the note in the
 build — it is the kind of thing that decides a question.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Process isolation.** Separate execution with separate state. *Why it matters here:* a
 subagent is an isolated context, which is the whole point and the whole hazard. *Depth:*
@@ -1288,7 +1299,10 @@ The second half is handoff, and the guide's framing is precise about why it is h
 are escalating to **human agents who lack access to the conversation transcript.** They
 cannot read what happened. Whatever they need must be *in* the handoff.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Precondition.** Something that must be true before an operation may run. *Why it matters
 here:* a prerequisite gate is a precondition with teeth. *Depth:* design-by-contract.
@@ -1475,7 +1489,10 @@ the prompt and another adds a hook. The hook is the answer, and the guide says w
 Its named uses are both here: **interception** — blocking a tool call that violates
 policy — and **normalisation** — transforming a tool result before the model processes it.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Determinism.** The same input always producing the same result. *Why it matters here:*
 it is the single property that separates a hook from an instruction. *Depth:* none
@@ -1722,7 +1739,10 @@ And it names one structural pattern worth memorising because it recurs everywher
 **per-item local passes plus a separate cross-item integration pass, to avoid attention
 dilution.** One pass trying to do both does neither well.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Prompt chaining.** A fixed sequence where each step's output feeds the next. *Why it
 matters here:* it is one of the two named options. *Depth:* any treatment of pipelines.
@@ -1915,7 +1935,10 @@ from a snapshot and nothing about the restoration says so.
 The guide also names forking for exploring divergent approaches from a shared baseline —
 the case where you have paid for analysis once and want two conclusions from it.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Session.** A saved conversation tied to a project directory. *Why it matters here:* it
 is the unit being resumed. *Depth:* `/docs/en/sessions`.
@@ -2129,7 +2152,10 @@ It also names a trap most people never consider: **system prompt wording can cre
 unintended tool associations.** A keyword-sensitive instruction elsewhere can override a
 well-written description.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Dispatch.** Choosing which of several implementations to run. *Why it matters here:*
 with an LLM, dispatch happens in natural language against your descriptions, so the
@@ -2310,7 +2336,10 @@ A timeout and a query that legitimately matched nothing are both "no data", and 
 for opposite responses. Collapsing them means an agent retries something that worked, or
 gives up on something that would have succeeded.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Error taxonomy.** Grouping failures by what the caller should *do*, not by where they
 happened. *Why it matters here:* the four categories are a decision table, not a
@@ -2501,7 +2530,10 @@ The second half is `tool_choice`, and the guide names three settings precisely. 
 item where the right answer is forcing a specific tool and the tempting one is a firmer
 instruction.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Decision complexity.** The cost of choosing grows with the number of options. *Why it
 matters here:* it is the stated mechanism — more tools, less reliable selection. *Depth:*
@@ -2680,7 +2712,10 @@ That last one is the setup for a question. If every server's tools are live at o
 adding servers is not free — it is Domain 2's own `tool_choice` problem arriving by the
 back door, which lesson 2.3 covers.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Client and server.** The client — Claude Code — connects to a server, asks what tools
 it has, and calls them. The server does the work. *Why it matters here:* configuration is
@@ -2909,7 +2944,10 @@ The guide then gives the contrast, also quoted: **"flag comments only when claim
 behavior contradicts actual code behavior"** against **"check that comments are
 accurate."** The first is a test. The second is a hope.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Precision and recall.** Precision is how many flagged things are real; recall is how
 many real things got flagged. *Why it matters here:* this task statement is entirely about
@@ -3092,7 +3130,10 @@ handling**, and that **enable generalisation to novel patterns rather than match
 pre-specified cases.** That is the difference between two and three examples, and it is
 the examinable part.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Few-shot prompting.** Including worked input/output pairs in the prompt. *Why it matters
 here:* it is the technique. *Depth:* any prompting guide; the mechanics are trivial and
@@ -3273,7 +3314,10 @@ to the total, values in the wrong fields. A valid document that is wrong.
 
 That distinction is the lesson. Everything else is mechanics.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **JSON Schema.** A machine-readable description of what a document must contain. *Why it
 matters here:* it is the contract. *Depth:* `json-schema.org`.
@@ -3503,7 +3547,10 @@ And it names the mechanism that makes a retry worth anything: **retry with error
 feedback** — appending the specific validation errors to the prompt so the second attempt
 is informed rather than merely repeated.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Validation.** Checking output against a rule after it is produced. *Why it matters here:*
 it is what generates the feedback the retry carries. *Depth:* lesson 4.3 for the schema
@@ -3695,7 +3742,10 @@ Then it names a second-order skill that is unusually concrete: **calculating sub
 frequency from an SLA.** Its own worked figure is 4-hour windows to guarantee a 30-hour
 SLA against 24-hour batch processing. That is arithmetic you can be asked to do.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Synchronous versus asynchronous.** Waiting for a reply against submitting and collecting
 later. *Why it matters here:* it is the entire distinction. *Depth:* any treatment of
@@ -3888,7 +3938,10 @@ reasoning context, are more effective at catching subtle issues than self-review
 instructions or extended thinking.** Both of those are the tempting options, and both are
 named as weaker.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Reviewer independence.** The reviewer did not produce the work. *Why it matters here:* it
 is the whole mechanism, and it is the reason human code review exists. *Depth:* any
@@ -4075,7 +4128,10 @@ input is not uniformly attended, and where you put something changes whether it 
 
 Both are examinable because both have cheap, specific remedies.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Progressive summarisation.** Replacing older history with a shorter version, repeatedly.
 *Why it matters here:* each pass loses detail, and the losses compound. *Depth:* lesson 1.1
@@ -4255,7 +4311,10 @@ And the sharpest rule, because it inverts a natural instinct: **honour an explic
 for a human immediately, without first attempting investigation.** The helpful move — let
 me just try one thing — is the wrong answer.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Escalation.** Handing a case to a human. *Why it matters here:* the subject. *Depth:*
 lesson 1.4 for the handoff format, which is the other half.
@@ -4433,7 +4492,10 @@ It also repeats the distinction from lesson 2.2 because it matters more at syste
 **access failures versus valid empty results.** A timeout and a query that legitimately
 matched nothing are both "no data" to a coordinator that cannot tell them apart.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Error propagation.** Passing a failure upward with context. *Why it matters here:* the
 subject. *Depth:* exception-chaining practice in any language.
@@ -4616,7 +4678,10 @@ The remedies it names are all forms of *getting findings out of the conversation
 scratchpad files, subagent delegation, summarising between phases, and structured state
 exports for crash recovery.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Context degradation.** Reliability falling as a session lengthens. *Why it matters here:*
 the subject, and it has a recognisable symptom. *Depth:* lesson 5.1's position effects are
@@ -4805,7 +4870,10 @@ sampling** of the high-confidence population, **accuracy analysed by document ty
 field**, and **field-level confidence calibrated using labelled validation sets** before
 human review is reduced.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Aggregate versus segmented metric.** One number against a number per population. *Why it
 matters here:* the whole warning. *Depth:* any treatment of Simpson's paradox, which is the
@@ -4999,7 +5067,10 @@ That is a context-management answer wearing a tooling hat, which is why it sits 
 pays off in Domain 5. Reading twenty files to answer one question spends the budget you
 needed for the answer.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Content search versus path search.** Finding text inside files against finding files by
 name. *Why it matters here:* it is the Grep/Glob distinction and the guide's first
@@ -5195,7 +5266,10 @@ It is **"who does it apply to."**
 Get it backwards and nothing errors. It applies to the wrong people, silently, which is
 why it makes a good exam item and a bad afternoon.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 Skip what you know. Here so a newcomer has somewhere to go and a senior gets the
 one-line refresh.
@@ -5477,7 +5551,10 @@ So the items here are not "how do I make a slash command." They are *should this
 skill or a CLAUDE.md rule*, and *what should it be allowed to do*. Both are judgment,
 and both have a defensible wrong answer sitting next to the right one.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Procedure versus convention.** A procedure is a thing you *do* on request; a
 convention is a thing that is *always true*. *Why it matters here:* it is the whole
@@ -5715,7 +5792,10 @@ structurally cannot do.
 And the reason this sits in Domain 3 but pays off in Domain 5: **instructions cost
 context.** A convention loaded while irrelevant is budget spent on nothing.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 Skip what you know.
 
@@ -5987,7 +6067,10 @@ approach gets applied consistently forty-five times.
 The guide also names the **Explore subagent** here, for isolating verbose discovery
 output to preserve main-conversation context. Planning is where context gets eaten.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Cost of rework.** What it costs to discover a wrong direction late. *Why it matters
 here:* it is the actual decision criterion, and it is not the same as task size. *Depth:*
@@ -6192,7 +6275,10 @@ Expect judgment items. "A reviewer's prose instructions produce inconsistent sev
 classifications. What is the most effective fix?" has four plausible options, and the
 tempting one — write firmer instructions — is the wrong answer the guide names.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 Skip what you know. Here so a newcomer has somewhere to go and a senior gets a
 one-line refresh.

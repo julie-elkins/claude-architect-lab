@@ -31,7 +31,10 @@ structurally cannot do.
 And the reason this sits in Domain 3 but pays off in Domain 5: **instructions cost
 context.** A convention loaded while irrelevant is budget spent on nothing.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 Skip what you know.
 

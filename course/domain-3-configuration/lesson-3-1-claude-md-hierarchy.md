@@ -29,7 +29,10 @@ It is **"who does it apply to."**
 Get it backwards and nothing errors. It applies to the wrong people, silently, which is
 why it makes a good exam item and a bad afternoon.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 Skip what you know. Here so a newcomer has somewhere to go and a senior gets the
 one-line refresh.

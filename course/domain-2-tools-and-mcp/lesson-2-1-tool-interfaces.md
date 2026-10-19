@@ -27,7 +27,10 @@ It also names a trap most people never consider: **system prompt wording can cre
 unintended tool associations.** A keyword-sensitive instruction elsewhere can override a
 well-written description.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Dispatch.** Choosing which of several implementations to run. *Why it matters here:*
 with an LLM, dispatch happens in natural language against your descriptions, so the

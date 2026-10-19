@@ -25,7 +25,10 @@ The remedies it names are all forms of *getting findings out of the conversation
 scratchpad files, subagent delegation, summarising between phases, and structured state
 exports for crash recovery.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Context degradation.** Reliability falling as a session lengthens. *Why it matters here:*
 the subject, and it has a recognisable symptom. *Depth:* lesson 5.1's position effects are

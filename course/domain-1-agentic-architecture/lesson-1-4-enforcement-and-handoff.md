@@ -28,7 +28,10 @@ The second half is handoff, and the guide's framing is precise about why it is h
 are escalating to **human agents who lack access to the conversation transcript.** They
 cannot read what happened. Whatever they need must be *in* the handoff.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Precondition.** Something that must be true before an operation may run. *Why it matters
 here:* a prerequisite gate is a precondition with teeth. *Depth:* design-by-contract.

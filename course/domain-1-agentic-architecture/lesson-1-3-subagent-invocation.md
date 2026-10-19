@@ -23,7 +23,10 @@ lesson we just discussed" has told the worker nothing. The worker has no "just".
 There is also a naming discrepancy you need to hold both halves of. See the note in the
 build — it is the kind of thing that decides a question.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Process isolation.** Separate execution with separate state. *Why it matters here:* a
 subagent is an isolated context, which is the whole point and the whole hazard. *Depth:*

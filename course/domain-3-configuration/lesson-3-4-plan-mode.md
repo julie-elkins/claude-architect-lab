@@ -28,7 +28,10 @@ approach gets applied consistently forty-five times.
 The guide also names the **Explore subagent** here, for isolating verbose discovery
 output to preserve main-conversation context. Planning is where context gets eaten.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Cost of rework.** What it costs to discover a wrong direction late. *Why it matters
 here:* it is the actual decision criterion, and it is not the same as task size. *Depth:*

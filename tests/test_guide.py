@@ -227,6 +227,38 @@ def test_guide_includes_the_program_notice_from_the_readme():
     assert "is not named in that announcement" in flat
 
 
+def test_every_fundamentals_block_carries_its_skip_signpost():
+    """The Fundamentals block serves a newcomer and a senior from one section, and
+    only the signpost tells the senior it is skippable.
+
+    Pinned across all 28 lessons because this is a format rule applied to every
+    course in the series, so the failure is a NEW lesson shipping without it --
+    which no reader would report, because a missing signpost looks exactly like a
+    section that was always meant to be read in full.
+
+    Deliberately asserts NO ENTRY COUNT. The blocks carry four, five or six terms
+    (measured 2026-10-19: 3 lessons with four, 24 with five, 1 with six), so a
+    signpost naming a number would be wrong in 25 of 28 and would be wrong in the
+    flattering direction -- understating the work.
+    """
+    sys.path.insert(0, str(REPO / "scripts"))
+    import build_guide
+
+    paths = {REPO / "course" / rel for _ts, _title, rel in build_guide.MANIFEST}
+    with_block = sorted(
+        p for p in paths if "## Fundamentals" in p.read_text(encoding="utf-8")
+    )
+    assert len(with_block) >= 28, "expected the Fundamentals blocks; found %d" % len(with_block)
+    for path in with_block:
+        text = path.read_text(encoding="utf-8")
+        assert "## Fundamentals 📘" in text, (
+            "%s: Fundamentals heading is missing its marker" % path.name
+        )
+        assert "skippable if you already build with this stack" in text, (
+            "%s: Fundamentals block has no skip signpost" % path.name
+        )
+
+
 def _declared_pages():
     sys.path.insert(0, str(REPO / "scripts"))
     import build_guide

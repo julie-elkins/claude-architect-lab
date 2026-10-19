@@ -27,7 +27,10 @@ sampling** of the high-confidence population, **accuracy analysed by document ty
 field**, and **field-level confidence calibrated using labelled validation sets** before
 human review is reduced.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Aggregate versus segmented metric.** One number against a number per population. *Why it
 matters here:* the whole warning. *Depth:* any treatment of Simpson's paradox, which is the

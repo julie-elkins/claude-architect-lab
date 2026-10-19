@@ -25,7 +25,10 @@ And it names the mechanism that makes a retry worth anything: **retry with error
 feedback** — appending the specific validation errors to the prompt so the second attempt
 is informed rather than merely repeated.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Validation.** Checking output against a rule after it is produced. *Why it matters here:*
 it is what generates the feedback the retry carries. *Depth:* lesson 4.3 for the schema

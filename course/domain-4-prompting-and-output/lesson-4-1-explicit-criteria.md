@@ -26,7 +26,10 @@ The guide then gives the contrast, also quoted: **"flag comments only when claim
 behavior contradicts actual code behavior"** against **"check that comments are
 accurate."** The first is a test. The second is a hope.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Precision and recall.** Precision is how many flagged things are real; recall is how
 many real things got flagged. *Why it matters here:* this task statement is entirely about

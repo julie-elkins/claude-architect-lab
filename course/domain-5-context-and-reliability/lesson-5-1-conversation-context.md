@@ -26,7 +26,10 @@ input is not uniformly attended, and where you put something changes whether it 
 
 Both are examinable because both have cheap, specific remedies.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Progressive summarisation.** Replacing older history with a shorter version, repeatedly.
 *Why it matters here:* each pass loses detail, and the losses compound. *Depth:* lesson 1.1

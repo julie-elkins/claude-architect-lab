@@ -25,7 +25,10 @@ from a snapshot and nothing about the restoration says so.
 The guide also names forking for exploring divergent approaches from a shared baseline —
 the case where you have paid for analysis once and want two conclusions from it.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Session.** A saved conversation tied to a project directory. *Why it matters here:* it
 is the unit being resumed. *Depth:* `/docs/en/sessions`.

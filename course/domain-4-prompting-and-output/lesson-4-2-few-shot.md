@@ -27,7 +27,10 @@ handling**, and that **enable generalisation to novel patterns rather than match
 pre-specified cases.** That is the difference between two and three examples, and it is
 the examinable part.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Few-shot prompting.** Including worked input/output pairs in the prompt. *Why it matters
 here:* it is the technique. *Depth:* any prompting guide; the mechanics are trivial and

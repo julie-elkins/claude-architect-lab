@@ -28,7 +28,10 @@ It also names a failure most people would never think to guard against: **overly
 task decomposition, leading to incomplete coverage of broad topics.** The coordinator can
 be too good at splitting.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **Hub-and-spoke.** One central node; all traffic passes through it. *Why it matters here:*
 it is the named architecture. *Depth:* network topology treatments; the trade is the same

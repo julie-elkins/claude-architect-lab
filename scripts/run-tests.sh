@@ -29,7 +29,10 @@ cd "$(dirname "$0")/.."
 # facing root pages as well as the lessons, so four tests pin that a declared page
 # exists, is actually emitted, raises when missing, and that the two deliberate
 # omissions are explained in the guide itself.
-EXPECTED_TESTS=87
+# 2026-10-19 (last): 87 -> 88. Every lesson's Fundamentals block now carries a
+# skip signpost, pinned so a NEW lesson cannot ship without one -- a missing
+# signpost looks exactly like a section meant to be read in full.
+EXPECTED_TESTS=88
 
 PYTHON=".venv/bin/python"
 if [[ ! -x "$PYTHON" ]]; then

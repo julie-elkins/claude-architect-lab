@@ -24,7 +24,10 @@ A published list of wrong answers is a published list of distractors. All three 
 plausible, all three are things a competent engineer actually does, and that is exactly
 what makes them good exam options.
 
-## Fundamentals
+## Fundamentals 📘
+
+*Glossed for a newcomer, skippable if you already build with this stack. Each term
+carries why it matters in this lesson and where to go for depth.*
 
 **The agentic loop.** Send a request, get back either tool calls or a final answer, run
 the tools, feed the results back, repeat. *Why it matters here:* it is the subject.
