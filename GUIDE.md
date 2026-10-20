@@ -714,6 +714,45 @@ hard signal is available.
 **A cap is still necessary.** The distinction the guide draws is primary versus backstop.
 Keep the cap; just do not let it be the thing that normally ends the run.
 
+```mermaid
+flowchart LR
+    subgraph LOOP["one turn"]
+        direction LR
+        REQ["Send request<br/>+ full history"] --> MODEL["Model<br/>responds"] --> STOP{"Tool calls<br/>present?"}
+        STOP -->|tool_use| TOOLS["Run<br/>the tools"] --> APPEND["Append results<br/>to history"]
+    end
+    APPEND -->|next turn| REQ
+    STOP ==>|end_turn| DONE["Present the<br/>final answer"]
+
+    subgraph BARRED["published anti-patterns — none of these may end the loop"]
+        direction LR
+        A1["prose says<br/>'I am done'"]
+        A2["assistant text<br/>is present"]
+        A3["iteration cap<br/>reached"]
+    end
+    STOP -.->|✗| A1
+    STOP -.->|✗| A2
+    STOP -.->|✗| A3
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef decide fill:#5CDDE2,stroke:#0D1030,stroke-width:2px,color:#0D1030
+    classDef barred fill:#3A3A4A,stroke:#8A8A9A,stroke-dasharray:4 3,color:#E4E4EC
+
+    class REQ,TOOLS,APPEND code
+    class MODEL,DONE model
+    class STOP decide
+    class A1,A2,A3 barred
+    style LOOP fill:none,stroke:#5CDDE2,stroke-width:1px,color:#5CDDE2
+    style BARRED fill:none,stroke:#8A8A9A,stroke-dasharray:4 3,color:#8A8A9A
+```
+
+**The diagram's whole argument is the arrows.** Exactly one solid arrow leaves the cycle, and
+it leaves on a structural field rather than on anything the model wrote. The three dashed ✗
+links go to the plausible alternatives — each is a published anti-pattern, and none of them
+is allowed to be the thing that ends the run. Purple is the model's turn, navy is your
+code's, cyan is the decision.
+
 ## The build
 
 ### Step 1 — the cycle, concretely
