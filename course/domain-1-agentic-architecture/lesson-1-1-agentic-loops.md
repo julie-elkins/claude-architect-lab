@@ -103,8 +103,8 @@ flowchart LR
     class MODEL,DONE model
     class STOP decide
     class A1,A2,A3 barred
-    style LOOP fill:none,stroke:#5CDDE2,stroke-width:1px,color:#5CDDE2
-    style BARRED fill:none,stroke:#8A8A9A,stroke-dasharray:4 3,color:#8A8A9A
+    style LOOP fill:none,stroke:#5CDDE2,stroke-width:1px
+    style BARRED fill:none,stroke:#8A8A9A,stroke-dasharray:4 3
 ```
 
 **The diagram's whole argument is the arrows.** Exactly one solid arrow leaves the cycle, and

@@ -72,6 +72,31 @@ for the evidence rather than the conclusion. Extract `calculated_total` *beside*
 `stated_total`. Add a `conflict_detected` boolean. You are not validating the model; you
 are making it surface what would reveal its own error.
 
+```mermaid
+flowchart LR
+    DOC["document"] --> EX["extract"] --> VAL{"validates?"}
+    VAL ==>|yes| OK["accepted"]
+    VAL -->|"format · structural"| RETRY["retry, carrying the document<br/>AND the failed extraction<br/>AND the specific errors"]
+    VAL -->|semantic| RETRY
+    VAL -.->|"✗ information absent<br/>from the source"| HUMAN["cannot be retried —<br/>route to a human"]
+    RETRY --> EX
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef decide fill:#5CDDE2,stroke:#0D1030,stroke-width:2px,color:#0D1030
+
+    class DOC,RETRY,OK,HUMAN code
+    class EX model
+    class VAL decide
+```
+
+**Three failures leave that diamond and only two of them loop.** The third is dashed
+because no amount of asking again puts a fact into a document that never had it — and a
+pipeline that retries it anyway burns the budget and then reports the same gap. The retry
+arrow is one node, not three, for a reason: what makes it a *correction* rather than a
+fresh attempt is the cargo listed on it, and a retry that re-sends only the document will
+usually make the same mistake.
+
 ## The build
 
 ### Step 1 — validate for the errors a schema cannot catch

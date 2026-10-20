@@ -743,8 +743,8 @@ flowchart LR
     class MODEL,DONE model
     class STOP decide
     class A1,A2,A3 barred
-    style LOOP fill:none,stroke:#5CDDE2,stroke-width:1px,color:#5CDDE2
-    style BARRED fill:none,stroke:#8A8A9A,stroke-dasharray:4 3,color:#8A8A9A
+    style LOOP fill:none,stroke:#5CDDE2,stroke-width:1px
+    style BARRED fill:none,stroke:#8A8A9A,stroke-dasharray:4 3
 ```
 
 **The diagram's whole argument is the arrows.** Exactly one solid arrow leaves the cycle, and
@@ -959,6 +959,42 @@ the coordinator **evaluates the synthesis output for gaps**, re-delegates with t
 queries, and re-invokes synthesis until coverage is sufficient. Not one pass — a loop with
 a coverage test.
 
+```mermaid
+flowchart LR
+    REQ["request"] --> PICK{"which workers does<br/>THIS request need?"}
+
+    subgraph WORKERS["workers — and they never talk to each other"]
+        direction TB
+        W1["worker · subtopic A"] -.->|✗| W2["worker · subtopic B"] -.->|✗| W3["worker · subtopic C"]
+    end
+
+    PICK --> W1
+    PICK --> W2
+    PICK --> W3
+    W1 --> AGG["coordinator<br/>aggregates"]
+    W2 --> AGG
+    W3 --> AGG
+    AGG ==> OUT["report"]
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef decide fill:#5CDDE2,stroke:#0D1030,stroke-width:2px,color:#0D1030
+
+    class REQ,AGG,OUT code
+    class W1,W2,W3 model
+    class PICK decide
+    style WORKERS fill:none,stroke:#8A8A9A,stroke-dasharray:4 3
+```
+
+**Every path in and out of a worker passes through the middle.** The dashed ✗ links are the
+ones that would destroy that, and they are barred for observability rather than because
+they could not be made to work. The first decision is the one most often skipped — *which*
+workers, not all of them.
+
+**The coverage loop is deliberately not drawn.** It belongs to the same lesson and it is a
+second shape; one diagram that tries to show a fan-out and a feedback loop at once lays out
+as neither. It is in the paragraph above instead.
+
 ## The build
 
 ### Step 1 — the shape
@@ -1153,6 +1189,34 @@ source a claim came from, and your report then cannot either.
 instructive: coordinator prompts should specify *research goals and quality criteria
 rather than step-by-step procedural instructions*, so the worker can adapt. Goals, not
 choreography — but a named boundary on what it may conclude.
+
+```mermaid
+flowchart LR
+    subgraph COORD["coordinator"]
+        direction TB
+        HIST["conversation history<br/>earlier turns · prior workers' output"]
+        PROMPT["the prompt you write<br/>complete findings, not references<br/>goals and criteria<br/>content kept apart from its source"]
+    end
+
+    PROMPT ==>|Task tool| WORKER["subagent<br/>fresh context"]
+    HIST -.->|"✗ not inherited"| WORKER
+    WORKER -->|typed result| JOIN["coordinator<br/>joins the results"]
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef barred fill:#3A3A4A,stroke:#8A8A9A,stroke-dasharray:4 3,color:#E4E4EC
+
+    class PROMPT,JOIN code
+    class WORKER model
+    class HIST barred
+    style COORD fill:none,stroke:#5CDDE2,stroke-width:1px
+```
+
+**Only one arrow carries anything into the worker.** Everything the coordinator already
+knows sits in the dashed box and does not cross — so a reference to it ("the findings
+above") arrives as a phrase about something the worker cannot see. There is no cyan in
+this diagram because there is no decision in it: the worker gets what you wrote down, and
+nothing else.
 
 ## The build
 
@@ -1823,6 +1887,42 @@ of the overview it needs.
 structure first, identify the high-impact areas, then build a prioritised plan **that
 adapts as dependencies are discovered.** Mapping before planning is the part that makes
 the plan worth anything.
+
+```mermaid
+flowchart LR
+    Q{"do you know the steps<br/>before you start?"}
+
+    subgraph FIXED["yes — chain it: simpler, cheaper, testable, repeatable"]
+        direction LR
+        S1["check 1"] --> S2["check 2"] --> S3["check 3"]
+    end
+
+    subgraph ADAPT["no — adapt: each finding changes what to look at next"]
+        direction LR
+        M["map the<br/>structure"] --> H["find the<br/>high-impact areas"] --> PL["prioritised<br/>plan"]
+        PL -.->|"re-plan as dependencies<br/>are discovered"| H
+    end
+
+    Q --> S1
+    Q --> M
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef decide fill:#5CDDE2,stroke:#0D1030,stroke-width:2px,color:#0D1030
+
+    class S1,S2,S3 code
+    class M,H,PL model
+    class Q decide
+    style FIXED fill:none,stroke:#5CDDE2,stroke-width:1px
+    style ADAPT fill:none,stroke:#8C52FE,stroke-width:1px
+```
+
+**The two shapes are the whole lesson, and the colour says why.** The fixed pipeline is
+navy because it is *your* structure — you wrote the order down in advance, which is what
+makes it testable. The adaptive path is purple because the model decides the order as it
+goes, and the dashed edge is the part that makes it adaptive rather than just longer. One
+question picks between them, and it is not "how big is this task" but "do I already know
+the steps."
 
 ## The build
 
@@ -3630,6 +3730,31 @@ correction — and it will usually make the same mistake.
 for the evidence rather than the conclusion. Extract `calculated_total` *beside*
 `stated_total`. Add a `conflict_detected` boolean. You are not validating the model; you
 are making it surface what would reveal its own error.
+
+```mermaid
+flowchart LR
+    DOC["document"] --> EX["extract"] --> VAL{"validates?"}
+    VAL ==>|yes| OK["accepted"]
+    VAL -->|"format · structural"| RETRY["retry, carrying the document<br/>AND the failed extraction<br/>AND the specific errors"]
+    VAL -->|semantic| RETRY
+    VAL -.->|"✗ information absent<br/>from the source"| HUMAN["cannot be retried —<br/>route to a human"]
+    RETRY --> EX
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef decide fill:#5CDDE2,stroke:#0D1030,stroke-width:2px,color:#0D1030
+
+    class DOC,RETRY,OK,HUMAN code
+    class EX model
+    class VAL decide
+```
+
+**Three failures leave that diamond and only two of them loop.** The third is dashed
+because no amount of asking again puts a fact into a document that never had it — and a
+pipeline that retries it anyway burns the budget and then reports the same gap. The retry
+arrow is one node, not three, for a reason: what makes it a *correction* rather than a
+fresh attempt is the cargo listed on it, and a retry that re-sends only the document will
+usually make the same mistake.
 
 ## The build
 

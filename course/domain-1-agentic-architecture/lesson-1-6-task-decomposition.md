@@ -73,6 +73,42 @@ structure first, identify the high-impact areas, then build a prioritised plan *
 adapts as dependencies are discovered.** Mapping before planning is the part that makes
 the plan worth anything.
 
+```mermaid
+flowchart LR
+    Q{"do you know the steps<br/>before you start?"}
+
+    subgraph FIXED["yes — chain it: simpler, cheaper, testable, repeatable"]
+        direction LR
+        S1["check 1"] --> S2["check 2"] --> S3["check 3"]
+    end
+
+    subgraph ADAPT["no — adapt: each finding changes what to look at next"]
+        direction LR
+        M["map the<br/>structure"] --> H["find the<br/>high-impact areas"] --> PL["prioritised<br/>plan"]
+        PL -.->|"re-plan as dependencies<br/>are discovered"| H
+    end
+
+    Q --> S1
+    Q --> M
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef decide fill:#5CDDE2,stroke:#0D1030,stroke-width:2px,color:#0D1030
+
+    class S1,S2,S3 code
+    class M,H,PL model
+    class Q decide
+    style FIXED fill:none,stroke:#5CDDE2,stroke-width:1px
+    style ADAPT fill:none,stroke:#8C52FE,stroke-width:1px
+```
+
+**The two shapes are the whole lesson, and the colour says why.** The fixed pipeline is
+navy because it is *your* structure — you wrote the order down in advance, which is what
+makes it testable. The adaptive path is purple because the model decides the order as it
+goes, and the dashed edge is the part that makes it adaptive rather than just longer. One
+question picks between them, and it is not "how big is this task" but "do I already know
+the steps."
+
 ## The build
 
 ### Step 1 — chain the predictable part

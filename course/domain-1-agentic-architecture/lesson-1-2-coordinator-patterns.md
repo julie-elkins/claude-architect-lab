@@ -74,6 +74,42 @@ the coordinator **evaluates the synthesis output for gaps**, re-delegates with t
 queries, and re-invokes synthesis until coverage is sufficient. Not one pass — a loop with
 a coverage test.
 
+```mermaid
+flowchart LR
+    REQ["request"] --> PICK{"which workers does<br/>THIS request need?"}
+
+    subgraph WORKERS["workers — and they never talk to each other"]
+        direction TB
+        W1["worker · subtopic A"] -.->|✗| W2["worker · subtopic B"] -.->|✗| W3["worker · subtopic C"]
+    end
+
+    PICK --> W1
+    PICK --> W2
+    PICK --> W3
+    W1 --> AGG["coordinator<br/>aggregates"]
+    W2 --> AGG
+    W3 --> AGG
+    AGG ==> OUT["report"]
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef decide fill:#5CDDE2,stroke:#0D1030,stroke-width:2px,color:#0D1030
+
+    class REQ,AGG,OUT code
+    class W1,W2,W3 model
+    class PICK decide
+    style WORKERS fill:none,stroke:#8A8A9A,stroke-dasharray:4 3
+```
+
+**Every path in and out of a worker passes through the middle.** The dashed ✗ links are the
+ones that would destroy that, and they are barred for observability rather than because
+they could not be made to work. The first decision is the one most often skipped — *which*
+workers, not all of them.
+
+**The coverage loop is deliberately not drawn.** It belongs to the same lesson and it is a
+second shape; one diagram that tries to show a fan-out and a feedback loop at once lays out
+as neither. It is in the paragraph above instead.
+
 ## The build
 
 ### Step 1 — the shape

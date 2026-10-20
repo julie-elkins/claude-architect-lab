@@ -164,6 +164,11 @@ definitions do not need pictures.
   `verify_claims.py` can still read the lesson. **A PNG is the one thing in this repository
   that nothing could verify** — and text baked into a raster image is how three published
   thumbnails on the channel shipped misspelled.
+- **NEVER set a `color:` on a subgraph label.** Leave it unset so it inherits the theme
+  and is therefore correct on both by construction. `#5CDDE2` cyan on white measures about
+  **1.8:1**, which is unreadable — and it shipped that way in the first diagram because the
+  dark render looked fine and the light one was only glanced at. Explicit fills on NODES are
+  different and are required: they override the theme, which is the point.
 - **Colour carries meaning, never decoration**, and the palette is the channel's own,
   measured from its art rather than chosen: **`#8C52FE` purple = the model's turn,
   `#0D1030` navy = your code's turn, `#5CDDE2` cyan = the decision point.** A neutral

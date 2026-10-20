@@ -66,6 +66,34 @@ instructive: coordinator prompts should specify *research goals and quality crit
 rather than step-by-step procedural instructions*, so the worker can adapt. Goals, not
 choreography — but a named boundary on what it may conclude.
 
+```mermaid
+flowchart LR
+    subgraph COORD["coordinator"]
+        direction TB
+        HIST["conversation history<br/>earlier turns · prior workers' output"]
+        PROMPT["the prompt you write<br/>complete findings, not references<br/>goals and criteria<br/>content kept apart from its source"]
+    end
+
+    PROMPT ==>|Task tool| WORKER["subagent<br/>fresh context"]
+    HIST -.->|"✗ not inherited"| WORKER
+    WORKER -->|typed result| JOIN["coordinator<br/>joins the results"]
+
+    classDef code fill:#0D1030,stroke:#5CDDE2,stroke-width:1px,color:#FFFFFF
+    classDef model fill:#8C52FE,stroke:#8C52FE,color:#FFFFFF
+    classDef barred fill:#3A3A4A,stroke:#8A8A9A,stroke-dasharray:4 3,color:#E4E4EC
+
+    class PROMPT,JOIN code
+    class WORKER model
+    class HIST barred
+    style COORD fill:none,stroke:#5CDDE2,stroke-width:1px
+```
+
+**Only one arrow carries anything into the worker.** Everything the coordinator already
+knows sits in the dashed box and does not cross — so a reference to it ("the findings
+above") arrives as a phrase about something the worker cannot see. There is no cyan in
+this diagram because there is no decision in it: the worker gets what you wrote down, and
+nothing else.
+
 ## The build
 
 ### Step 1 — the tool that spawns, and the name discrepancy
