@@ -437,3 +437,8 @@ preparation resource. The authoritative source for what is on the exam is always
 on the Anthropic Partner Academy certification page, which supersedes anything written here.
 Exam details change; this README records what the guide said at the version noted in
 [SOURCES.md](SOURCES.md).
+
+---
+
+More at [youtube.com/@JulieElkins](https://www.youtube.com/@JulieElkins) — where AWS
+certification meets AI engineering.
