@@ -10,6 +10,23 @@ well-built wrong answer is a plausible mistake, so a published list of them is a
 
 Anthropic's Partner Academy courses cover the concepts. **This course builds the system.**
 
+## Start here: the three-part learning path
+
+If you are new to agent systems, start with the
+[three-part learning path](LEARNING-PATH.md). It gives you one sequence through this
+course and two connected public projects:
+
+1. **Claude Architect Lab** — learn the architecture, tools, configuration, prompting,
+   context, and reliability patterns.
+2. **Agent Assurance Harness** — run a hands-on lab that catches a green-looking
+   workflow whose task actually failed.
+3. **LLM Eval Validity** — test whether an evaluation is trustworthy enough to support a
+   decision.
+
+The path is designed so you can begin with `GUIDE.md` without understanding this
+repository's folder structure. The individual lesson files remain the editable source;
+the guide is the learner-facing reading path assembled from them.
+
 ## What makes it different: it is built to catch itself being wrong
 
 Study material goes stale silently. A page gets reworded, a flag gets renamed, a version
@@ -115,8 +132,10 @@ afterwards · why the exam cares · **fundamentals** (skippable — glosses for 
 a refresh for a senior) · the build, with real commands · **tips** the documentation does
 not tell you · the published anti-pattern · what the lesson does not cover · sources.
 
-**Five ways in, depending on what you want.**
+**Course navigation**
 
+- **[LEARNING-PATH.md](LEARNING-PATH.md)** — the recommended starting point for a new
+  learner and the route into the two connected evaluation projects.
 - **[STUDY-PATH.md](STUDY-PATH.md)** — start here if you have a date booked. Plans for a
   week, a weekend and an evening, and the one thing to decide before you book.
 - **[GUIDE.md](GUIDE.md)** — the whole course as one scrollable document. Generated from
